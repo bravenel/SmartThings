@@ -82,15 +82,15 @@ def getButtonSections(buttonNumber) {
 			input "lightOff_${buttonNumber}_held", "capability.switch", title: "Held", multiple: true, required: false
 		}
         	section("Lights Dim First") {
-			input "lightDim_${buttonNumber}_pushed", "capability.switch", title: "Pushed", multiple: true, required: false
+			input "lightDim_${buttonNumber}_pushed", "capability.switchLevel", title: "Pushed", multiple: true, required: false
 			input "lightVal_${buttonNumber}_pushed", "number", title: "Dim Level", multiple: false, required: false
-			input "lightDim_${buttonNumber}_held", "capability.switch", title: "Held", multiple: true, required: false
+			input "lightDim_${buttonNumber}_held", "capability.switchLevel", title: "Held", multiple: true, required: false
 			input "lightVal_${buttonNumber}_held", "number", title: "Dim Level", multiple: false, required: false
 		}
 		section("Lights Dim Second") {
-			input "lightD2m_${buttonNumber}_pushed", "capability.switch", title: "Pushed", multiple: true, required: false
+			input "lightD2m_${buttonNumber}_pushed", "capability.switchLevel", title: "Pushed", multiple: true, required: false
 			input "lightV2l_${buttonNumber}_pushed", "number", title: "Dim Level", multiple: false, required: false
-			input "lightD2m_${buttonNumber}_held", "capability.switch", title: "Held", multiple: true, required: false
+			input "lightD2m_${buttonNumber}_held", "capability.switchLevel", title: "Held", multiple: true, required: false
 			input "lightV2l_${buttonNumber}_held", "number", title: "Dim Level", multiple: false, required: false
 		}
 
