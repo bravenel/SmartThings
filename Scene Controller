@@ -6,10 +6,10 @@
  */
 definition(
     name: "Scene Controller",
-    namespace: "",
+    namespace: "bravenel",
     author: "SmartThings, Bruce Ravenel",
     description: "Set Scenes with the Aeon Labs Minimote",
-    category: "My Apps",
+    category: "Convenience",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/MyApps/Cat-MyApps.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/MyApps/Cat-MyApps@2x.png"
 )
@@ -77,17 +77,17 @@ def getButtonSections(buttonNumber) {
 			input "lightOn_${buttonNumber}_pushed", "capability.switch", title: "Pushed", multiple: true, required: false
 			input "lightOn_${buttonNumber}_held", "capability.switch", title: "Held", multiple: true, required: false
 		}
-        section("Lights Off") {
+        	section("Lights Off") {
 			input "lightOff_${buttonNumber}_pushed", "capability.switch", title: "Pushed", multiple: true, required: false
 			input "lightOff_${buttonNumber}_held", "capability.switch", title: "Held", multiple: true, required: false
 		}
-        section("Lights Dim First") {
+        	section("Lights Dim First") {
 			input "lightDim_${buttonNumber}_pushed", "capability.switchLevel", title: "Pushed", multiple: true, required: false
 			input "lightVal_${buttonNumber}_pushed", "number", title: "Dim Level", multiple: false, required: false
 			input "lightDim_${buttonNumber}_held", "capability.switchLevel", title: "Held", multiple: true, required: false
 			input "lightVal_${buttonNumber}_held", "number", title: "Dim Level", multiple: false, required: false
 		}
-        section("Lights Dim Second") {
+        	section("Lights Dim Second") {
 			input "lightD2m_${buttonNumber}_pushed", "capability.switchLevel", title: "Pushed", multiple: true, required: false
 			input "lightV2l_${buttonNumber}_pushed", "number", title: "Dim Level", multiple: false, required: false
 			input "lightD2m_${buttonNumber}_held", "capability.switchLevel", title: "Held", multiple: true, required: false
@@ -114,10 +114,10 @@ def getButtonSections(buttonNumber) {
 				input "phrase_${buttonNumber}_held", "enum", title: "Held", required: false, options: phrases
 			}
 		}
-        section("Associate Virtual Momentary Button"){
-        	input "virtB_${buttonNumber}_pushed","capability.momentary",title: "Pushed", required: false
-            input "virtB_${buttonNumber}_held","capability.momentary",title: "Held", required: false
-        }
+        	section("Associate Virtual Momentary Button"){
+        		input "virtB_${buttonNumber}_pushed","capability.momentary",title: "Pushed", required: false
+            		input "virtB_${buttonNumber}_held","capability.momentary",title: "Held", required: false
+        	}
 	}
 }
 
@@ -131,7 +131,7 @@ def updated() {
 }
 
 def initialize() {
-	subscribe(buttonDevice, "button", buttonEvent)
+    subscribe(buttonDevice, "button", buttonEvent)
     if(virtB_1_pushed != null) subscribe(virtB_1_pushed,"momentary.pushed",fakebutton1Event)
     if(virtB_2_pushed != null) subscribe(virtB_2_pushed,"momentary.pushed",fakebutton2Event)
     if(virtB_3_pushed != null) subscribe(virtB_3_pushed,"momentary.pushed",fakebutton3Event)
@@ -148,12 +148,12 @@ def configured() {
 
 def buttonConfigured(idx) {
 	return settings["lights_$idx_pushed"] ||
-    	settings["lightOn_$idx_pushed"] ||
-    	settings["lightOff_$idx_pushed"] ||
-        settings["lightDim_$idx_pushed"] ||
-        settings["lightVal_$idx_pushed"] ||
-        settings["lightD2m_$idx_pushed"] ||
-        settings["lightV2l_$idx_pushed"] ||
+    		settings["lightOn_$idx_pushed"] ||
+    		settings["lightOff_$idx_pushed"] ||
+        	settings["lightDim_$idx_pushed"] ||
+        	settings["lightVal_$idx_pushed"] ||
+        	settings["lightD2m_$idx_pushed"] ||
+        	settings["lightV2l_$idx_pushed"] ||
 		settings["locks_$idx_pushed"] ||
 		settings["sonos_$idx_pushed"] ||
 		settings["mode_$idx_pushed"]
@@ -235,11 +235,11 @@ def executeHandlers(buttonNumber, value) {
 	if (lights2 != null) turnOff(lights2)
 
 	def lights3 = find('lightDim', buttonNumber, value)
-    def dimval3 = find('lightVal', buttonNumber, value)
+    	def dimval3 = find('lightVal', buttonNumber, value)
 	if (lights3 != null) turnDim(lights3,dimval3)
 
 	def lights4 = find('lightD2m', buttonNumber, value)
-    def dimval4 = find('lightV2l', buttonNumber, value)
+    	def dimval4 = find('lightV2l', buttonNumber, value)
 	if (lights4 != null) turnDim(lights4,dimval4)
 
 	def locks = find('locks', buttonNumber, value)
