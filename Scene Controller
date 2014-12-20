@@ -6,10 +6,10 @@
  */
 definition(
     name: "Scene Controller",
-    namespace: "bravenel",
+    namespace: "",
     author: "SmartThings, Bruce Ravenel",
     description: "Set Scenes with the Aeon Labs Minimote",
-    category: "Convenience",
+    category: "My Apps",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/MyApps/Cat-MyApps.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/MyApps/Cat-MyApps@2x.png"
 )
@@ -32,7 +32,7 @@ preferences {
 def selectButton() {
 	dynamicPage(name: "selectButton", title: "First, select your button device", nextPage: "configureButton1", uninstall: configured()) {
 		section {
-			input "buttonDevice", "capability.button", title: "MiniMote", multiple: false, required: true
+			input "buttonDevice", "capability.button", title: "MiniMote", multiple: false, required: false
 		}
 		
 		section(title: "More options", hidden: hideOptionsSection(), hideable: true) {
@@ -46,6 +46,9 @@ def selectButton() {
 
 			input "modes", "mode", title: "Only when mode is", multiple: true, required: false
 		}
+        section() {
+        	label title: "Assign a name:", required: false
+        }
 	}
 }
 
@@ -69,55 +72,58 @@ def configureButton4() {
 
 def getButtonSections(buttonNumber) {
 	return {
-		section("Toggle Lights") {
+		section("Lights to Toggle") {
 			input "lights_${buttonNumber}_pushed", "capability.switch", title: "Pushed", multiple: true, required: false
 			input "lights_${buttonNumber}_held", "capability.switch", title: "Held", multiple: true, required: false
 		}
-		section("Lights On") {
+		section("Lights to Turn On") {
 			input "lightOn_${buttonNumber}_pushed", "capability.switch", title: "Pushed", multiple: true, required: false
 			input "lightOn_${buttonNumber}_held", "capability.switch", title: "Held", multiple: true, required: false
 		}
-        	section("Lights Off") {
+        section("Lights to Turn Off") {
 			input "lightOff_${buttonNumber}_pushed", "capability.switch", title: "Pushed", multiple: true, required: false
 			input "lightOff_${buttonNumber}_held", "capability.switch", title: "Held", multiple: true, required: false
 		}
-        	section("Lights Dim First") {
+        section("Lights to Dim Level 1") {
 			input "lightDim_${buttonNumber}_pushed", "capability.switchLevel", title: "Pushed", multiple: true, required: false
-			input "lightVal_${buttonNumber}_pushed", "number", title: "Dim Level", multiple: false, required: false
+			input "lightVal_${buttonNumber}_pushed", "number", title: "Dim Level 1", multiple: false, required: false
 			input "lightDim_${buttonNumber}_held", "capability.switchLevel", title: "Held", multiple: true, required: false
-			input "lightVal_${buttonNumber}_held", "number", title: "Dim Level", multiple: false, required: false
+			input "lightVal_${buttonNumber}_held", "number", title: "Dim Level 1", multiple: false, required: false
 		}
-        	section("Lights Dim Second") {
+        section("Lights to Dim Level 2") {
 			input "lightD2m_${buttonNumber}_pushed", "capability.switchLevel", title: "Pushed", multiple: true, required: false
-			input "lightV2l_${buttonNumber}_pushed", "number", title: "Dim Level", multiple: false, required: false
+			input "lightV2l_${buttonNumber}_pushed", "number", title: "Dim Level 2", multiple: false, required: false
 			input "lightD2m_${buttonNumber}_held", "capability.switchLevel", title: "Held", multiple: true, required: false
-			input "lightV2l_${buttonNumber}_held", "number", title: "Dim Level", multiple: false, required: false
+			input "lightV2l_${buttonNumber}_held", "number", title: "Dim Level 2", multiple: false, required: false
 		}
-
-		section("Locks") {
-			input "locks_${buttonNumber}_pushed", "capability.lock", title: "Pushed", multiple: true, required: false
-			input "locks_${buttonNumber}_held", "capability.lock", title: "Held", multiple: true, required: false
-		}
-		section("Sonos") {
-			input "sonos_${buttonNumber}_pushed", "capability.musicPlayer", title: "Pushed", multiple: true, required: false
-			input "sonos_${buttonNumber}_held", "capability.musicPlayer", title: "Held", multiple: true, required: false
-		}
-		section("Modes") {
+        section("Fan to Adjust Speed") {
+			input "autoFanAdjust_${buttonNumber}_pushed", "capability.switchLevel", title: "Pushed", multiple: false, required: false
+			input "autoFanAdjust_${buttonNumber}_held", "capability.switchLevel", title: "Held", multiple: false, required: false
+        }
+//		section("Locks") {
+//			input "locks_${buttonNumber}_pushed", "capability.lock", title: "Pushed", multiple: true, required: false
+//			input "locks_${buttonNumber}_held", "capability.lock", title: "Held", multiple: true, required: false
+//		}
+//		section("Sonos") {
+//			input "sonos_${buttonNumber}_pushed", "capability.musicPlayer", title: "Pushed", multiple: true, required: false
+//			input "sonos_${buttonNumber}_held", "capability.musicPlayer", title: "Held", multiple: true, required: false
+//		}
+		section("Mode to Set") {
 			input "mode_${buttonNumber}_pushed", "mode", title: "Pushed", required: false
 			input "mode_${buttonNumber}_held", "mode", title: "Held", required: false
 		}
 		def phrases = location.helloHome?.getPhrases()*.label
 		if (phrases) {
-			section("Hello Home Actions") {
+			section("Hello Home Action to Take") {
 				log.trace phrases
 				input "phrase_${buttonNumber}_pushed", "enum", title: "Pushed", required: false, options: phrases
 				input "phrase_${buttonNumber}_held", "enum", title: "Held", required: false, options: phrases
 			}
 		}
-        	section("Associate Virtual Momentary Button"){
-        		input "virtB_${buttonNumber}_pushed","capability.momentary",title: "Pushed", required: false
-            		input "virtB_${buttonNumber}_held","capability.momentary",title: "Held", required: false
-        	}
+        section("Associate a Momentary Button"){
+        	input "virtB_${buttonNumber}_pushed","capability.momentary",title: "Pushed", required: false
+            input "virtB_${buttonNumber}_held","capability.momentary",title: "Held", required: false
+        }
 	}
 }
 
@@ -131,7 +137,7 @@ def updated() {
 }
 
 def initialize() {
-    subscribe(buttonDevice, "button", buttonEvent)
+	subscribe(buttonDevice, "button", buttonEvent)
     if(virtB_1_pushed != null) subscribe(virtB_1_pushed,"momentary.pushed",fakebutton1Event)
     if(virtB_2_pushed != null) subscribe(virtB_2_pushed,"momentary.pushed",fakebutton2Event)
     if(virtB_3_pushed != null) subscribe(virtB_3_pushed,"momentary.pushed",fakebutton3Event)
@@ -140,6 +146,7 @@ def initialize() {
     if(virtB_2_held != null) subscribe(virtB_2_held,"momentary.pushed",fakebutton2hEvent)
     if(virtB_3_held != null) subscribe(virtB_3_held,"momentary.pushed",fakebutton3hEvent)
     if(virtB_4_held != null) subscribe(virtB_4_held,"momentary.pushed",fakebutton4hEvent)
+    state.goingUp = true
 }
 
 def configured() {
@@ -148,12 +155,13 @@ def configured() {
 
 def buttonConfigured(idx) {
 	return settings["lights_$idx_pushed"] ||
-    		settings["lightOn_$idx_pushed"] ||
-    		settings["lightOff_$idx_pushed"] ||
-        	settings["lightDim_$idx_pushed"] ||
-        	settings["lightVal_$idx_pushed"] ||
-        	settings["lightD2m_$idx_pushed"] ||
-        	settings["lightV2l_$idx_pushed"] ||
+    	settings["lightOn_$idx_pushed"] ||
+    	settings["lightOff_$idx_pushed"] ||
+        settings["lightDim_$idx_pushed"] ||
+        settings["lightVal_$idx_pushed"] ||
+        settings["lightD2m_$idx_pushed"] ||
+        settings["lightV2l_$idx_pushed"] ||
+        settings["autoFanAdjust_$idx_pushed"] ||
 		settings["locks_$idx_pushed"] ||
 		settings["sonos_$idx_pushed"] ||
 		settings["mode_$idx_pushed"]
@@ -235,13 +243,16 @@ def executeHandlers(buttonNumber, value) {
 	if (lights2 != null) turnOff(lights2)
 
 	def lights3 = find('lightDim', buttonNumber, value)
-    	def dimval3 = find('lightVal', buttonNumber, value)
+    def dimval3 = find('lightVal', buttonNumber, value)
 	if (lights3 != null) turnDim(lights3,dimval3)
 
 	def lights4 = find('lightD2m', buttonNumber, value)
-    	def dimval4 = find('lightV2l', buttonNumber, value)
+    def dimval4 = find('lightV2l', buttonNumber, value)
 	if (lights4 != null) turnDim(lights4,dimval4)
 
+	def fan = find('autoFanAdjust', buttonNumber, value)
+    if (fan != null) adjustFan(fan)
+    
 	def locks = find('locks', buttonNumber, value)
 	if (locks != null) toggle(locks)
 
@@ -281,6 +292,26 @@ def turnDim(devices, level) {
 	log.debug "turnDim: $devices = ${devices*.currentValue('switch')}"
 
 	devices.setLevel(level)
+}
+
+def adjustFan(device) {
+	log.debug "adjust: $device = ${device.currentValue('level')}"
+    
+    def currentLevel = device.currentValue('level')
+
+    if(device.currentValue('switch') == 'off') {
+    	device.setLevel(15)
+        state.goingUp = true
+    } else if (currentLevel < 34) {
+    	if(state.goingUp) device.setLevel(50)
+    	else device.off()
+  	} else if (currentLevel < 67) {
+  		if (state.goingUp) device.setLevel(90)
+        else device.setLevel(15)
+    } else {
+    	device.setLevel(50)
+      	state.goingUp = false
+    }
 }
 
 def toggle(devices) {
