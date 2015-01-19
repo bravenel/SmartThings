@@ -102,22 +102,22 @@ def selectDimmers() {
 				required: true
 		}
 
-    	section("Then the Master and these Dimmers...") {
+    		section("Then the Master and these Dimmers...") {
 			input "dimmers", "capability.switchLevel", 
 				multiple: true, 
 				title: "Dimmer(s) will be set...", 
 				required: false
 		}
         
-        section("Use these dim levels") {
-            input "digits6", "number", 
-            title: "Use form DDEENN: ",
-            required: true
-        }
+        	section("Use these dim levels") {
+            		input "digits6", "number", 
+            		title: "Use form DDEENN: ",
+            		required: true
+        	}
 		
-        section {
-        	label title: "Assign a name:", required: false
-        }
+        	section {
+        		label title: "Assign a name:", required: false
+        	}	
 	}
 }
 
