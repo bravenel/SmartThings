@@ -53,7 +53,7 @@ definition(
  */
 
 preferences {
-	page(name: "selectDimmers")
+    page(name: "selectDimmers")
     page(name: "otherSettings")
 	
 	page(name: "timeIntervalInput", title: "Only during a certain time") {
@@ -67,7 +67,7 @@ preferences {
 def otherSettings() {
 	dynamicPage(name:"otherSettings", uninstall: false, install: true) {
 
-		section("And these will also be turned off with it") {
+	section("And these will also be turned off with it") {
             input "offDimmers", "capability.switchLevel",
         	multiple: true,
        		title: "These dimmers off when master off...",
@@ -78,16 +78,16 @@ def otherSettings() {
     		input "motions", "capability.motionSensor", title: "Motion Here", required: false, multiple: true
     	}
 	
-		section(title: "Motion options", hidden: hideOptionsSection(), hideable: true) {
+	section(title: "Motion options", hidden: hideOptionsSection(), hideable: true) {
 
-			def timeLabel = timeIntervalLabel()
+		def timeLabel = timeIntervalLabel()
 
-			href "timeIntervalInput", title: "Only during a certain time", description: timeLabel ?: "Tap to set", state: timeLabel ? "complete" : null
+		href "timeIntervalInput", title: "Only during a certain time", description: timeLabel ?: "Tap to set", state: timeLabel ? "complete" : null
 
-			input "days", "enum", title: "Only on certain days of the week", multiple: true, required: false,
-				options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+		input "days", "enum", title: "Only on certain days of the week", multiple: true, required: false,
+			options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
-			input "modes", "mode", title: "Only when mode is", multiple: true, required: false            
+		input "modes", "mode", title: "Only when mode is", multiple: true, required: false            
 		}    
 	}
 }
@@ -110,7 +110,7 @@ def selectDimmers() {
 		}
         
         section("Use these dim levels") {
-        	input "digits6", "number", 
+            input "digits6", "number", 
             title: "Use form DDEENN: ",
             required: true
         }
@@ -132,7 +132,7 @@ def updated() {
 }
 
 def initialize() {
-	subscribe(master, "switch.on", switchOnHandler)
+    subscribe(master, "switch.on", switchOnHandler)
     subscribe(master, "switch.off", switchOffHandler)
     subscribe(master, "switch.setLevel", setLevelHandler)
     subscribe(master, "level", setLevelHandler)
@@ -146,26 +146,26 @@ def initialize() {
     }
     subscribe(location, modeChangeHandler)
     subscribe(motions, "motion.active", motionOnHandler)
-	def digits4 = digits6 % 10000
+    def digits4 = digits6 % 10000
     def right2 = digits4 % 100
     def mid2 = digits4 / 100
     def left2 = digits6 / 10000
     state.DayLevel = left2.toInteger()
     state.EveningLevel = mid2.toInteger()
     state.NightLevel = right2
-	if     (location.mode == "Day") state.lastdimLevel = state.DayLevel  
- 	else if(location.mode == "Evening") state.lastdimLevel = state.EveningLevel
-	else if(location.mode == "Night") state.lastdimLevel = state.NightLevel
+    if     (location.mode == "Day") state.lastdimLevel = state.DayLevel  
+    else if(location.mode == "Evening") state.lastdimLevel = state.EveningLevel
+    else if(location.mode == "Night") state.lastdimLevel = state.NightLevel
     state.switchEnable = true
 }
 
 def switchOnHandler(evt) {
-	if(state.switchEnable) { //this is so we can disable switchOn during mode change
+    if(state.switchEnable) { //this is so we can disable switchOn during mode change
     	def dimLevel = state.lastdimLevel
-		if     (location.mode == "Day") dimLevel = state.DayLevel  
- 		else if(location.mode == "Evening") dimLevel = state.EveningLevel
-		else if(location.mode == "Night") dimLevel = state.NightLevel
-		master.setLevel(dimLevel)
+	if     (location.mode == "Day") dimLevel = state.DayLevel  
+ 	else if(location.mode == "Evening") dimLevel = state.EveningLevel
+	else if(location.mode == "Night") dimLevel = state.NightLevel
+	master.setLevel(dimLevel)
     	dimmers?.setLevel(dimLevel)
     	state.lastdimLevel = dimLevel
     }
@@ -180,68 +180,68 @@ def motionOnHandler(evt) {
     	def dimLevel = state.lastdimLevel  //could be the lights are already on, and have been adjusted, so accept that
     	if((master.currentValue("switch") == "off") || (master.currentValue("level") != dimLevel)) master.setLevel(dimLevel)
     	def i = 0
-		for(mySwitch in dimmers) {
+	for(mySwitch in dimmers) {
 	    	if((mySwitch.currentValue("switch") == "off") || (mySwitch.currentValue("level") != dimlevel)) dimmers[i].setLevel(dimLevel)
- 	   		i++	
- 		}    
+ 	   	i++	
+ 	}    
     }
 }
 
 def switchOffHandler(evt) {
-	master.off()
+    master.off()
     dimmers?.off()
     offDimmers?.off()
-	if     (location.mode == "Day") state.lastdimLevel = state.DayLevel  //this to undo manual dimLevel change
- 	else if(location.mode == "Evening") state.lastdimLevel = state.EveningLevel
-	else if(location.mode == "Night") state.lastdimLevel = state.NightLevel
+    if     (location.mode == "Day") state.lastdimLevel = state.DayLevel  //this to undo manual dimLevel change
+    else if(location.mode == "Evening") state.lastdimLevel = state.EveningLevel
+    else if(location.mode == "Night") state.lastdimLevel = state.NightLevel
 }
 
 def setLevelHandler(evt) {
-	if ((evt.value == "on") || (evt.value == "off" )) return
-	def dimLevel = evt.value.toFloat()
-	dimLevel = dimLevel.toInteger()
+    if ((evt.value == "on") || (evt.value == "off" )) return
+    def dimLevel = evt.value.toFloat()
+    dimLevel = dimLevel.toInteger()
     state.lastdimLevel = dimLevel  //so "on" from motion doesn't reset level later
     master.setLevel(dimLevel)
-	dimmers?.setLevel(dimLevel)
+    dimmers?.setLevel(dimLevel)
 }
 
 def modeChangeHandler(evt) {
-	if     (location.mode == "Day") state.lastdimLevel = state.DayLevel  
- 	else if(location.mode == "Evening") state.lastdimLevel = state.EveningLevel
-	else if(location.mode == "Night") state.lastdimLevel = state.NightLevel
+    if     (location.mode == "Day") state.lastdimLevel = state.DayLevel  
+    else if(location.mode == "Evening") state.lastdimLevel = state.EveningLevel
+    else if(location.mode == "Night") state.lastdimLevel = state.NightLevel
     else return
     def dimLevel = state.lastdimLevel
     def i = 0
-	if(motions){  // we won't bother with lights that are off, because motion-on will set the level
-		if(master.currentValue("switch") == "on") master.setLevel(dimLevel)
-		for(mySwitch in dimmers) {
-	    	if(mySwitch.currentValue("switch") == "on") dimmers[i].setLevel(dimLevel)
- 	   		i++	
- 		}
+    if(motions){  // we won't bother with lights that are off, because motion-on will set the level
+	if(master.currentValue("switch") == "on") master.setLevel(dimLevel)
+	for(mySwitch in dimmers) {
+	    if(mySwitch.currentValue("switch") == "on") dimmers[i].setLevel(dimLevel)
+ 	    i++	
+ 	}
     } else {  // no motion, so physical switches (or minimotes) are in use
     	def wasOff = master.currentValue("switch") == "off"
         def wasntRunIn = true
-		master.setLevel(dimLevel)
+	master.setLevel(dimLevel)
     	if(wasOff) {
-        	master.off(delay: 100)
-    		state.switchEnable = false
-        	runIn(61,reEnableSwitch)  //disable the physical switch for 61 seconds
+            master.off(delay: 100)
+    	    state.switchEnable = false
+            runIn(61,reEnableSwitch)  //disable the physical switch for 61 seconds
             wasntRunIn = false		  //so if the device type throws an On it will be ignored
         }
-		for(mySwitch in dimmers) {
+	for(mySwitch in dimmers) {
     		wasOff = mySwitch.currentValue("switch") == "off"
-			dimmers[i].setLevel(dimLevel)
-            if(wasOff) {
-            	dimmers[i].off(delay:100)
+		dimmers[i].setLevel(dimLevel)
+        	if(wasOff) {
+            		dimmers[i].off(delay:100)
     			state.switchEnable = false
-                if(wasntRunIn) {   //so we only do the runIn once
-        			runIn(61,reEnableSwitch)
-                    wasntRunIn = false
-                }
-            }
- 	   		i++	
- 		}
-	}
+                	if(wasntRunIn) {   //so we only do the runIn once
+        	    		runIn(61,reEnableSwitch)
+                    		wasntRunIn = false
+                	}
+            	}
+ 	    	i++	
+ 	}
+    }
 }
 
 // execution filter methods
