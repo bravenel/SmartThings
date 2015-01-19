@@ -15,7 +15,7 @@ definition(
 )
 
 /**
-	This app is hardwired for 3 modes named Day, Evening, and Night (which could be changed).
+    This app is hardwired for 3 modes named Day, Evening, and Night (which could be changed).
     The dim levels for the 3 are entered as a single 6 digit number, e.g. 903010,
     which would give 90 for Day, 30 for Evening, and 10 for Night.
     The app also allows you to specify additional dimmers that are turned off
