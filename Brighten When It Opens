@@ -61,23 +61,23 @@ preferences {
 def installed() {
 //	log.debug "Installed with settings: ${settings}"
 	subscribe(contact1, "contact.open", contactOpenHandler)
-    subscribe(contact1, "contact.closed", contactClosedHandler)
+	subscribe(contact1, "contact.closed", contactClosedHandler)
 }
 
 def updated() {
 //	log.debug "Updated with settings: ${settings}"
 	unsubscribe()
 	subscribe(contact1, "contact.open", contactOpenHandler)
-    subscribe(contact1, "contact.closed", contactClosedHandler)
+    	subscribe(contact1, "contact.closed", contactClosedHandler)
 }
 
 def contactOpenHandler(evt) {
 	getDeviceSettings()
-    def i = 0
+    	def i = 0
 	for(mySwitch in switches) {
 		if(mySwitch.latestValue("level")) mySwitch.setLevel(100)
-        else mySwitch.on() // a switch, not a dimmer
-        i++   
+        	else mySwitch.on() // a switch, not a dimmer
+        	i++   
 	}      
 }
 
