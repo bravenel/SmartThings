@@ -33,10 +33,9 @@ definition(
     The app adjusts dimmer levels on each mode change to one of the three hardwired modes.
     A mode change to some other mode has no effect on the dimmer levels, which allows for
     extra modes that can be used to disable motion entirely at times.  If an instance of
-    the app has motion activation, at mode change those lights will be adjusted if they are on.
-    If an instance does not have motion activation, it will also adjust those levels if the
-    lights are on.  However, if the lights are off at mode change, the app will adjust their
-    dimmer levels and then immediately turn them back off.  This is so that the next time
+    the app has motion activation, at mode change those lights will be adjusted for the next on.
+    If an instance does not have motion activation,  if the lights are off at mode change, the app
+    will adjust dimmer levels and then immediately turn them back off.  This is so that the next time
     the lights are turned on using the physical switch, they come on to the right level.  
     Without this feature, the light would come on to its previous dimmer level, and then
     adjust the level once ST sees the lights-on event.  This can be a number of seconds 
