@@ -46,7 +46,7 @@ preferences {
 	}
 	
 	section("Select dimmers to brighten...") {
-		input "switches", "capability.switchLevel", multiple: true, title "Which?"
+		input "switches", "capability.switch", multiple: true, title "Which?"
 	}
     
     //Uncomment this section below to test/change on the IDE. Smartphone does 
@@ -60,38 +60,32 @@ preferences {
 
 def installed() {
 //	log.debug "Installed with settings: ${settings}"
-//	subscribe(app, appTouch) 
 	subscribe(contact1, "contact.open", contactOpenHandler)
     subscribe(contact1, "contact.closed", contactClosedHandler)
-//    getDeviceSettings()
 }
 
 def updated() {
 //	log.debug "Updated with settings: ${settings}"
 	unsubscribe()
-//    subscribe(app, appTouch)
 	subscribe(contact1, "contact.open", contactOpenHandler)
     subscribe(contact1, "contact.closed", contactClosedHandler)
-    
-   //if(record == "Yes") //uncomment this line to test/change stuff on the IDE
-//      getDeviceSettings()
-}
-
-def appTouch(evt) {
-//	log.debug "appTouch: $evt"
-	setScene()
 }
 
 def contactOpenHandler(evt) {
 	getDeviceSettings()
-	switches.setLevel(100)
+    def i = 0
+	for(mySwitch in switches) {
+		if(mySwitch.latestValue("level")) mySwitch.setLevel(100)
+        else mySwitch.on() // a switch, not a dimmer
+        i++   
+	}      
 }
 
 def contactClosedHandler(evt) {
-	setScene()
+	resetScene()
 }
 
-private setScene() {
+private resetScene() {
 
 	def i = 0
     def switchName  = ""
