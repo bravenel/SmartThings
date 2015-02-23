@@ -126,7 +126,7 @@ private getDeviceSettings() {
 
     def cnt = 0
     for(myCounter in switches) {
-    	switches[cnt].refresh() //this was a try to get dimmer values (bug)
+//    	switches[cnt].refresh() //this was a try to get dimmer values (bug)
         switches[cnt].poll()
     	cnt++
     }
