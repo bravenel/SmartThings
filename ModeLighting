@@ -185,8 +185,8 @@ def switchOffHandler(evt) {
     else if(location.mode == "Evening") state.lastdimLevel = state.EveningLevel
     else if(location.mode == "Night") state.lastdimLevel = state.NightLevel
     if(state.needsLevel) {  //master w/o motion was on at mode change, reset the levels now
-    	master.setLevel(state.lastdimLevel,0)
-    	dimmers?.setLevel(state.lastdimLevel,0)
+    	master.resetLevel(state.lastdimLevel,0)
+    	dimmers?.resetLevel(state.lastdimLevel,0)
         state.needsLevel = false
     }
     master.off()
@@ -203,8 +203,8 @@ def setLevelHandler(evt) {
     dimmers?.setLevel(dimLevel)
 }
 
-// Using a hacked version of Dimmer Switch device type: when duration specified in setLevel,
-// that means to set the level and then immediately turn off the light.
+// Using a modified version of Dimmer Switch device type: resetLevel is used
+// to set the level and then immediately turn off the light.
 
 def modeChangeHandler(evt) {
     if     (location.mode == "Day") state.lastdimLevel = state.DayLevel  
@@ -212,9 +212,9 @@ def modeChangeHandler(evt) {
     else if(location.mode == "Night") state.lastdimLevel = state.NightLevel
     else return
     if(!motions) {
-		if(master.currentValue("switch") == "off") master.setLevel(state.lastdimLevel,0)
+		if(master.currentValue("switch") == "off") master.resetLevel(state.lastdimLevel)
     	else state.needsLevel = true
-		for(mySwitch in dimmers) if(mySwitch.currentValue("switch") == "off") mySwitch.setLevel(state.lastdimLevel,0)
+		for(mySwitch in dimmers) if(mySwitch.currentValue("switch") == "off") mySwitch.resetLevel(state.lastdimLevel)
     }
 }
 
