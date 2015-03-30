@@ -2,14 +2,14 @@
  *	Mode Lighting
  *
  *	Author: SmartThings, modified by Bruce Ravenel
- *	Date: 2015-02-21
+ *	Date: 2015-03-29
  */
 definition(
     name: "Mode Lighting",
     namespace: "bravenel",
     author: "SmartThings, Bruce Ravenel",
     description: "Set Dimmer Levels Based on Mode",
-    category: "My Apps",
+    category: "Convenience",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/MyApps/Cat-MyApps.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/MyApps/Cat-MyApps@2x.png"
 )
@@ -65,6 +65,36 @@ preferences {
 	}
 }
 
+def selectDimmers() {
+	dynamicPage(name: "selectDimmers", title: "First, select your dimmers", nextPage: "otherSettings", uninstall: true) {
+
+		section("When This...") { 
+			input "master", "capability.switchLevel", 
+				multiple: false, 
+				title: "Master Dimmer Is Turned On...", 
+				required: true
+		}
+
+    	section("Then the Master and these Dimmers...") {
+			input "dimmers", "capability.switchLevel", 
+				multiple: true, 
+				title: "Dimmer(s) will be set...", 
+				required: false
+		}
+        
+        section("Use these dim levels") {
+            input "digits6", "number", 
+            	title: "Use form DDEENN: ",
+            	required: true,
+                description: "DDEENN"
+        }
+		
+        section {
+        	label title: "Assign a name:", required: false
+        }	
+	}
+}
+
 def otherSettings() {
 	dynamicPage(name:"otherSettings", uninstall: false, install: true) {
 
@@ -97,36 +127,6 @@ def otherSettings() {
 	}
 }
 
-def selectDimmers() {
-	dynamicPage(name: "selectDimmers", title: "First, select your dimmers", nextPage: "otherSettings", uninstall: true) {
-
-		section("When This...") { 
-			input "master", "capability.switchLevel", 
-				multiple: false, 
-				title: "Master Dimmer Is Turned On...", 
-				required: true
-		}
-
-    	section("Then the Master and these Dimmers...") {
-			input "dimmers", "capability.switchLevel", 
-				multiple: true, 
-				title: "Dimmer(s) will be set...", 
-				required: false
-		}
-        
-        section("Use these dim levels") {
-            input "digits6", "number", 
-            	title: "Use form DDEENN: ",
-            	required: true,
-                description: "DDEENN"
-        }
-		
-        section {
-        	label title: "Assign a name:", required: false
-        }	
-	}
-}
-
 
 def installed() {
 	initialize()
@@ -137,11 +137,8 @@ def updated() {
 	initialize()
 }
 
-// change the hardwired modes just below
+
 def initialize() {
-	state.dayMode = "Day"
-	state.eveMode = "Evening"
-    state.nitMode = "Night"
     subscribe(master, "switch.on", switchOnHandler)
     subscribe(master, "switch.off", switchOffHandler)
     subscribe(master, "switch.setLevel", setLevelHandler)
@@ -160,43 +157,41 @@ def initialize() {
     state.DayLevel = left2.toInteger()
     state.EveningLevel = mid2.toInteger()
     state.NightLevel = right2
-    state.needsLevel = false
-    if     (location.mode == state.dayMode) state.lastdimLevel = state.DayLevel  
-    else if(location.mode == state.eveMode) state.lastdimLevel = state.EveningLevel
-    else if(location.mode == state.nitMode) state.lastdimLevel = state.NightLevel
     state.currentMode = location.mode
+    if(setdimLevel()) state.dimLevel = state.DayLevel
+}
+
+// change the hardwired modes just below, edit as you need
+boolean setdimLevel() {
+	def result = false
+    if     (location.mode == "Day")     state.dimLevel = state.DayLevel  
+    else if(location.mode == "Evening") state.dimLevel = state.EveningLevel
+    else if(location.mode == "Night")   state.dimLevel = state.NightLevel
+    else result = true
+    result
 }
 
 def switchOnHandler(evt) {
-    def dimLevel = state.lastdimLevel
-	if     (location.mode == state.dayMode) dimLevel = state.DayLevel  
- 	else if(location.mode == state.eveMode) dimLevel = state.EveningLevel
-	else if(location.mode == state.nitMode) dimLevel = state.NightLevel
-	master.setLevel(dimLevel)
-    dimmers?.setLevel(dimLevel)
-    state.lastdimLevel = dimLevel
+    setdimLevel()
+	master.setLevel(state.dimLevel)
+    dimmers?.setLevel(state.dimLevel)
 }
 
 def motionOnHandler(evt) {
     if(allOk) {
-    	def dimLevel = state.lastdimLevel  //could be the lights are already on, and have been adjusted, so accept that
-    	if(master.currentValue("switch") == "off") master.setLevel(dimLevel)
-		for(mySwitch in dimmers) if(mySwitch.currentValue("switch") == "off") mySwitch.setLevel(dimLevel)
+    	if(master.currentValue("switch") == "off") master.setLevel(state.dimLevel)
+		dimmers.each {if(it.currentValue("switch") == "off") it.setLevel(state.dimLevel)}
     }
 }
 
 def switchOffHandler(evt) {
-    if     (location.mode == state.dayMode) state.lastdimLevel = state.DayLevel  //this to undo manual dimLevel change
-    else if(location.mode == state.eveMode) state.lastdimLevel = state.EveningLevel
-    else if(location.mode == state.nitMode) state.lastdimLevel = state.NightLevel
-    if(state.needsLevel) {  //master w/o motion was on at mode change, reset the levels now
-    	master.resetLevel(state.lastdimLevel)
-    	dimmers?.resetLevel(state.lastdimLevel)
-        state.needsLevel = false
-    } else {
-    	master.off()
-    	dimmers?.off()
+    setdimLevel()
+    if(!motions) {
+    	master.resetLevel(state.dimLevel) //these will fail with normal device type Dimmer Switch
+    	dimmers?.resetLevel(state.dimLevel)
     }
+    master.off()
+    dimmers?.off()
     offDimmers?.off()
 }
 
@@ -204,31 +199,27 @@ def setLevelHandler(evt) {
     if ((evt.value == "on") || (evt.value == "off")) return
     def dimLevel = evt.value.toFloat()
     dimLevel = dimLevel.toInteger()
-    state.lastdimLevel = dimLevel  //so "on" from motion doesn't reset level later
+    state.dimLevel = dimLevel
     master.setLevel(dimLevel)
     dimmers?.setLevel(dimLevel)
 }
 
 // Using a modified version of Dimmer Switch device type: resetLevel is used
 // to set the level and then immediately turn off the light.
+// This device type is REQUIRED for instances of the app with no motion sensors
 
 def modeChangeHandler(evt) {
 	if(state.currentMode == location.mode) return  // if mode didn't actually change
-    if     (location.mode == state.dayMode) state.lastdimLevel = state.DayLevel  
-    else if(location.mode == state.eveMode) state.lastdimLevel = state.EveningLevel
-    else if(location.mode == state.nitMode) state.lastdimLevel = state.NightLevel
-    else return
+    if(setdimLevel()) return     // if not one of our 3 modes
     state.currentMode = location.mode
-    if(motions) {
-    	if(master.currentValue("switch")=="on") if(master.currentValue("level") < state.lastdimLevel) {
-        	master.setLevel(state.lastdimLevel)
-            dimmers?.setLevel(state.lastdimLevel)
-        }
-    	return
+    if((master.currentValue("switch")=="on") && (master.currentValue("level") < state.dimLevel)) {
+        master.setLevel(state.dimLevel)
+        dimmers?.setLevel(state.dimLevel)
+        return
     }
-	if(master.currentValue("switch") == "off") master.resetLevel(state.lastdimLevel)
-    else state.needsLevel = true
-	for(mySwitch in dimmers) if(mySwitch.currentValue("switch") == "off") mySwitch.resetLevel(state.lastdimLevel)
+    if(motions) return
+	if(master.currentValue("switch") == "off") master.resetLevel(state.dimLevel)
+	dimmers.each {if(it.currentValue("switch") == "off") it.resetLevel(state.dimLevel)}
 }
 
 // execution filter methods
