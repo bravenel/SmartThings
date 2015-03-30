@@ -15,26 +15,29 @@ definition(
 )
 
 /**
-    This app is hardwired for 3 modes named Day, Evening, and Night (which could be changed).
+    This app is hardwired for 3 modes named Day, Evening, and Night (which can be changed).
     The dim levels for the 3 are entered as a single 6 digit number, e.g. 903010,
     which would give 90 for Day, 30 for Evening, and 10 for Night.
     The app also allows you to specify additional dimmers that are turned off
     when the master dimmer is turned off.  The app has similar functionality to 
-    Dim and Dimmer, in that there is a master dimmer and some slave dimmers. The
+    Dim With Me, in that there is a master dimmer and some slave dimmers. The
     idea for that is that sometimes the master dimmer physical switch is used to
     turn on the lights -- the slaves follow, or likewise to turn off some lights.  That's
     how I use it, for a master off for an entire area, encompassing more than would be turned on.
     
+    It should be noted that for this to work, one must use an instant reporting z-wave dimmer.
+    One such dimmer is the Leviton VRMX1.  It must be included directly to the hub.
+    
     If motion sensors(s) are specified they turn on the master and all slaves to the 
     current mode's dimmer level.  I use "Turn off when there is no motion" from Lights &
     Switches to turn things off after some amount of time.  The motion activation can
-    be conditioned on time of day, days of week, or mode.
+    be conditioned on times of day, days of week, or modes.
     
     The app adjusts dimmer levels on each mode change to one of the three hardwired modes.
     A mode change to some other mode has no effect on the dimmer levels, which allows for
     extra modes that can be used to disable motion entirely at times. For an instance of the
     app without motion, if the lights are off at mode change, the app will adjust their
-    dimmer levels and then immediately turn them back off.  This is so that the next time
+    dimmer levels using a modified device type.  This is so that the next time
     the lights are turned on using the physical switch, they come on to the right level.  
     Without this feature, the light would come on to its previous dimmer level, and then
     adjust the level once ST sees the lights-on event.  This can be a number of seconds 
@@ -46,7 +49,7 @@ definition(
     dimmer level.  For example, in the evening, a woman wants to put on makeup and the light
     isn't bright enough.  She turns up the dimmer.  That event is responded to by temporarily
     adjusting the dimmer level for both master and slaves to that new level.  Once the light is turned off, 
-    the dimmer levels will be restored to their specified settings.  Without this feature, she could 
+    the dimmer levels will be restored to their mode-specific settings.  Without this feature, she could 
     brighten the lights only to have the app put them right back where they were before.
  */
 
@@ -73,23 +76,23 @@ def otherSettings() {
     	}
         
         section("Turn on with this button...") {
-        input "trigger", "capability.momentary", title: "Button to turn on", multiple: false, required: false
+            input "trigger", "capability.momentary", title: "Button to turn on", multiple: false, required: false
         }
     
     	section("Turn them On when there is...") {
     		input "motions", "capability.motionSensor", title: "Motion Here", required: false, multiple: true
     	}
 	
-	section(title: "Motion options", hidden: hideOptionsSection(), hideable: true) {
+		section(title: "Motion options", hidden: hideOptionsSection(), hideable: true) {
 
-		def timeLabel = timeIntervalLabel()
+			def timeLabel = timeIntervalLabel()
 
-		href "timeIntervalInput", title: "Only during a certain time", description: timeLabel ?: "Tap to set", state: timeLabel ? "complete" : null
+			href "timeIntervalInput", title: "Only during a certain time", description: timeLabel ?: "Tap to set", state: timeLabel ? "complete" : null
 
-		input "days", "enum", title: "Only on certain days of the week", multiple: true, required: false,
-			options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+			input "days", "enum", title: "Only on certain days of the week", multiple: true, required: false,
+				options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
-		input "modes", "mode", title: "Only when mode is", multiple: true, required: false
+			input "modes", "mode", title: "Only when mode is", multiple: true, required: false
    		}    
 	}
 }
@@ -104,22 +107,23 @@ def selectDimmers() {
 				required: true
 		}
 
-    		section("Then the Master and these Dimmers...") {
+    	section("Then the Master and these Dimmers...") {
 			input "dimmers", "capability.switchLevel", 
 				multiple: true, 
 				title: "Dimmer(s) will be set...", 
 				required: false
 		}
         
-        	section("Use these dim levels") {
-            		input "digits6", "number", 
-            		title: "Use form DDEENN: ",
-            		required: true
-        	}
+        section("Use these dim levels") {
+            input "digits6", "number", 
+            	title: "Use form DDEENN: ",
+            	required: true,
+                description: "DDEENN"
+        }
 		
-        	section {
-        		label title: "Assign a name:", required: false
-        	}	
+        section {
+        	label title: "Assign a name:", required: false
+        }	
 	}
 }
 
@@ -133,14 +137,18 @@ def updated() {
 	initialize()
 }
 
+// change the hardwired modes just below
 def initialize() {
+	state.dayMode = "Day"
+	state.eveMode = "Evening"
+    state.nitMode = "Night"
     subscribe(master, "switch.on", switchOnHandler)
     subscribe(master, "switch.off", switchOffHandler)
     subscribe(master, "switch.setLevel", setLevelHandler)
     subscribe(master, "level", setLevelHandler)
-    for(myDimmer in dimmers) {  //so that adjusting any dimmer does them all
-    	subscribe(myDimmer, "switch.setLevel", setLevelHandler)
-    	subscribe(myDimmer, "level", setLevelHandler) 
+    dimmers.each {  //so that adjusting any dimmer does them all
+    	subscribe(it, "switch.setLevel", setLevelHandler)
+    	subscribe(it, "level", setLevelHandler) 
     }
     subscribe(location, modeChangeHandler)
     subscribe(motions, "motion.active", motionOnHandler)
@@ -153,23 +161,20 @@ def initialize() {
     state.EveningLevel = mid2.toInteger()
     state.NightLevel = right2
     state.needsLevel = false
-    if     (location.mode == "Day") state.lastdimLevel = state.DayLevel  
-    else if(location.mode == "Evening") state.lastdimLevel = state.EveningLevel
-    else if(location.mode == "Night") state.lastdimLevel = state.NightLevel
+    if     (location.mode == state.dayMode) state.lastdimLevel = state.DayLevel  
+    else if(location.mode == state.eveMode) state.lastdimLevel = state.EveningLevel
+    else if(location.mode == state.nitMode) state.lastdimLevel = state.NightLevel
+    state.currentMode = location.mode
 }
 
 def switchOnHandler(evt) {
     def dimLevel = state.lastdimLevel
-	if     (location.mode == "Day") dimLevel = state.DayLevel  
- 	else if(location.mode == "Evening") dimLevel = state.EveningLevel
-	else if(location.mode == "Night") dimLevel = state.NightLevel
+	if     (location.mode == state.dayMode) dimLevel = state.DayLevel  
+ 	else if(location.mode == state.eveMode) dimLevel = state.EveningLevel
+	else if(location.mode == state.nitMode) dimLevel = state.NightLevel
 	master.setLevel(dimLevel)
     dimmers?.setLevel(dimLevel)
     state.lastdimLevel = dimLevel
-}
-
-def switchOnHandlerDimmer(evt) {
-    for(mySwitch in dimmers) if(evt.linkText == mySwitch.toString()) mySwitch.off()
 }
 
 def motionOnHandler(evt) {
@@ -181,21 +186,22 @@ def motionOnHandler(evt) {
 }
 
 def switchOffHandler(evt) {
-    if     (location.mode == "Day") state.lastdimLevel = state.DayLevel  //this to undo manual dimLevel change
-    else if(location.mode == "Evening") state.lastdimLevel = state.EveningLevel
-    else if(location.mode == "Night") state.lastdimLevel = state.NightLevel
+    if     (location.mode == state.dayMode) state.lastdimLevel = state.DayLevel  //this to undo manual dimLevel change
+    else if(location.mode == state.eveMode) state.lastdimLevel = state.EveningLevel
+    else if(location.mode == state.nitMode) state.lastdimLevel = state.NightLevel
     if(state.needsLevel) {  //master w/o motion was on at mode change, reset the levels now
-    	master.resetLevel(state.lastdimLevel,0)
-    	dimmers?.resetLevel(state.lastdimLevel,0)
+    	master.resetLevel(state.lastdimLevel)
+    	dimmers?.resetLevel(state.lastdimLevel)
         state.needsLevel = false
+    } else {
+    	master.off()
+    	dimmers?.off()
     }
-    master.off()
-    dimmers?.off()
     offDimmers?.off()
 }
 
 def setLevelHandler(evt) {
-    if ((evt.value == "on") || (evt.value == "off" || !state.switchEnable)) return
+    if ((evt.value == "on") || (evt.value == "off")) return
     def dimLevel = evt.value.toFloat()
     dimLevel = dimLevel.toInteger()
     state.lastdimLevel = dimLevel  //so "on" from motion doesn't reset level later
@@ -207,15 +213,22 @@ def setLevelHandler(evt) {
 // to set the level and then immediately turn off the light.
 
 def modeChangeHandler(evt) {
-    if     (location.mode == "Day") state.lastdimLevel = state.DayLevel  
-    else if(location.mode == "Evening") state.lastdimLevel = state.EveningLevel
-    else if(location.mode == "Night") state.lastdimLevel = state.NightLevel
+	if(state.currentMode == location.mode) return  // if mode didn't actually change
+    if     (location.mode == state.dayMode) state.lastdimLevel = state.DayLevel  
+    else if(location.mode == state.eveMode) state.lastdimLevel = state.EveningLevel
+    else if(location.mode == state.nitMode) state.lastdimLevel = state.NightLevel
     else return
-    if(!motions) {
-		if(master.currentValue("switch") == "off") master.resetLevel(state.lastdimLevel)
-    	else state.needsLevel = true
-		for(mySwitch in dimmers) if(mySwitch.currentValue("switch") == "off") mySwitch.resetLevel(state.lastdimLevel)
+    state.currentMode = location.mode
+    if(motions) {
+    	if(master.currentValue("switch")=="on") if(master.currentValue("level") < state.lastdimLevel) {
+        	master.setLevel(state.lastdimLevel)
+            dimmers?.setLevel(state.lastdimLevel)
+        }
+    	return
     }
+	if(master.currentValue("switch") == "off") master.resetLevel(state.lastdimLevel)
+    else state.needsLevel = true
+	for(mySwitch in dimmers) if(mySwitch.currentValue("switch") == "off") mySwitch.resetLevel(state.lastdimLevel)
 }
 
 // execution filter methods
@@ -250,8 +263,10 @@ private getTimeOk() {
 	def result = true
 	if (starting && ending) {
 		def currTime = now()
-		def start = timeToday(starting).time
-		def stop = timeToday(ending).time
+//		def start = timeToday(starting).time
+        def start = timeToday(starting,location.timeZone).time
+//		def stop = timeToday(ending).time
+        def stop = timeToday(ending,location.timeZone).time
 		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
 	}
 //	log.trace "timeOk = $result"
