@@ -2,7 +2,7 @@
  *	Mode Lighting
  *
  *	Author: SmartThings, modified by Bruce Ravenel
- *	Date: 2015-03-29
+ *	Date: 2015-04-05
  */
 definition(
     name: "Mode Lighting",
@@ -16,7 +16,8 @@ definition(
 
 /**
     This app is hardwired for 3 modes named Day, Evening, and Night (which can be changed).
-    The dim levels for the 3 are entered as a single 6 digit number, e.g. 903010,
+    Edit lines 168, 169 and 170 to change the modes used in the app.
+    The dim levels for the 3 mode are entered as a single 6 digit number, e.g. 903010,
     which would give 90 for Day, 30 for Evening, and 10 for Night.
     The app also allows you to specify additional dimmers that are turned off
     when the master dimmer is turned off.  The app has similar functionality to 
@@ -158,7 +159,7 @@ def initialize() {
     state.EveningLevel = mid2.toInteger()
     state.NightLevel = right2
     state.currentMode = location.mode
-    if(setdimLevel()) state.dimLevel = state.DayLevel
+    if(setdimLevel()) state.dimLevel = state.DayLevel  //if installed during some other mode
 }
 
 // change the hardwired modes just below, edit as you need
@@ -212,11 +213,8 @@ def modeChangeHandler(evt) {
 	if(state.currentMode == location.mode) return  // if mode didn't actually change
     if(setdimLevel()) return     // if not one of our 3 modes
     state.currentMode = location.mode
-    if((master.currentValue("switch")=="on") && (master.currentValue("level") < state.dimLevel)) {
-        master.setLevel(state.dimLevel)
-        dimmers?.setLevel(state.dimLevel)
-        return
-    }
+    if((master.currentValue("switch")=="on") && (master.currentValue("level") < state.dimLevel)) master.setLevel(state.dimLevel)
+    dimmers.each {if((it.currentValue("switch")=="on") && (it.currentValue("level") < state.dimLevel)) it.setLevel(state.dimLevel)}
     if(motions) return
 	if(master.currentValue("switch") == "off") master.resetLevel(state.dimLevel)
 	dimmers.each {if(it.currentValue("switch") == "off") it.resetLevel(state.dimLevel)}
