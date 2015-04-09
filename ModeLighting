@@ -2,7 +2,7 @@
  *	Mode Lighting
  *
  *	Author: SmartThings, modified by Bruce Ravenel
- *	Date: 2015-04-05
+ *	Date: 2015-04-08
  */
 definition(
     name: "Mode Lighting",
@@ -16,9 +16,9 @@ definition(
 
 /**
     This app is hardwired for 3 modes named Day, Evening, and Night (which can be changed).
-    Edit lines 168, 169 and 170 to change the modes used in the app.
-    The dim levels for the 3 mode are entered as a single 6 digit number, e.g. 903010,
-    which would give 90 for Day, 30 for Evening, and 10 for Night.
+    Edit lines 173, 174 and 175 to change the modes used in the app.
+    The dim levels for the 3 mode are entered as a single 6 digit number, e.g. 903510,
+    which would give 90 for Day, 35 for Evening, and 10 for Night.
     The app also allows you to specify additional dimmers that are turned off
     when the master dimmer is turned off.  The app has similar functionality to 
     Dim With Me, in that there is a master dimmer and some slave dimmers. The
@@ -30,9 +30,8 @@ definition(
     One such dimmer is the Leviton VRMX1.  It must be included directly to the hub.
     
     If motion sensors(s) are specified they turn on the master and all slaves to the 
-    current mode's dimmer level.  I use "Turn off when there is no motion" from Lights &
-    Switches to turn things off after some amount of time.  The motion activation can
-    be conditioned on times of day, days of week, or modes.
+    current mode's dimmer level.  The motion activation can be conditioned on times of day,
+    days of week, or modes.  Other sensors can be used for turning off after x minutes.
     
     The app adjusts dimmer levels on each mode change to one of the three hardwired modes.
     A mode change to some other mode has no effect on the dimmer levels, which allows for
@@ -100,9 +99,9 @@ def otherSettings() {
 	dynamicPage(name:"otherSettings", uninstall: false, install: true) {
 
 		section("And these will also be turned off with it") {
-            input "offDimmers", "capability.switchLevel",
+            input "offSwitches", "capability.switch",
         	multiple: true,
-       		title: "These dimmers off when master off...",
+       		title: "These switches off when master off...",
         	required: false
     	}
         
@@ -113,6 +112,11 @@ def otherSettings() {
     	section("Turn them On when there is...") {
     		input "motions", "capability.motionSensor", title: "Motion Here", required: false, multiple: true
     	}
+        
+        section("Turn them Off when there is no motion...") {
+        	input "offMotions", "capability.motionSensor", title: "on these sensors:", required: false, multiple: true
+        	input "minutes", "number", title: "For this many minutes", required: false, multiple: false
+        }
 	
 		section(title: "Motion options", hidden: hideOptionsSection(), hideable: true) {
 
@@ -150,6 +154,7 @@ def initialize() {
     }
     subscribe(location, modeChangeHandler)
     subscribe(motions, "motion.active", motionOnHandler)
+    subscribe(offMotions, "motion.inactive", motionOffHandler)
     subscribe(trigger, "switch.on", switchOnHandler)
     def digits4 = digits6 % 10000
     def right2 = digits4 % 100
@@ -176,24 +181,38 @@ def switchOnHandler(evt) {
     setdimLevel()
 	master.setLevel(state.dimLevel)
     dimmers?.setLevel(state.dimLevel)
+	unschedule()
 }
 
 def motionOnHandler(evt) {
     if(allOk) {
     	if(master.currentValue("switch") == "off") master.setLevel(state.dimLevel)
 		dimmers.each {if(it.currentValue("switch") == "off") it.setLevel(state.dimLevel)}
+    	unschedule()
     }
+}
+
+def motionOffHandler(evt) {
+    if(allOk) {
+    	def noMotion = true
+        offMotions.each {noMotion = noMotion && it.currentValue("motion")=="inactive"}
+    	if(noMotion) {
+        	if(minutes > 0) runIn(minutes*60,switchOffHandler)
+            else switchOffHandler(evt)
+        }
+	}
 }
 
 def switchOffHandler(evt) {
     setdimLevel()
-    if(!motions) {
-    	master.resetLevel(state.dimLevel) //these will fail with normal device type Dimmer Switch
-    	dimmers?.resetLevel(state.dimLevel)
+    if(motions) {
+        master.off()
+    	dimmers?.off() 
+    } else {    //WARNING: This will fail unless you have custom device type "Dimmer Switch with Off"
+    	if(master.currentValue("level") != state.dimLevel) master.resetLevel(state.dimLevel) 
+    	dimmers.each {if(it.currentValue("level") != state.dimLevel) it.resetLevel(state.dimLevel) else it.off()}
     }
-    master.off()
-    dimmers?.off()
-    offDimmers?.off()
+    offSwitches?.off()
 }
 
 def setLevelHandler(evt) {
@@ -205,12 +224,12 @@ def setLevelHandler(evt) {
     dimmers?.setLevel(dimLevel)
 }
 
-// Using a modified version of Dimmer Switch device type: resetLevel is used
-// to set the level and then immediately turn off the light.
-// This device type is REQUIRED for instances of the app with no motion sensors
+// Must use a custom version of Dimmer Switch device type: "Dimmer Switch with Off"
+// resetLevel() is used to set the level and then immediately turn off the dimmer.
+// This device type is REQUIRED for instances of the app with no motion sensors!
 
 def modeChangeHandler(evt) {
-	if(state.currentMode == location.mode) return  // if mode didn't actually change
+	if(state.currentMode == location.mode) return  // if our mode didn't actually change
     if(setdimLevel()) return     // if not one of our 3 modes
     state.currentMode = location.mode
     if((master.currentValue("switch")=="on") && (master.currentValue("level") < state.dimLevel)) master.setLevel(state.dimLevel)
