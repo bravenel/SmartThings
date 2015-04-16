@@ -2,7 +2,7 @@
  *	Mode Lighting
  *
  *	Author: SmartThings, modified by Bruce Ravenel
- *	Date: 2015-04-14
+ *	Date: 2015-04-16
  */
 definition(
     name: "Mode Lighting",
@@ -16,7 +16,7 @@ definition(
 
 /**
     This app is hardwired for 3 modes named Day, Evening, and Night (which can be changed).
-    Edit lines 170, 171 and 172 to change the modes used in the app.
+    Edit lines 172, 173 and 174 to change the modes used in the app.
     The dim levels for the 3 mode are entered as a single 6 digit number, e.g. 903510,
     which would give 90 for Day, 35 for Evening, and 10 for Night.
     The app also allows you to specify additional dimmers that are turned off
@@ -161,6 +161,8 @@ def initialize() {
     state.NightLevel = right2
     state.currentMode = location.mode
     if(setdimLevel()) if(!state.dimLevel) state.dimLevel = state.DayLevel  //if null & installed during some other mode
+    state.motionOffDismissed = true
+    state.masterOff = true
 }
 
 // change the hardwired modes just below, edit as you need
@@ -175,13 +177,16 @@ boolean setdimLevel(dimLevel) {
 }
 
 def switchesOn(dimLevel) {
+	state.motionOffDismissed = true
+    state.masterOff = false
     setdimLevel(dimLevel)
 	master.setLevel(state.dimLevel)
     dimmers?.setLevel(state.dimLevel)
-	unschedule()        // kill any pending motion off
 }
 
 def switchesOff() {
+	if(state.motionOffDismissed) return
+    state.masterOff = true
 	master.off()
     dimmers?.off()
     offSwitches?.off()
@@ -197,13 +202,14 @@ def buttonOnHandler(evt) {
 
 def motionOnHandler(evt) {
     if(allOk) {
-		if(master.currentValue("switch") == "off") switchesOn()
-    	else unschedule()    // kill any pending motion off 
+		if(state.masterOff) switchesOn() //leave dimLevel alone since multiple hits
+    	else state.motionOffDismissed = true 
     }
 }
 
 def switchOffHandler(evt) {
 	if(evt.isPhysical()) {
+    	state.masterOff = true
     	setdimLevel()        // undo any manual dimLevel changes
     	if(motions) dimmers?.off() 
     	else {    //WARNING: This will fail unless you have custom device type "Dimmer Switch with Off"
@@ -214,19 +220,20 @@ def switchOffHandler(evt) {
     }
 }
 
-def motionOffHandler(evt) {
+def motionOffHandler(evt) {  // called when motion goes inactive, check all sensors
     if(allOk) {
     	def noMotion = true
         offMotions.each {noMotion = noMotion && it.currentValue("motion")=="inactive"}
     	if(noMotion) {
+        	state.motionOffDismissed = false
         	if(minutes > 0) runIn(minutes*60,switchesOff)
             else switchesOff()
         }
 	}
 }
 
-def levelHandler(evt) {
-    if ((evt.value == "on") || (evt.value == "off")) return
+def levelHandler(evt) {      // allows a physical dimmer to change the current dimLevel
+    if (evt.isDigital() || (evt.value == "on") || (evt.value == "off")) return
     def dimLevel = evt.value.toFloat()
     dimLevel = dimLevel.toInteger()
     switchesOn(dimLevel)
