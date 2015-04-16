@@ -191,7 +191,7 @@ def buttonOnHandler(evt) {
 def motionOnHandler(evt) {
 	if(allOk) {
 		if(state.masterOff) switchesOn() //leave dimLevel alone since multiple hits
-    	else state.motionOffDismissed = true 
+		else state.motionOffDismissed = true 
 	}
 }
 
