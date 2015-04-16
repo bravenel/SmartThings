@@ -72,17 +72,17 @@ def selectDimmers() {
 			input "master", "capability.switchLevel", multiple: false, title: "Master Dimmer Is Turned On...", required: true
 		}
 
-    		section("Then the Master and these Dimmers...") {
+		section("Then the Master and these Dimmers...") {
 			input "dimmers", "capability.switchLevel", multiple: true, title: "Dimmer(s) will be set...", required: false
 		}
         
-        	section("Use these dim levels") {
-        		input "digits6", "number", title: "Use form DDEENN: ", required: true, description: "DDEENN"
-        	}
+		section("Use these dim levels") {
+			input "digits6", "number", title: "Use form DDEENN: ", required: true, description: "DDEENN"
+		}
 		
-        	section {
-        		label title: "Assign a name:", required: false
-        	}	
+		section {
+			label title: "Assign a name:", required: false
+		}	
 	}
 }
 
@@ -91,20 +91,20 @@ def otherSettings() {
 
 		section("And these will also be turned off with it") {
 			input "offSwitches", "capability.switch", title: "These switches off when master off...", multiple: true, required: false
-    		}
+		}
         
-        	section("Turn on with this button...") {
-            		input "trigger", "capability.momentary", title: "Button to turn on", multiple: false, required: false
-        	}
+		section("Turn on with this button...") {
+			input "trigger", "capability.momentary", title: "Button to turn on", multiple: false, required: false
+		}
     
-    		section("Turn them On when there is...") {
-    			input "motions", "capability.motionSensor", title: "Motion Here", required: false, multiple: true
-    		}
+		section("Turn them On when there is...") {
+			input "motions", "capability.motionSensor", title: "Motion Here", required: false, multiple: true
+		}
         
-        	section("Turn them Off when there is no motion...") {
-        		input "offMotions", "capability.motionSensor", title: "on these sensors:", required: false, multiple: true
-        		input "minutes", "number", title: "For this many minutes", required: false, multiple: false
-        	}
+		section("Turn them Off when there is no motion...") {
+			input "offMotions", "capability.motionSensor", title: "on these sensors:", required: false, multiple: true
+			input "minutes", "number", title: "For this many minutes", required: false, multiple: false
+		}
 	
 		section(title: "Motion options", hidden: hideOptionsSection(), hideable: true) {
 
@@ -166,10 +166,10 @@ boolean setdimLevel(dimLevel) {
 
 def switchesOn(dimLevel) {
 	state.motionOffDismissed = true
-    	state.masterOff = false
-    	setdimLevel(dimLevel)
+	state.masterOff = false
+	setdimLevel(dimLevel)
 	master.setLevel(state.dimLevel)
-    	dimmers?.setLevel(state.dimLevel)
+	dimmers?.setLevel(state.dimLevel)
 }
 
 def switchesOff() {
@@ -197,13 +197,13 @@ def motionOnHandler(evt) {
 
 def switchOffHandler(evt) {
 	if(evt.isPhysical()) {
-    		state.masterOff = true
-    		setdimLevel()        // undo any manual dimLevel changes
-    		if(motions) dimmers?.off() 
-    		else {    //WARNING: This will fail unless you have custom device type "Dimmer Switch with Off"
-    			if(master.currentValue("level") != state.dimLevel) master.resetLevel(state.dimLevel) 
-    			dimmers.each {if(it.currentValue("level") != state.dimLevel) it.resetLevel(state.dimLevel) else it.off()}
-    		}
+		state.masterOff = true
+		setdimLevel()        // undo any manual dimLevel changes
+		if(motions) dimmers?.off() 
+		else {    //WARNING: This will fail unless you have custom device type "Dimmer Switch with Off"
+			if(master.currentValue("level") != state.dimLevel) master.resetLevel(state.dimLevel) 
+			dimmers.each {if(it.currentValue("level") != state.dimLevel) it.resetLevel(state.dimLevel) else it.off()}
+		}
 		offSwitches?.off()
 	}
 }
@@ -213,10 +213,10 @@ def motionOffHandler(evt) {  // called when motion goes inactive, check all sens
 		def noMotion = true
 		offMotions.each {noMotion = noMotion && it.currentValue("motion")=="inactive"}
 		if(noMotion) {
-        		state.motionOffDismissed = false
-        		if(minutes > 0) runIn(minutes*60,switchesOff)
-            	else switchesOff()
-        	}
+			state.motionOffDismissed = false
+			if(minutes > 0) runIn(minutes*60,switchesOff)
+			else switchesOff()
+		}
 	}
 }
 
