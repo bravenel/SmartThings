@@ -174,12 +174,12 @@ def switchesOn(dimLevel) {
 
 def switchesOff() {
 	if(state.motionOffDismissed) return
-    if(allOk) {
+	if(allOk) {
 		state.masterOff = true
 		master.off()
 		dimmers?.off()
 		offSwitches?.off()
-    }
+	}
 }
 
 def switchOnHandler(evt) {
