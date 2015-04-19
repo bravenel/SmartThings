@@ -2,7 +2,7 @@
  *	Mode Lighting
  *
  *	Author: SmartThings, modified by Bruce Ravenel
- *	Date: 2015-04-16
+ *	Date: 2015-04-19
  */
 definition(
     name: "Mode Lighting",
@@ -153,7 +153,7 @@ def initialize() {
 	state.masterOff = true
 }
 
-// change the hardwired modes just below, edit as you need
+// change the hardwired modes just below, edit as you need the modes in quotes
 boolean setdimLevel(dimLevel) {
 	def result = false
 	if(dimLevel) state.dimLevel = dimLevel
@@ -174,10 +174,12 @@ def switchesOn(dimLevel) {
 
 def switchesOff() {
 	if(state.motionOffDismissed) return
-	state.masterOff = true
-	master.off()
-	dimmers?.off()
-	offSwitches?.off()
+    if(allOk) {
+		state.masterOff = true
+		master.off()
+		dimmers?.off()
+		offSwitches?.off()
+    }
 }
 
 def switchOnHandler(evt) {
@@ -196,13 +198,13 @@ def motionOnHandler(evt) {
 }
 
 def switchOffHandler(evt) {
+	state.masterOff = true
 	if(evt.isPhysical()) {
-		state.masterOff = true
 		setdimLevel()        // undo any manual dimLevel changes
 		if(motions) dimmers?.off() 
 		else {    //WARNING: This will fail unless you have custom device type "Dimmer Switch with Off"
-			if(master.currentValue("level") != state.dimLevel) master.resetLevel(state.dimLevel) 
-			dimmers.each {if(it.currentValue("level") != state.dimLevel) it.resetLevel(state.dimLevel) else it.off()}
+			if(master.currentLevel != state.dimLevel) master.resetLevel(state.dimLevel) 
+			dimmers.each {if(it.currentLevel != state.dimLevel) it.resetLevel(state.dimLevel) else it.off()}
 		}
 		offSwitches?.off()
 	}
@@ -221,7 +223,7 @@ def motionOffHandler(evt) {  // called when motion goes inactive, check all sens
 }
 
 def levelHandler(evt) {      // allows a physical dimmer to change the current dimLevel
-	if (evt.isDigital() || (evt.value == "on") || (evt.value == "off")) return
+	if (evt.isDigital() || evt.value == "on" || evt.value == "off") return
 	def dimLevel = evt.value.toFloat()
 	dimLevel = dimLevel.toInteger()
 	switchesOn(dimLevel)
@@ -235,11 +237,11 @@ def modeChangeHandler(evt) {
 	if(state.currentMode == location.mode) return  // if our mode didn't actually change
 	if(setdimLevel()) return                       // if not one of our 3 modes
 	state.currentMode = location.mode
-	if((master.currentValue("switch") == "on") && (master.currentValue("level") < state.dimLevel)) master.setLevel(state.dimLevel)
-	dimmers.each {if((it.currentValue("switch")=="on") && (it.currentValue("level") < state.dimLevel)) it.setLevel(state.dimLevel)}
+	if(!state.masterOff && master.currentLevel < state.dimLevel) master.setLevel(state.dimLevel)
+	dimmers.each {if(it.currentSwitch == "on" && it.currentLevel < state.dimLevel) it.setLevel(state.dimLevel)}
 	if(motions) return
-	if(master.currentValue("switch") == "off") master.resetLevel(state.dimLevel)
-	dimmers.each {if(it.currentValue("switch") == "off") it.resetLevel(state.dimLevel)}
+	if(state.masterOff) master.resetLevel(state.dimLevel)
+	dimmers.each {if(it.currentSwitch == "off") it.resetLevel(state.dimLevel)}
 }
 
 // execution filter methods
