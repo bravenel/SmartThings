@@ -15,15 +15,12 @@
  */
 metadata {
 	definition (name: "Aeon Motor Controller", namespace: "smartthings", author: "SmartThings") {
-		capability "Switch"
-		capability "Polling"
 		capability "Power Meter"
 		capability "Energy Meter"
 		capability "Refresh"
-		capability "Switch Level"
 		capability "Sensor"
 		capability "Actuator"
-        capability "doorControl"
+        	capability "doorControl"
 
         command "up"
         command "down"
@@ -40,9 +37,9 @@ metadata {
 		status "33%":  "command: 2603, payload: 21"
 		status "66%":  "command: 2603, payload: 42"
 		status "99%":  "command: 2603, payload: 63"
-        status "up":   "command: 2604, payload: FF"
-        status "down": "command: 2604, payload: 00"
-        status "stop": "command: 2605, payload: FE"
+        	status "up":   "command: 2604, payload: FF"
+        	status "down": "command: 2604, payload: 00"
+        	status "stop": "command: 2605, payload: FE"
 
 		for (int i = 0; i <= 10000; i += 1000) {
 			status "power  ${i} W": new physicalgraph.zwave.Zwave().meterV1.meterReport(
@@ -59,19 +56,11 @@ metadata {
 	}
 
 	tiles {
-//		standardTile("switch", "device.switch", width: 2, height: 2, canChangeIcon: true) {
-//			state "on", label:'Up', action:"switch.down", icon:"http://cdn.device-icons.smartthings.com/thermostat/thermostat-up@2x.png", backgroundColor:"#79b821", nextState:"turningOff"
-//			state "off", label:'Down', action:"switch.up", icon:"http://cdn.device-icons.smartthings.com/thermostat/thermostat-down@2x.png", backgroundColor:"#ffffff", nextState:"turningOn"
-//			state "turningOn", label:'${name}', icon:"st.switches.switch.on", backgroundColor:"#79b821"
-//			state "turningOff", label:'${name}', icon:"st.switches.switch.off", backgroundColor:"#ffffff"
-//		}
-		standardTile("toggle", "device.door", width: 2, height: 2, canChangeIcon: true) {
-			state("unknown", label:'${name}', action:"refresh.refresh", icon:"st.doors.garage.garage-open", backgroundColor:"#ffa81e")
-			state("closed", label:'stop', icon:"st.doors.garage.garage-closed", backgroundColor:"#79b821", nextState:"opening")
-			state("open", label:'${name}', action:"door control.close", icon:"st.doors.garage.garage-open", backgroundColor:"#ffa81e", nextState:"closing")
-			state("opening", label:'up', icon:"st.doors.garage.garage-opening", backgroundColor:"#ffe71e")
-			state("closing", label:'down', icon:"st.doors.garage.garage-closing", backgroundColor:"#ffe71e")
-					}
+		standardTile("motor", "device.door", width: 2, height: 2, canChangeIcon: true) {
+			state("stop", label:'stop', icon:"st.doors.garage.garage-closed", backgroundColor:"#79b821", decoration: "flat")
+			state("up", label:'up', icon:"st.doors.garage.garage-opening", action:'stop', backgroundColor:"#ffe71e")
+			state("down", label:'down', icon:"st.doors.garage.garage-closing", action:'stop', backgroundColor:"#ffe71e")
+		}
 		valueTile("power", "device.power", decoration: "flat") {
 			state "default", label:'${currentValue} W'
 		}
@@ -80,9 +69,6 @@ metadata {
 		}
 		standardTile("reset", "device.energy", inactiveLabel: false, decoration: "flat") {
 			state "default", label:'reset kWh', action:"reset"
-		}
-		controlTile("levelSliderControl", "device.level", "slider", height: 1, width: 3, inactiveLabel: false) {
-			state "level", action:"switch level.setLevel"
 		}
 		standardTile("refresh", "device.switch", inactiveLabel: false, decoration: "flat") {
 			state "default", label:"", action:"refresh.refresh", icon:"st.secondary.refresh"
@@ -97,8 +83,8 @@ metadata {
         	state "default", label: "Down", action: "down", icon:"http://cdn.device-icons.smartthings.com/thermostat/thermostat-down@2x.png"
         }
 	}
-	main(["toggle"])
-	details(["toggle", "power", "energy", "up", "down", "stop", "reset", "refresh"])
+	main(["motor"])
+	details(["motor", "power", "energy", "up", "down", "stop", "reset", "refresh"])
 }
 
 // parse events into attributes
@@ -128,15 +114,11 @@ def zwaveEvent(physicalgraph.zwave.commands.switchmultilevelv3.SwitchMultilevelR
 
 def dimmerEvents(physicalgraph.zwave.Command cmd) {
 	def result = []
-    def switchEvent = null
-    if(cmd.value == 0) {switchEvent = createEvent(name: "door", value: "closing", descriptionText: text)}
-    else if(cmd.value == 254) {switchEvent = createEvent(name: "door", value: "closed", descriptionText: text)}
-    else if(cmd.value == 255) {switchEvent = createEvent(name: "door", value: "opening", descriptionText: text)}
-//	def switchEvent = createEvent(name: "switch", value: (cmd.value ? "on" : "off"), descriptionText: text)
+    	def switchEvent = null
+    	if(cmd.value == 0) {switchEvent = createEvent(name: "door", value: "down", descriptionText: text)}
+    	else if(cmd.value == 254) {switchEvent = createEvent(name: "door", value: "stop", descriptionText: text)}
+    	else if(cmd.value == 255) {switchEvent = createEvent(name: "door", value: "up", descriptionText: text)}
 	result << switchEvent
-//	if (cmd.value) {
-//		result << createEvent(name: "level", value: cmd.value, unit: "%")
-//	}
 	if (switchEvent.isStateChange) {
 		result << response(["delay 1500", zwave.meterV2.meterGet(scale: 2).format()])
 	}
@@ -159,41 +141,12 @@ def zwaveEvent(physicalgraph.zwave.commands.meterv3.MeterReport cmd) {
 	}
 }
 
-def on() {
-	delayBetween([
-		zwave.basicV1.basicSet(value: 0xFF).format(),
-		zwave.switchMultilevelV1.switchMultilevelGet().format(),
-	], 5000)
-}
-
-def off() {
-	delayBetween([
-		zwave.basicV1.basicSet(value: 0x00).format(),
-		zwave.switchMultilevelV1.switchMultilevelGet().format(),
-	], 5000)
-}
-
-def poll() {
-	delayBetween([
-		zwave.meterV2.meterGet(scale: 0).format(),
-		zwave.meterV2.meterGet(scale: 2).format(),
-	], 1000)
-}
-
 def refresh() {
 	delayBetween([
 		zwave.switchMultilevelV1.switchMultilevelGet().format(),
 		zwave.meterV2.meterGet(scale: 0).format(),
 		zwave.meterV2.meterGet(scale: 2).format(),
 	], 1000)
-}
-
-def setLevel(level) {
-	if(level > 99) level = 99
-	delayBetween([
-		zwave.basicV1.basicSet(value: level).format(),
-		zwave.switchMultilevelV1.switchMultilevelGet().format()
-	], 5000)
 }
 
 def up() {
