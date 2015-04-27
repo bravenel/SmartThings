@@ -28,7 +28,7 @@ metadata {
         command "down"
         command "stop"
 
-		fingerprint inClusters: "0x26,0x32"
+//		fingerprint inClusters: "0x26,0x32"
 	}
 
 	simulator {
