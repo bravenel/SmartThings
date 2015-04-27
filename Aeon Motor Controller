@@ -20,7 +20,7 @@ metadata {
 		capability "Refresh"
 		capability "Sensor"
 		capability "Actuator"
-        	capability "doorControl"
+        capability "doorControl"
 
         command "up"
         command "down"
@@ -30,16 +30,9 @@ metadata {
 	}
 
 	simulator {
-		status "on":   "command: 2603, payload: FF"
-		status "off":  "command: 2603, payload: 00"
-		status "09%":  "command: 2603, payload: 09"
-		status "10%":  "command: 2603, payload: 0A"
-		status "33%":  "command: 2603, payload: 21"
-		status "66%":  "command: 2603, payload: 42"
-		status "99%":  "command: 2603, payload: 63"
-        	status "up":   "command: 2604, payload: FF"
-        	status "down": "command: 2604, payload: 00"
-        	status "stop": "command: 2605, payload: FE"
+        status "up":   "command: 2604, payload: FF"
+        status "down": "command: 2604, payload: 00"
+        status "stop": "command: 2605, payload: FE"
 
 		for (int i = 0; i <= 10000; i += 1000) {
 			status "power  ${i} W": new physicalgraph.zwave.Zwave().meterV1.meterReport(
@@ -50,13 +43,13 @@ metadata {
 				scaledMeterValue: i, precision: 3, meterType: 0, scale: 0, size: 4).incomingMessage()
 		}
 
-		["FF", "FE", "00", "09", "0A", "21", "42", "63"].each { val ->
+		["FF", "FE", "00"].each { val ->
 			reply "2001$val,delay 100,2602": "command: 2603, payload: $val"
 		}
 	}
 
 	tiles {
-		standardTile("motor", "device.door", width: 2, height: 2, canChangeIcon: true) {
+		standardTile("motor", "device.motor", width: 2, height: 2, canChangeIcon: true) {
 			state("stop", label:'stop', icon:"st.doors.garage.garage-closed", backgroundColor:"#79b821", decoration: "flat")
 			state("up", label:'up', icon:"st.doors.garage.garage-opening", action:'stop', backgroundColor:"#ffe71e")
 			state("down", label:'down', icon:"st.doors.garage.garage-closing", action:'stop', backgroundColor:"#ffe71e")
@@ -114,10 +107,10 @@ def zwaveEvent(physicalgraph.zwave.commands.switchmultilevelv3.SwitchMultilevelR
 
 def dimmerEvents(physicalgraph.zwave.Command cmd) {
 	def result = []
-    	def switchEvent = null
-    	if(cmd.value == 0) {switchEvent = createEvent(name: "door", value: "down", descriptionText: text)}
-    	else if(cmd.value == 254) {switchEvent = createEvent(name: "door", value: "stop", descriptionText: text)}
-    	else if(cmd.value == 255) {switchEvent = createEvent(name: "door", value: "up", descriptionText: text)}
+    def switchEvent = null
+    if(cmd.value == 0) {switchEvent = createEvent(name: "motor", value: "down", descriptionText: text)}
+    else if(cmd.value == 254) {switchEvent = createEvent(name: "motor", value: "stop", descriptionText: text)}
+    else if(cmd.value == 255) {switchEvent = createEvent(name: "motor", value: "up", descriptionText: text)}
 	result << switchEvent
 	if (switchEvent.isStateChange) {
 		result << response(["delay 1500", zwave.meterV2.meterGet(scale: 2).format()])
