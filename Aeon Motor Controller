@@ -14,7 +14,7 @@
  *
  */
 metadata {
-	definition (name: "Aeon Motor Controller", namespace: "smartthings", author: "SmartThings") {
+	definition (name: "Aeon Motor Controller2", namespace: "smartthings", author: "SmartThings") {
 		capability "Switch"
 		capability "Polling"
 		capability "Power Meter"
@@ -23,6 +23,7 @@ metadata {
 		capability "Switch Level"
 		capability "Sensor"
 		capability "Actuator"
+        capability "doorControl"
 
         command "up"
         command "down"
@@ -41,6 +42,7 @@ metadata {
 		status "99%":  "command: 2603, payload: 63"
         status "up":   "command: 2604, payload: FF"
         status "down": "command: 2604, payload: 00"
+        status "stop": "command: 2605, payload: FE"
 
 		for (int i = 0; i <= 10000; i += 1000) {
 			status "power  ${i} W": new physicalgraph.zwave.Zwave().meterV1.meterReport(
@@ -51,18 +53,25 @@ metadata {
 				scaledMeterValue: i, precision: 3, meterType: 0, scale: 0, size: 4).incomingMessage()
 		}
 
-		["FF", "00", "09", "0A", "21", "42", "63"].each { val ->
+		["FF", "FE", "00", "09", "0A", "21", "42", "63"].each { val ->
 			reply "2001$val,delay 100,2602": "command: 2603, payload: $val"
 		}
 	}
 
 	tiles {
-		standardTile("switch", "device.switch", width: 2, height: 2, canChangeIcon: true) {
-			state "on", label:'Up', action:"switch.down", icon:"http://cdn.device-icons.smartthings.com/thermostat/thermostat-up@2x.png", backgroundColor:"#79b821", nextState:"turningOff"
-			state "off", label:'Down', action:"switch.up", icon:"http://cdn.device-icons.smartthings.com/thermostat/thermostat-down@2x.png", backgroundColor:"#ffffff", nextState:"turningOn"
-			state "turningOn", label:'${name}', icon:"st.switches.switch.on", backgroundColor:"#79b821"
-			state "turningOff", label:'${name}', icon:"st.switches.switch.off", backgroundColor:"#ffffff"
-		}
+//		standardTile("switch", "device.switch", width: 2, height: 2, canChangeIcon: true) {
+//			state "on", label:'Up', action:"switch.down", icon:"http://cdn.device-icons.smartthings.com/thermostat/thermostat-up@2x.png", backgroundColor:"#79b821", nextState:"turningOff"
+//			state "off", label:'Down', action:"switch.up", icon:"http://cdn.device-icons.smartthings.com/thermostat/thermostat-down@2x.png", backgroundColor:"#ffffff", nextState:"turningOn"
+//			state "turningOn", label:'${name}', icon:"st.switches.switch.on", backgroundColor:"#79b821"
+//			state "turningOff", label:'${name}', icon:"st.switches.switch.off", backgroundColor:"#ffffff"
+//		}
+		standardTile("toggle", "device.door", width: 2, height: 2, canChangeIcon: true) {
+			state("unknown", label:'${name}', action:"refresh.refresh", icon:"st.doors.garage.garage-open", backgroundColor:"#ffa81e")
+			state("closed", label:'stop', icon:"st.doors.garage.garage-closed", backgroundColor:"#79b821", nextState:"opening")
+			state("open", label:'${name}', action:"door control.close", icon:"st.doors.garage.garage-open", backgroundColor:"#ffa81e", nextState:"closing")
+			state("opening", label:'up', icon:"st.doors.garage.garage-opening", backgroundColor:"#ffe71e")
+			state("closing", label:'down', icon:"st.doors.garage.garage-closing", backgroundColor:"#ffe71e")
+					}
 		valueTile("power", "device.power", decoration: "flat") {
 			state "default", label:'${currentValue} W'
 		}
@@ -88,8 +97,8 @@ metadata {
         	state "default", label: "Down", action: "down", icon:"http://cdn.device-icons.smartthings.com/thermostat/thermostat-down@2x.png"
         }
 	}
-	main(["switch"])
-	details(["switch", "power", "energy", "up", "down", "stop", "reset", "refresh"])
+	main(["toggle"])
+	details(["toggle", "power", "energy", "up", "down", "stop", "reset", "refresh"])
 }
 
 // parse events into attributes
@@ -119,11 +128,15 @@ def zwaveEvent(physicalgraph.zwave.commands.switchmultilevelv3.SwitchMultilevelR
 
 def dimmerEvents(physicalgraph.zwave.Command cmd) {
 	def result = []
-	def switchEvent = createEvent(name: "switch", value: (cmd.value ? "on" : "off"), descriptionText: text)
+    def switchEvent = null
+    if(cmd.value == 0) {switchEvent = createEvent(name: "door", value: "closing", descriptionText: text)}
+    else if(cmd.value == 254) {switchEvent = createEvent(name: "door", value: "closed", descriptionText: text)}
+    else if(cmd.value == 255) {switchEvent = createEvent(name: "door", value: "opening", descriptionText: text)}
+//	def switchEvent = createEvent(name: "switch", value: (cmd.value ? "on" : "off"), descriptionText: text)
 	result << switchEvent
-	if (cmd.value) {
-		result << createEvent(name: "level", value: cmd.value, unit: "%")
-	}
+//	if (cmd.value) {
+//		result << createEvent(name: "level", value: cmd.value, unit: "%")
+//	}
 	if (switchEvent.isStateChange) {
 		result << response(["delay 1500", zwave.meterV2.meterGet(scale: 2).format()])
 	}
