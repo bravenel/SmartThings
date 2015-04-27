@@ -14,7 +14,7 @@
  *
  */
 metadata {
-	definition (name: "Aeon Motor Controller2", namespace: "smartthings", author: "SmartThings") {
+	definition (name: "Aeon Motor Controller", namespace: "smartthings", author: "SmartThings") {
 		capability "Switch"
 		capability "Polling"
 		capability "Power Meter"
