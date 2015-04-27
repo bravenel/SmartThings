@@ -71,6 +71,7 @@ def configureButton4() {
 }
 
 def getButtonSections(buttonNumber) {
+    	section("Button number $buttonNumber") { } //correct for ST bug with title
 	return {
 		section("Lights to Toggle") {
 			input "lights_${buttonNumber}_pushed", "capability.switch", title: "Pushed", multiple: true, required: false
