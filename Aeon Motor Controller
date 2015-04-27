@@ -58,8 +58,8 @@ metadata {
 
 	tiles {
 		standardTile("switch", "device.switch", width: 2, height: 2, canChangeIcon: true) {
-			state "on", label:'${name}', action:"switch.off", icon:"st.switches.switch.on", backgroundColor:"#79b821", nextState:"turningOff"
-			state "off", label:'${name}', action:"switch.on", icon:"st.switches.switch.off", backgroundColor:"#ffffff", nextState:"turningOn"
+			state "on", label:'Up', action:"switch.down", icon:"http://cdn.device-icons.smartthings.com/thermostat/thermostat-up@2x.png", backgroundColor:"#79b821", nextState:"turningOff"
+			state "off", label:'Down', action:"switch.up", icon:"http://cdn.device-icons.smartthings.com/thermostat/thermostat-down@2x.png", backgroundColor:"#ffffff", nextState:"turningOn"
 			state "turningOn", label:'${name}', icon:"st.switches.switch.on", backgroundColor:"#79b821"
 			state "turningOff", label:'${name}', icon:"st.switches.switch.off", backgroundColor:"#ffffff"
 		}
@@ -78,13 +78,18 @@ metadata {
 		standardTile("refresh", "device.switch", inactiveLabel: false, decoration: "flat") {
 			state "default", label:"", action:"refresh.refresh", icon:"st.secondary.refresh"
 		}
-        standardTile("stop", "device.switch", inactiveLabel: false, decoration: "flat") {
-        	state "default", label:"", action: "stop.stop"
+        standardTile("stop", "device.switch") {
+        	state "default", label:"", action: "stop", icon:"http://cdn.device-icons.smartthings.com/sonos/stop-btn@2x.png"
+        }
+        standardTile("up", "device.switch") {
+        	state "default", label: "Up", action: "up", icon:"http://cdn.device-icons.smartthings.com/thermostat/thermostat-up@2x.png"
+        }
+        standardTile("down", "device.switch") {
+        	state "default", label: "Down", action: "down", icon:"http://cdn.device-icons.smartthings.com/thermostat/thermostat-down@2x.png"
         }
 	}
-
 	main(["switch"])
-	details(["switch", "power", "energy", "levelSliderControl", "reset", "refresh"])
+	details(["switch", "power", "energy", "up", "down", "stop", "reset", "refresh"])
 }
 
 // parse events into attributes
