@@ -1,1 +1,39 @@
-sss
+
+    This app is hardwired for 3 modes named Day, Evening, and Night (easily changed).
+    Edit lines 160, 161 and 162 to change the modes used in the app.
+    The dim levels for the 3 modes are entered as a single 6 digit number, e.g. 903510,
+    which would give 90 for Day, 35 for Evening, and 10 for Night (or corresponding modes).
+    The app also allows you to specify additional dimmers that are turned off
+    when the master dimmer is turned off.  The app has similar functionality to 
+    Dim With Me, in that there is a master dimmer and some slave dimmers. The
+    idea for that is that sometimes the master dimmer physical switch is used to
+    turn on the lights -- the slaves follow, or likewise to turn off some lights.  That's
+    how I use it, for a master off for an entire area, encompassing more than would be turned on.
+    
+    It should be noted that for this to work, one must use an instant reporting z-wave dimmer.
+    One such dimmer is the Leviton VRMX1 (which must be included directly to the hub to have instant).
+    
+    If motion sensors(s) are specified they turn on the master and all slaves to the 
+    current mode's dimmer level.  The motion activation can be conditioned on times of day,
+    days of week, or modes.  Other sensors can be used for turning off after x minutes.
+    
+    The app adjusts dimmer levels on each mode change to one of the three hardwired modes.
+    A mode change to some other mode has no effect on the dimmer levels, which allows for
+    extra modes that can be used to disable motion entirely at times. For an instance of the
+    app without motion, if the lights are off at mode change, the app will adjust their
+    dimmer levels using a modified device type.  This is so that the next time
+    the lights are turned on using the physical switch, they come on to the right level.  
+    Without this feature, the light would come on to its previous dimmer level, and then
+    adjust the level once ST sees the lights-on event.  This can be a number of seconds 
+    after the physical switch is pressed.  What you don't want is for someone to go into
+    the bathroom in the middle of the night, turn on a switch, and have the light come on
+    bright for a few seconds before it dims to the correct level.
+    
+    There is one more feature of this app that has to do with someone manually changing the
+    dimmer level.  For example, in the evening, a woman wants to put on makeup and the light
+    isn't bright enough.  She turns up the dimmer.  That event is responded to by temporarily
+    adjusting the dimmer level for both master and slaves to that new level.  Once the light is turned off, 
+    the dimmer levels will be restored to their mode-specific settings.  Without this feature, she could 
+    brighten the lights only to have the app put them right back where they were before.
+
+
