@@ -15,10 +15,10 @@ definition(
 )
 
 /**
-    This app is hardwired for 3 modes named Day, Evening, and Night (which can be changed).
+    This app is hardwired for 3 modes named Day, Evening, and Night (easily changed).
     Edit lines 160, 161 and 162 to change the modes used in the app.
-    The dim levels for the 3 mode are entered as a single 6 digit number, e.g. 903510,
-    which would give 90 for Day, 35 for Evening, and 10 for Night.
+    The dim levels for the 3 modes are entered as a single 6 digit number, e.g. 903510,
+    which would give 90 for Day, 35 for Evening, and 10 for Night (or corresponding modes).
     The app also allows you to specify additional dimmers that are turned off
     when the master dimmer is turned off.  The app has similar functionality to 
     Dim With Me, in that there is a master dimmer and some slave dimmers. The
@@ -27,7 +27,7 @@ definition(
     how I use it, for a master off for an entire area, encompassing more than would be turned on.
     
     It should be noted that for this to work, one must use an instant reporting z-wave dimmer.
-    One such dimmer is the Leviton VRMX1.  It must be included directly to the hub.
+    One such dimmer is the Leviton VRMX1 (which must be included directly to the hub to have instant).
     
     If motion sensors(s) are specified they turn on the master and all slaves to the 
     current mode's dimmer level.  The motion activation can be conditioned on times of day,
@@ -89,7 +89,7 @@ def selectDimmers() {
 def otherSettings() {
 	dynamicPage(name:"otherSettings", uninstall: false, install: true) {
 
-		section("And these will also be turned off with it") {
+		section("These switches will be turned off...") {
 			input "offSwitches", "capability.switch", title: "These switches off when master off...", multiple: true, required: false
 		}
         
@@ -140,6 +140,9 @@ def initialize() {
 	subscribe(motions, "motion.active", motionOnHandler)
 	subscribe(offMotions, "motion.inactive", motionOffHandler)
 	subscribe(trigger, "switch.on", buttonOnHandler)
+//	
+//	this part converts the 6 digit number into the three dimLevels
+//
 	def digits4 = digits6 % 10000
 	def right2 = digits4 % 100
 	def mid2 = digits4 / 100
@@ -147,10 +150,11 @@ def initialize() {
 	state.DayLevel = left2.toInteger()
 	state.EveningLevel = mid2.toInteger()
 	state.NightLevel = right2
+//
 	state.currentMode = location.mode
-	if(setdimLevel()) if(!state.dimLevel) state.dimLevel = state.DayLevel  //if null & installed during some other mode
 	state.motionOffDismissed = true
 	state.masterOff = true
+    if(setdimLevel()) if(!state.dimLevel) state.dimLevel = state.DayLevel
 }
 
 // change the hardwired modes just below, edit as you need the modes in quotes
@@ -160,30 +164,20 @@ boolean setdimLevel(dimLevel) {
 	else if(location.mode == "Day")     state.dimLevel = state.DayLevel  
 	else if(location.mode == "Evening") state.dimLevel = state.EveningLevel
 	else if(location.mode == "Night")   state.dimLevel = state.NightLevel
-	else result = true
-	result
+    else result = true
+    result
 }
 
 def switchesOn(dimLevel) {
-	state.motionOffDismissed = true
-	state.masterOff = false
-	setdimLevel(dimLevel)
+	state.motionOffDismissed = true    //we use this variable instead of unschedule() to kill pending off()
+	state.masterOff = false            //we track the on/off state of the master dimmer for efficiency
+    setdimLevel(dimLevel)
 	master.setLevel(state.dimLevel)
 	dimmers?.setLevel(state.dimLevel)
 }
 
-def switchesOff() {
-	if(state.motionOffDismissed) return
-	if(allOk) {
-		state.masterOff = true
-		master.off()
-		dimmers?.off()
-		offSwitches?.off()
-	}
-}
-
 def switchOnHandler(evt) {
-	if(evt.isPhysical()) switchesOn()
+	if(evt.isPhysical()) switchesOn() else state.motionOffDismissed = true
 }
 
 def buttonOnHandler(evt) {
@@ -191,23 +185,33 @@ def buttonOnHandler(evt) {
 }
 
 def motionOnHandler(evt) {
-	if(allOk) {
-		if(state.masterOff) switchesOn() //leave dimLevel alone since multiple hits
-		else state.motionOffDismissed = true 
-	}
+	if(state.masterOff && allOk) switchesOn() else state.motionOffDismissed = true
+}
+
+def levelHandler(evt) {      // allows a physical dimmer to change the current dimLevel
+	if (evt.isDigital() || evt.value == "on" || evt.value == "off") return
+	def dimLevel = evt.value.toFloat()
+	dimLevel = dimLevel.toInteger()
+	switchesOn(dimLevel)
+}
+
+def switchesOff() {                    //this is only used by motionOffHandler
+	if(state.motionOffDismissed || !allOk) return     //intervening On, kill this Off. Replaces use of unschedule()
+	state.masterOff = true
+	master.off()
+	dimmers?.off()
+	offSwitches?.off()
 }
 
 def switchOffHandler(evt) {
 	state.masterOff = true
-	if(evt.isPhysical()) {
-		setdimLevel()        // undo any manual dimLevel changes
-		if(motions) dimmers?.off() 
-		else {    //WARNING: This will fail unless you have custom device type "Dimmer Switch with Off"
-			if(master.currentLevel != state.dimLevel) master.resetLevel(state.dimLevel) 
-			dimmers.each {if(it.currentLevel != state.dimLevel) it.resetLevel(state.dimLevel) else it.off()}
-		}
-		offSwitches?.off()
+	if(evt.isDigital()) return
+	if(motions) dimmers?.off() 
+	else {    //WARNING: This will fail unless you have custom device type "Dimmer Switch with Off"
+		if(master.currentLevel != state.dimLevel) master.resetLevel(state.dimLevel) 
+		dimmers.each {if(it.currentLevel != state.dimLevel) it.resetLevel(state.dimLevel) else it.off()}
 	}
+	offSwitches?.off()
 }
 
 def motionOffHandler(evt) {  // called when motion goes inactive, check all sensors
@@ -222,13 +226,6 @@ def motionOffHandler(evt) {  // called when motion goes inactive, check all sens
 	}
 }
 
-def levelHandler(evt) {      // allows a physical dimmer to change the current dimLevel
-	if (evt.isDigital() || evt.value == "on" || evt.value == "off") return
-	def dimLevel = evt.value.toFloat()
-	dimLevel = dimLevel.toInteger()
-	switchesOn(dimLevel)
-}
-
 // Must use a custom version of Dimmer Switch device type: "Dimmer Switch with Off"
 // resetLevel() is used to set the level and then immediately turn off the dimmer.
 // This device type is REQUIRED for instances of the app with no motion sensors!
@@ -236,11 +233,18 @@ def levelHandler(evt) {      // allows a physical dimmer to change the current d
 def modeChangeHandler(evt) {
 	if(state.currentMode == location.mode) return  // if our mode didn't actually change
 	if(setdimLevel()) return                       // if not one of our 3 modes
-	state.currentMode = location.mode
-	if(!state.masterOff && master.currentLevel < state.dimLevel) master.setLevel(state.dimLevel)
+    state.currentMode = location.mode			   // ok, new mode
+    
+    // the next two lines brighten any lights on when new mode is brighter than previous
+    
+	if(master.currentSwitch == "on" && master.currentLevel < state.dimLevel) master.setLevel(state.dimLevel)
 	dimmers.each {if(it.currentSwitch == "on" && it.currentLevel < state.dimLevel) it.setLevel(state.dimLevel)}
+
 	if(motions) return
-	if(state.masterOff) master.resetLevel(state.dimLevel)
+    
+    // for rooms with no motion, reset the dimLevel IF off
+    
+	if(master.currentSwitch == "off") master.resetLevel(state.dimLevel)
 	dimmers.each {if(it.currentSwitch == "off") it.resetLevel(state.dimLevel)}
 }
 
@@ -277,9 +281,9 @@ private getTimeOk() {
 	if (starting && ending) {
 		def currTime = now()
 //		def start = timeToday(starting).time
-        	def start = timeToday(starting,location.timeZone).time
+		def start = timeToday(starting,location.timeZone).time
 //		def stop = timeToday(ending).time
-        	def stop = timeToday(ending,location.timeZone).time
+		def stop = timeToday(ending,location.timeZone).time
 		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
 	}
 //	log.trace "timeOk = $result"
