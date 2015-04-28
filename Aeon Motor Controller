@@ -99,11 +99,7 @@ def dimmerEvents(physicalgraph.zwave.Command cmd) {
 }
 
 def refresh() {
-	delayBetween([
-		zwave.switchMultilevelV1.switchMultilevelGet().format(),
-		zwave.meterV2.meterGet(scale: 0).format(),
-		zwave.meterV2.meterGet(scale: 2).format(),
-	], 1000)
+	zwave.switchMultilevelV1.switchMultilevelGet().format()
 }
 
 def up() {
