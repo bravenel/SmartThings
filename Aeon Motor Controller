@@ -22,7 +22,6 @@ metadata {
         command "up"
         command "down"
         command "stop"
-        command "upOrDown"
 
 //		fingerprint inClusters: "0x26,0x32"
 	}
@@ -39,7 +38,8 @@ metadata {
 
 	tiles {
 		standardTile("motor", "device.motor", width: 2, height: 2, canChangeIcon: true) {
-			state("stop", label:'stop', icon:"st.doors.garage.garage-closed", action:'upOrDown', backgroundColor:"#79b821")
+			state("stopUp", label:'stop', icon:"st.doors.garage.garage-open", action: 'down', backgroundColor:"#79b821")
+			state("stopDn", label:'stop', icon:"st.doors.garage.garage-closed", action: 'up', backgroundColor:"#79b821")
 			state("up", label:'up', icon:"st.doors.garage.garage-opening", action:'stop', backgroundColor:"#ffe71e")
 			state("down", label:'down', icon:"st.doors.garage.garage-closing", action:'stop', backgroundColor:"#ffe71e")
 		}
@@ -90,12 +90,15 @@ def zwaveEvent(physicalgraph.zwave.commands.switchmultilevelv3.SwitchMultilevelR
 
 def motorEvents(physicalgraph.zwave.Command cmd) {
 	def result = []
-    def switchEvent = null
+    def switchEvent = []
+    def stopVal = ""
     if(cmd.value == 0) {switchEvent = createEvent(name: "motor", value: "down", descriptionText: text)}
-    else if(cmd.value == 254) {switchEvent = createEvent(name: "motor", value: "stop", descriptionText: text)}
+    else if(cmd.value == 254) {
+    	stopVal = state.nextDown ? "stopUp" : "stopDn"
+    	switchEvent = createEvent(name: "motor", value: stopVal, descriptionText: text)
+    }
     else if(cmd.value == 255) {switchEvent = createEvent(name: "motor", value: "up", descriptionText: text)}
 	result << switchEvent
-	return result
 }
 
 def refresh() {
@@ -103,7 +106,7 @@ def refresh() {
 }
 
 def up() {
-	state.nextDirection = true
+	state.nextDown = true
 	delayBetween([
     	zwave.basicV1.basicSet(value: 0xFF).format(),
 		zwave.switchMultilevelV1.switchMultilevelGet().format()
@@ -111,15 +114,11 @@ def up() {
 }
 
 def down() {
-	state.nextDirection = false
+	state.nextDown = false
 	delayBetween([
     	zwave.basicV1.basicSet(value: 0x00).format(),
 		zwave.switchMultilevelV1.switchMultilevelGet().format()
     ], 1000)
-}
-
-def upOrDown() {
-	if(state.nextDirection) down() else up()
 }
 
 def stop() {
