@@ -77,18 +77,18 @@ def parse(String description) {
 }
 
 def zwaveEvent(physicalgraph.zwave.commands.basicv1.BasicReport cmd) {
-	dimmerEvents(cmd)
+	motorEvents(cmd)
 }
 
 def zwaveEvent(physicalgraph.zwave.commands.basicv1.BasicSet cmd) {
-	dimmerEvents(cmd)
+	motorEvents(cmd)
 }
 
 def zwaveEvent(physicalgraph.zwave.commands.switchmultilevelv3.SwitchMultilevelReport cmd) {
-	dimmerEvents(cmd)
+	motorEvents(cmd)
 }
 
-def dimmerEvents(physicalgraph.zwave.Command cmd) {
+def motorEvents(physicalgraph.zwave.Command cmd) {
 	def result = []
     def switchEvent = null
     if(cmd.value == 0) {switchEvent = createEvent(name: "motor", value: "down", descriptionText: text)}
