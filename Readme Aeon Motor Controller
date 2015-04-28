@@ -4,3 +4,5 @@ The device can be in one of three states: up, down, stop, e.g. if(device.current
 There are three commands available: up(), down(), stop(), e.g. device.up()
 
 After you include the Aeon device into ST, edit its device type in the IDE to be "Aeon Motor Controller"
+
+Down turns on motor M1, and Up turns on motor M2.
