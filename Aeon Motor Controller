@@ -37,7 +37,7 @@ metadata {
 	}
 
 	tiles {
-		standardTile("motor", "device.motor", width: 2, height: 2, canChangeIcon: true) {
+		standardTile("motor", "device.motor", width: 2, height: 2) {
 			state("stopUp", label:'stop', icon:"st.doors.garage.garage-open", action: 'down', backgroundColor:"#79b821")
 			state("stopDn", label:'stop', icon:"st.doors.garage.garage-closed", action: 'up', backgroundColor:"#79b821")
 			state("up", label:'up', icon:"st.doors.garage.garage-opening", action:'stop', backgroundColor:"#ffe71e")
@@ -91,10 +91,9 @@ def zwaveEvent(physicalgraph.zwave.commands.switchmultilevelv3.SwitchMultilevelR
 def motorEvents(physicalgraph.zwave.Command cmd) {
 	def result = []
     def switchEvent = []
-    def stopVal = ""
     if(cmd.value == 0) {switchEvent = createEvent(name: "motor", value: "down", descriptionText: text)}
     else if(cmd.value == 254) {
-    	stopVal = state.nextDown ? "stopUp" : "stopDn"
+    	def stopVal = state.up ? "stopUp" : "stopDn"
     	switchEvent = createEvent(name: "motor", value: stopVal, descriptionText: text)
     }
     else if(cmd.value == 255) {switchEvent = createEvent(name: "motor", value: "up", descriptionText: text)}
@@ -106,7 +105,7 @@ def refresh() {
 }
 
 def up() {
-	state.nextDown = true
+	state.up = true
 	delayBetween([
     	zwave.basicV1.basicSet(value: 0xFF).format(),
 		zwave.switchMultilevelV1.switchMultilevelGet().format()
@@ -114,7 +113,7 @@ def up() {
 }
 
 def down() {
-	state.nextDown = false
+	state.up = false
 	delayBetween([
     	zwave.basicV1.basicSet(value: 0x00).format(),
 		zwave.switchMultilevelV1.switchMultilevelGet().format()
