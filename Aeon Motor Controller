@@ -16,13 +16,13 @@
 metadata {
 	definition (name: "Aeon Motor Controller", namespace: "smartthings", author: "SmartThings") {
 		capability "Refresh"
-		capability "Sensor"
 		capability "Actuator"
         capability "doorControl"
 
         command "up"
         command "down"
         command "stop"
+        command "upOrDown"
 
 //		fingerprint inClusters: "0x26,0x32"
 	}
@@ -39,7 +39,7 @@ metadata {
 
 	tiles {
 		standardTile("motor", "device.motor", width: 2, height: 2, canChangeIcon: true) {
-			state("stop", label:'stop', icon:"st.doors.garage.garage-closed", backgroundColor:"#79b821")
+			state("stop", label:'stop', icon:"st.doors.garage.garage-closed", action:'upOrDown', backgroundColor:"#79b821")
 			state("up", label:'up', icon:"st.doors.garage.garage-opening", action:'stop', backgroundColor:"#ffe71e")
 			state("down", label:'down', icon:"st.doors.garage.garage-closing", action:'stop', backgroundColor:"#ffe71e")
 		}
@@ -107,6 +107,7 @@ def refresh() {
 }
 
 def up() {
+	state.nextDirection = true
 	delayBetween([
     	zwave.basicV1.basicSet(value: 0xFF).format(),
 		zwave.switchMultilevelV1.switchMultilevelGet().format()
@@ -114,10 +115,15 @@ def up() {
 }
 
 def down() {
+	state.nextDirection = false
 	delayBetween([
     	zwave.basicV1.basicSet(value: 0x00).format(),
 		zwave.switchMultilevelV1.switchMultilevelGet().format()
     ], 1000)
+}
+
+def upOrDown() {
+	if(state.nextDirection) down() else up()
 }
 
 def stop() {
