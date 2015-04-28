@@ -15,8 +15,6 @@
  */
 metadata {
 	definition (name: "Aeon Motor Controller", namespace: "smartthings", author: "SmartThings") {
-		capability "Power Meter"
-		capability "Energy Meter"
 		capability "Refresh"
 		capability "Sensor"
 		capability "Actuator"
@@ -34,15 +32,6 @@ metadata {
         status "down": "command: 2604, payload: 00"
         status "stop": "command: 2605, payload: FE"
 
-		for (int i = 0; i <= 10000; i += 1000) {
-			status "power  ${i} W": new physicalgraph.zwave.Zwave().meterV1.meterReport(
-				scaledMeterValue: i, precision: 3, meterType: 4, scale: 2, size: 4).incomingMessage()
-		}
-		for (int i = 0; i <= 100; i += 10) {
-			status "energy  ${i} kWh": new physicalgraph.zwave.Zwave().meterV1.meterReport(
-				scaledMeterValue: i, precision: 3, meterType: 0, scale: 0, size: 4).incomingMessage()
-		}
-
 		["FF", "FE", "00"].each { val ->
 			reply "2001$val,delay 100,2602": "command: 2603, payload: $val"
 		}
@@ -54,14 +43,8 @@ metadata {
 			state("up", label:'up', icon:"st.doors.garage.garage-opening", action:'stop', backgroundColor:"#ffe71e")
 			state("down", label:'down', icon:"st.doors.garage.garage-closing", action:'stop', backgroundColor:"#ffe71e")
 		}
-		valueTile("power", "device.power", decoration: "flat") {
-			state "default", label:'${currentValue} W'
-		}
 		valueTile("energy", "device.energy", decoration: "flat") {
-			state "default", label:'${currentValue} kWh'
-		}
-		standardTile("reset", "device.energy", inactiveLabel: false, decoration: "flat") {
-			state "default", label:'reset kWh', action:"reset"
+			state "default", label:' '
 		}
 		standardTile("refresh", "device.switch", inactiveLabel: false, decoration: "flat") {
 			state "default", label:"", action:"refresh.refresh", icon:"st.secondary.refresh"
@@ -77,13 +60,13 @@ metadata {
         }
 	}
 	main(["motor"])
-	details(["motor", "power", "energy", "up", "down", "stop", "reset", "refresh"])
+	details(["motor",  "refresh", "energy", "up", "down", "stop",])
 }
 
 // parse events into attributes
 def parse(String description) {
 	def result = []
-	def cmd = zwave.parse(description, [0x20: 1, 0x26: 3, 0x70: 1, 0x32:3])
+	def cmd = zwave.parse(description, [0x20: 1, 0x26: 3])
 	if (cmd) {
 		result = zwaveEvent(cmd)
 		log.debug("'$description' parsed to $result")
@@ -112,26 +95,7 @@ def dimmerEvents(physicalgraph.zwave.Command cmd) {
     else if(cmd.value == 254) {switchEvent = createEvent(name: "motor", value: "stop", descriptionText: text)}
     else if(cmd.value == 255) {switchEvent = createEvent(name: "motor", value: "up", descriptionText: text)}
 	result << switchEvent
-	if (switchEvent.isStateChange) {
-		result << response(["delay 1500", zwave.meterV2.meterGet(scale: 2).format()])
-	}
 	return result
-}
-
-def zwaveEvent(physicalgraph.zwave.commands.meterv3.MeterReport cmd) {
-	if (cmd.meterType == 1) {
-		if (cmd.scale == 0) {
-			return createEvent(name: "energy", value: cmd.scaledMeterValue, unit: "kWh")
-		} else if (cmd.scale == 1) {
-			return createEvent(name: "energy", value: cmd.scaledMeterValue, unit: "kVAh")
-		} else if (cmd.scale == 2) {
-			return createEvent(name: "power", value: Math.round(cmd.scaledMeterValue), unit: "W")
-		} else {
-			return createEvent(name: "electric", value: cmd.scaledMeterValue, unit: ["pulses", "V", "A", "R/Z", ""][cmd.scale - 3])
-		}
-	} else {
-		return [linkText: linkText, descriptionText: "$linkText: $cmd", displayed: false]
-	}
 }
 
 def refresh() {
