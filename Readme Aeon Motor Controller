@@ -1,1 +1,4 @@
-To use this device type in SmartApps, use "capability.doorControl" in Preferences to select the controller.  Then you can reference the state of the device with device.currentValue("motor") or device.currentMotor.  The device can be in one of three states: up, down, stop.  There are three commands available: up(), down(), stop().
+To use this device type in SmartApps, use "capability.doorControl" in Preferences to select the controller.  
+Then you can reference the state of the device with device.currentValue("motor") or device.currentMotor.  
+The device can be in one of three states: up, down, stop.  
+There are three commands available: up(), down(), stop().
