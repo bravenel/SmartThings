@@ -39,7 +39,7 @@ metadata {
 
 	tiles {
 		standardTile("motor", "device.motor", width: 2, height: 2, canChangeIcon: true) {
-			state("stop", label:'stop', icon:"st.doors.garage.garage-closed", backgroundColor:"#79b821", decoration: "flat")
+			state("stop", label:'stop', icon:"st.doors.garage.garage-closed", backgroundColor:"#79b821")
 			state("up", label:'up', icon:"st.doors.garage.garage-opening", action:'stop', backgroundColor:"#ffe71e")
 			state("down", label:'down', icon:"st.doors.garage.garage-closing", action:'stop', backgroundColor:"#ffe71e")
 		}
