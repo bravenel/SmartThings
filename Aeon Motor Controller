@@ -1,7 +1,7 @@
 /**
  *  Aeon Motor Controller
  *
- *  Copyright 2015 SmartThings, modified by Bruce Ravenel
+ *  Copyright 2015 Bruce Ravenel
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
 metadata {
-	definition (name: "Aeon Motor Controller", namespace: "smartthings", author: "SmartThings") {
+	definition (name: "Aeon Motor Controller", namespace: "bravenel", author: "Bruce Ravenel") {
 		capability "Refresh"
 		capability "Actuator"
         capability "doorControl"
