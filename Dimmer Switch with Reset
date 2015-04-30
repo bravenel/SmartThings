@@ -1,6 +1,6 @@
 metadata {
 	// Automatically generated. Make future change here.
-	definition (name: "Dimmer Switch with Off", namespace: "bravenel", author: "SmartThings") {
+	definition (name: "Dimmer Switch with Reset", namespace: "bravenel", author: "SmartThings") {
 		capability "Switch Level"
 		capability "Actuator"
 		capability "Indicator"
