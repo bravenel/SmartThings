@@ -168,7 +168,7 @@ def switchOffHandler(evt) {
 	state.masterOff = true
 	if(evt.isDigital()) return
 	if(motions) dimmers?.off() 
-	else {    //WARNING: This will fail unless you have custom device type "Dimmer Switch with Off"
+	else {    //WARNING: This will fail unless you have custom device type "Dimmer Switch with Reset"
 		if(master.currentLevel != state.dimLevel) master.resetLevel(state.dimLevel) 
 		dimmers.each {if(it.currentLevel != state.dimLevel) it.resetLevel(state.dimLevel) else it.off()}
 	}
@@ -187,7 +187,7 @@ def motionOffHandler(evt) {  // called when motion goes inactive, check all sens
 	}
 }
 
-// Must use a custom version of Dimmer Switch device type: "Dimmer Switch with Off"
+// Must use a custom version of Dimmer Switch device type: "Dimmer Switch with Reset"
 // resetLevel() is used to set the level and then immediately turn off the dimmer.
 // This device type is REQUIRED for instances of the app with no motion sensors!
 
