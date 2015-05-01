@@ -181,7 +181,7 @@ def motionOffHandler(evt) {  // called when motion goes inactive, check all sens
 		offMotions.each {noMotion = noMotion && it.currentValue("motion")=="inactive"}
 		if(noMotion) {
 			state.motionOffDismissed = false
-			if(minutes > 0) runIn(minutes*60,switchesOff)
+			if(minutes) runIn(minutes*60, switchesOff)
 			else switchesOff()
 		}
 	}
