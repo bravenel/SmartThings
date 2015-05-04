@@ -2,12 +2,12 @@
  *	Mode Lighting
  *
  *	Author: SmartThings, modified by Bruce Ravenel
- *	Date: 2015-04-30
+ *	Date: 2015-05-03
  */
 definition(
     name: "Mode Lighting",
     namespace: "bravenel",
-    author: "SmartThings, Bruce Ravenel",
+    author: "Bruce Ravenel",
     description: "Set Dimmer Levels Based on Mode",
     category: "Convenience",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/MyApps/Cat-MyApps.png",
@@ -109,7 +109,7 @@ def initialize() {
 	def mid2 = digits4 / 100
 	def left2 = digits6 / 10000
 //
-// change the hardwired modes just below, edit as needed the 3 modes in quotes (and one more 5 lines down)
+// change the hardwired modes just below, edit as needed the 3 modes in quotes (and one more 6 lines down)
 
 	state.myModes = ["Day":left2.toInteger(), "Evening":mid2.toInteger(), "Night":right2]
     
@@ -148,14 +148,14 @@ def motionOnHandler(evt) {
 
 def levelHandler(evt) {      				// allows a physical dimmer to change the current dimLevel
 	if (evt.isDigital() || evt.value == "on" || evt.value == "off") return
-    state.dimLevel = evt.value				// we will reset the dimLevel when turned off
+    state.dimLevel = evt.value				// reset the dimLevel when turned off
 	switchesOn(true)
 }
 
-def switchesOff() {                    		//this is only used by motionOffHandler
+def switchesOff() {                    		// this is only used by motionOffHandler
 	if(state.motionOffDismissed || !allOk) return     //intervening On, kill this Off. Replaces use of unschedule()
 	state.masterOff = true
-    state.dimLevel = state.oldDimLevel
+    state.dimLevel = state.oldDimLevel		// restore dimLevel in case 'level' changed it
 	master.off()
 	dimmers?.off()
 	offSwitches?.off()
@@ -163,7 +163,7 @@ def switchesOff() {                    		//this is only used by motionOffHandler
 
 def switchOffHandler(evt) {
 	state.masterOff = true
-    state.dimLevel = state.oldDimLevel
+    state.dimLevel = state.oldDimLevel		// restore dimLevel in case 'level' changed it
 	if(evt.isDigital()) return
 	if(motions) dimmers?.off() 
 	else {  
@@ -176,19 +176,20 @@ def switchOffHandler(evt) {
 def motionOffHandler(evt) {  // called when motion goes inactive, check all sensors
 	if(allOk) {
 		def noMotion = true
-		offMotions.each {noMotion = noMotion && it.currentValue("motion")=="inactive"}
+		offMotions.each {noMotion = noMotion && it.currentMotion == "inactive"}
 		if(noMotion) {
 			state.motionOffDismissed = false
-			if(minutes) runIn(minutes*60, switchesOff)
-			else switchesOff()
+			if(minutes) runIn(minutes*60, switchesOff) else switchesOff()
 		}
 	}
 }
 
 def modeChangeHandler(evt) {
 	if(state.currentMode == location.mode) return  // if our mode didn't actually change
+    
     if(location.mode in state.myModes) state.dimLevel = state.myModes[location.mode]
     else return                             	   // if not one of our 3 modes
+    
     state.currentMode = location.mode			   // ok, new mode
     state.oldDimLevel = state.dimLevel
     
