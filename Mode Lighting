@@ -1,14 +1,14 @@
 /**
  *	Mode Lighting
  *
- *	Author: SmartThings, modified by Bruce Ravenel
- *	Date: 2015-05-03
+ *	Bruce Ravenel
+ *	Date: 2015-05-07
  */
 definition(
     name: "Mode Lighting",
     namespace: "bravenel",
     author: "Bruce Ravenel",
-    description: "Set Dimmer Levels Based on Mode",
+    description: "Set Dimmer Levels Based on Mode, with Motion on/off",
     category: "Convenience",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/MyApps/Cat-MyApps.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/MyApps/Cat-MyApps@2x.png"
@@ -105,72 +105,68 @@ def initialize() {
 //	this part converts the 6 digit number into the three dimLevels
 //
 	def digits4 = digits6 % 10000
-	def right2 = digits4 % 100
-	def mid2 = digits4 / 100
-	def left2 = digits6 / 10000
+	def nightLevel = digits4 % 100
+	def eveningLevel = (digits4 / 100).toInteger()
+	def dayLevel = (digits6 / 10000).toInteger()
 //
 // change the hardwired modes just below, edit as needed the 3 modes in quotes (and one more 6 lines down)
-
-	state.myModes = ["Day":left2.toInteger(), "Evening":mid2.toInteger(), "Night":right2]
+//
+	state.myModes = ["Day":dayLevel, "Evening":eveningLevel, "Night":nightLevel]
     
 	if(location.mode in state.myModes) {
     	state.currentMode = location.mode
         state.dimLevel = state.myModes[location.mode]
     } else {
     	state.currentMode = "Day"
-        state.dimLevel = left2.toInteger()
+        state.dimLevel = dayLevel
     }
-    state.oldDimLevel = state.dimLevel
 	state.motionOffDismissed = true
 	state.masterOff = true
 }
 
-def switchesOn(condition) {
+def switchesOn(condition, level) {
 	state.motionOffDismissed = true    		//we use this variable instead of unschedule() to kill pending off()
     if(condition) {
 		state.masterOff = false            	//we track the on/off state of the master dimmer for efficiency
-		master.setLevel(state.dimLevel)
-		dimmers?.setLevel(state.dimLevel)
+		master.setLevel(level)
+		dimmers?.setLevel(level)
     }
 }
 
 def switchOnHandler(evt) {
-	switchesOn(evt.isPhysical())
+	switchesOn(evt.isPhysical(), state.dimLevel)
 }
 
 def buttonOnHandler(evt) {
-	switchesOn(true)
+	switchesOn(true, state.dimLevel)
 }
 
 def motionOnHandler(evt) {
-	switchesOn(state.masterOff && allOk)
+	switchesOn(state.masterOff && allOk, state.dimLevel)
 }
 
 def levelHandler(evt) {      				// allows a physical dimmer to change the current dimLevel
-	if (evt.isDigital() || evt.value == "on" || evt.value == "off") return
-    state.dimLevel = evt.value				// reset the dimLevel when turned off
-	switchesOn(true)
-}
-
-def switchesOff() {                    		// this is only used by motionOffHandler
-	if(state.motionOffDismissed || !allOk) return     //intervening On, kill this Off. Replaces use of unschedule()
-	state.masterOff = true
-    state.dimLevel = state.oldDimLevel		// restore dimLevel in case 'level' changed it
-	master.off()
-	dimmers?.off()
-	offSwitches?.off()
+	switchesOn(evt.isPhysical(), evt.value)
 }
 
 def switchOffHandler(evt) {
 	state.masterOff = true
-    state.dimLevel = state.oldDimLevel		// restore dimLevel in case 'level' changed it
 	if(evt.isDigital()) return
-	if(motions) dimmers?.off() 
-	else {  
+	if(motions) dimmers?.off() else {  
 		if(master.currentLevel != state.dimLevel) master.resetLevel(state.dimLevel) 
 		dimmers.each {if(it.currentLevel != state.dimLevel) it.resetLevel(state.dimLevel) else it.off()}
 	}
 	offSwitches?.off()
+}
+
+def switchesOff() {                    		// this is only used by motionOffHandler
+	if(state.motionOffDismissed) return     // intervening On, kill this Off. Replaces use of unschedule()
+    if(allOk) {
+		state.masterOff = true
+		master.off()
+		dimmers?.off()
+		offSwitches?.off()
+    }
 }
 
 def motionOffHandler(evt) {  // called when motion goes inactive, check all sensors
@@ -188,10 +184,9 @@ def modeChangeHandler(evt) {
 	if(state.currentMode == location.mode) return  // if our mode didn't actually change
     
     if(location.mode in state.myModes) state.dimLevel = state.myModes[location.mode]
-    else return                             	   // if not one of our 3 modes
+    else return // not one of our 3 modes
     
     state.currentMode = location.mode			   // ok, new mode
-    state.oldDimLevel = state.dimLevel
     
     // the next two lines brighten any lights on when new mode is brighter than previous
     
