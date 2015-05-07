@@ -1,7 +1,7 @@
 
     This app is hardwired for 3 modes named Day, Evening, and Night (easily changed).
     Edit lines 114 and 120 to change the 3 modes used in the app.
-    The dim levels for the 3 modes are entered as a single 6 digit number, e.g. 903510,
+    The dim levels for all 3 modes are entered as a single 6 digit number, e.g. 903510,
     which would give 90 for Day, 35 for Evening, and 10 for Night (or corresponding modes).
     The app also allows you to specify additional dimmers that are turned off
     when the master dimmer is turned off.  The app has similar functionality to 
