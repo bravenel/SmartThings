@@ -33,7 +33,6 @@
     dimmer level.  For example, in the evening, a woman wants to put on makeup and the light
     isn't bright enough.  She turns up the dimmer.  That event is responded to by temporarily
     adjusting the dimmer level for both master and slaves to that new level.  Once the light is turned off, 
-    the dimmer levels will be restored to their mode-specific settings.  Without this feature, she could 
-    brighten the lights only to have the app put them right back where they were before.
+    the dimmer levels will be restored to their mode-specific settings.
 
 
