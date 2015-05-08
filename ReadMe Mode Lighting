@@ -1,21 +1,24 @@
-
-    This app is hardwired for 3 modes named Day, Evening, and Night (easily changed).
-    Edit lines 114 and 120 to change the 3 modes used in the app.
+    This app controls the dimmer levels for a group of lights based on one of three lighting modes.  
+    The user can have other modes, but this app only adjusts the lights for three specified modes.
+    It could easily be extended to support four modes, an exercise left to the reader.
+    
+    The app is hardwired for 3 modes named "Day", "Evening", and "Night" (easily changed).
+    Edit lines 114 and 120 to change the 3 modes used in the app.  Which modes you choose is up to you.
     The dim levels for all 3 modes are entered as a single 6 digit number, e.g. 903510,
-    which would give 90 for Day, 35 for Evening, and 10 for Night (or corresponding modes).
-    The app also allows you to specify additional dimmers that are turned off
-    when the master dimmer is turned off.  The app has a master dimmer and some slave dimmers. The
-    idea is that sometimes the master dimmer physical switch is used to
-    turn on the lights -- the slaves follow, or likewise to turn off some lights.  That's
-    how I use it, for a master off for an entire area, encompassing more than would be turned on.
-    The set of lights turned off can include other lights, beyond those set by this app.
+    which would give 90 for Day, 35 for Evening, and 10 for Night (or corresponding modes).  I did these
+    things to make it easier to install 20+ intances of the app, without repeating the same information
+    over and over.
+    
+    The app has a master dimmer and some slave dimmers. The idea is that sometimes the master dimmer physical 
+    switch is used to turn on the lights -- the slaves follow, or likewise to turn off some lights.  
+    The app also allows you to specify additional switches that are turned off when the master dimmer is turned off.  
     
     It should be noted that for this master switch function to work with near instant response, 
     one must use an instant reporting z-wave dimmer.  One such dimmer is the Leviton VRMX1 
     (which must be included directly to the hub to have instant reporting).
     
-    This app relies on the device type Dimmer Switch with Reset for instances of the app that are not
-    controlled by motion sensors.  This device type replaces the standard Dimmer Switch device type;
+    This app relies on the customdevice type "Dimmer Switch with Reset" for instances of the app that are not
+    controlled by motion sensors.  This device type replaces the standard "Dimmer Switch" device type;
     its function is to reset the dimLevel of a dimmer that is off or about to be turned off.
     
     If motion sensors(s) are specified they turn on the master and all slaves to the 
@@ -26,7 +29,7 @@
     A mode change to some other mode has no effect on the dimmer levels, which allows for
     extra modes that can be used to disable motion entirely at times. For an instance of the
     app without motion, if the lights are off at mode change, the app will adjust their
-    dimmer levels using the Dimmer Switch with Reset device type.  This is so that the next time
+    dimmer levels using the "Dimmer Switch with Reset" device type.  This is so that the next time
     the lights are turned on using the physical switch, they come on to the right level.  
     Without this feature, the light would come on to its previous dimmer level, and then
     adjust the level once ST sees the lights-on event.  This can be a number of seconds 
