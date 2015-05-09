@@ -4,9 +4,7 @@
     The location can have other modes, but this app only adjusts the lights for three selected modes.
 
     The dim levels for all three modes are entered as a single 6 digit number, e.g. 903510,
-    which would mean 90 for Day, 35 for Evening, and 10 for Night (or your corresponding modes).  I did this
-    to make it easier to install 20+ intances of the app, without repeating the same information
-    over and over.
+    which would mean 90 for Day, 35 for Evening, and 10 for Night (or your corresponding modes).
     
     The app has a master dimmer and some slave dimmers. The idea is that sometimes the master dimmer physical 
     switch is used to turn on the lights -- the slaves follow, or likewise to turn off some lights.  
@@ -20,7 +18,7 @@
     controlled by motion sensors.  This device type replaces the standard "Dimmer Switch" device type;
     its function is to reset the dimLevel of a dimmer that is off or about to be turned off.
     
-    If motion sensors(s) are specified they turn on the master and all slaves to the 
+    If motion sensors(s) are specified, they turn on the master and all slaves to the 
     current mode dimmer level.  The motion activation can be conditioned on times of day,
     days of week, or modes.  The same or other sensors can be used for turning off after x minutes.
     
@@ -36,14 +34,14 @@
     the bathroom in the middle of the night, turn on a switch, and have the light come on
     bright for a few seconds before it dims to the correct subdued level.
     
-    There is a feature of this app for manually changing the dimmer level.  For example, 
-    in the evening, a woman wants to put on makeup and the light isn't bright enough.  
+    The app allows manual changing of the dimmer level, either by the physical switch or mobile app.  
+    For example, in the evening, a woman wants to put on makeup and the light isn't bright enough.  
     She turns up the dimmer.  That event is responded to by temporarily adjusting the 
     dimmer level for both master and slaves to that new level.
     
     On line 42 of the source code there is an option, commented out, to set default modes.
     I use this feature so that I don't have to enter the modes each time I install the app.
     If you want default modes, remove the // that starts the comment, and edit the modes
-    in quotes to match your modes.
+    in quotes to match your three modes.
 
 
