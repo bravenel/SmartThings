@@ -5,7 +5,7 @@
 
     The dim levels for all three modes are entered as a single 6 digit number, e.g. 903510,
     which would mean 90 for Day, 35 for Evening, and 10 for Night (or your corresponding modes).  I did this
-     to make it easier to install 20+ intances of the app, without repeating the same information
+    to make it easier to install 20+ intances of the app, without repeating the same information
     over and over.
     
     The app has a master dimmer and some slave dimmers. The idea is that sometimes the master dimmer physical 
