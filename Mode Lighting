@@ -115,14 +115,11 @@ def initialize() {
 	def nightLevel = digits4 % 100
 	def eveningLevel = (digits4 / 100).toInteger()
 	def dayLevel = (digits6 / 10000).toInteger()
-//
-// change the hardwired modes just below, edit as needed the 3 modes in quotes (and one more 6 lines down)
-//
-	state.myModes = [(modes3[0]):dayLevel, (modes3[1]):eveningLevel, (modes3[2]):nightLevel]
+	state.myModeLevels = [(modes3[0]):dayLevel, (modes3[1]):eveningLevel, (modes3[2]):nightLevel]
     
 	if(location.mode in modes3) {
     	state.currentMode = location.mode
-        state.dimLevel = state.myModes[location.mode]
+        state.dimLevel = state.myModeLevels[location.mode]
     } else {
     	state.currentMode = modes3[0]
         state.dimLevel = dayLevel
@@ -190,7 +187,7 @@ def motionOffHandler(evt) {  				// called when motion goes inactive, check all 
 def modeChangeHandler(evt) {
     if(state.currentMode == location.mode || !(location.mode in modes3)) return		// not one of our 3 modes
     
-    state.dimLevel = state.myModes[location.mode]
+    state.dimLevel = state.myModeLevels[location.mode]
     state.currentMode = location.mode			   
     
     // the next two lines brighten any lights on when new mode is brighter than previous
