@@ -39,21 +39,21 @@ def selectDimmers() {
 		}
         
 		section("Using these three modes and dimLevels") {
-        	input "modes3", "mode", multiple: true, title: "Which modes?", required: true//, defaultValue: ["Home", "Evening", "Night"]
+        	input "modes3", "mode", multiple: true, title: "Which modes?", required: true//, defaultValue: ["Day", "Evening", "Night"]
 			input "digits6", "number", title: "Use two digits per mode, like\n80|45|01, but as a 6 digit number", required: true, defaultValue: 903010
         }
 	}
 }
 
 def motionSettings() {
-	dynamicPage(name:"motionSettings",title: "Select any motion sensors", nextPage: "otherSettings", uninstall: false) {
+	dynamicPage(name:"motionSettings",title: "Select your motion sensors (optional)", nextPage: "otherSettings", uninstall: false) {
     
-		section("Turn them On when there is motion...") {
-			input "motions", "capability.motionSensor", title: "Motion here", required: false, multiple: true
+		section("Turn them on when there is motion...") {
+			input "motions", "capability.motionSensor", title: "Motion on these sensors", required: false, multiple: true
 		}
         
-		section("Turn them Off when there is no motion...") {
-			input "offMotions", "capability.motionSensor", title: "No motion here", required: false, multiple: true
+		section("Turn them off when there is no motion...") {
+			input "offMotions", "capability.motionSensor", title: "No motion on these sensors", required: false, multiple: true
 			input "minutes", "number", title: "For this many minutes", required: false, multiple: false
 		}
 	
@@ -75,11 +75,12 @@ def otherSettings() {
 	dynamicPage(name:"otherSettings", uninstall: false, install: true) {
 
 		section("Turn them on with this button...") {
-			input "button", "capability.momentary", title: "Button to turn on", multiple: false, required: false
+			input "button", "capability.momentary", title: "Button to turn them on", multiple: false, required: false
 		}
 
-		section("These switches will be turned off...") {
-			input "offSwitches", "capability.switch", title: "When the master is turned off", multiple: true, required: false
+		section("These switches will be turned on / off") {
+			input "onSwitches", "capability.switch", title: "When the Master is turned on", multiple: true, required: false
+			input "offSwitches", "capability.switch", title: "When the Master is turned off", multiple: true, required: false
 		}
         
 		section {
@@ -134,6 +135,7 @@ def switchesOn(condition, level) {
 		state.masterOff = false            	// track the on/off state of the master dimmer for efficiency with motionOn
 		master.setLevel(level)
 		dimmers?.setLevel(level)
+        onSwitches?.on()
     }
 }
 
