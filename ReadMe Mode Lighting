@@ -1,14 +1,11 @@
     This app sets the dimmer levels for a group of lights based on one of three lighting modes.
     It supports motion sensors that turn on the group, and turns them off after a specified period,
     and has provision for linking to button controllers and Hello Home phrases, through a button device.
-    The location can have other modes, but this app only adjusts the lights for three specified modes.
-    It could easily be extended to support four modes, an exercise left to the reader.
-    
-    The app's three modes are hardwired, named "Day", "Evening", and "Night" (easily changed).
-    Edit lines 114 and 120 to change the three modes used in the app.  Which modes you choose is up to you.
+    The location can have other modes, but this app only adjusts the lights for three selected modes.
+
     The dim levels for all three modes are entered as a single 6 digit number, e.g. 903510,
-    which would mean 90 for Day, 35 for Evening, and 10 for Night (or your corresponding modes).  I did these
-    things to make it easier to install 20+ intances of the app, without repeating the same information
+    which would mean 90 for Day, 35 for Evening, and 10 for Night (or your corresponding modes).  I did this
+     to make it easier to install 20+ intances of the app, without repeating the same information
     over and over.
     
     The app has a master dimmer and some slave dimmers. The idea is that sometimes the master dimmer physical 
@@ -39,9 +36,14 @@
     the bathroom in the middle of the night, turn on a switch, and have the light come on
     bright for a few seconds before it dims to the correct subdued level.
     
-    There is one more feature of this app that has to do with manually changing the
-    dimmer level.  For example, in the evening, a woman wants to put on makeup and the light
-    isn't bright enough.  She turns up the dimmer.  That event is responded to by temporarily
-    adjusting the dimmer level for both master and slaves to that new level.
+    There is a feature of this app for manually changing the dimmer level.  For example, 
+    in the evening, a woman wants to put on makeup and the light isn't bright enough.  
+    She turns up the dimmer.  That event is responded to by temporarily adjusting the 
+    dimmer level for both master and slaves to that new level.
+    
+    On line 42 of the source code there is an option, commented out, to set default modes.
+    I use this feature so that I don't have to enter the modes each time I install the app.
+    If you want default modes, remove the // that starts the comment, and edit the modes
+    in quotes to match your modes.
 
 
