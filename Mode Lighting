@@ -39,7 +39,7 @@ def selectDimmers() {
 		}
         
 		section("Using these three modes and dimLevels") {
-        	input "modes3", "mode", multiple: true, title: "Which modes?", required: true//, defaultValue: ["Day", "Evening", "Night"]
+        	input "modes3", "mode", multiple: true, title: "Which modes?", required: true//, defaultValue: ["Home", "Evening", "Night"]
 			input "digits6", "number", title: "Use two digits per mode, like\n80|45|01, but as a 6 digit number", required: true, defaultValue: 903010
         }
 	}
