@@ -95,7 +95,7 @@ def initialize() {
         subscribe(offMotions, "motion.inactive", motionOffHandler)
     }
 	state.switchesOn = false
-    state.motionOffDismissed = true			// this state variable replaces unsubscribe()
+    state.motionOffDismissed = true			// this state variable replaces unschedule()
 }
 
 def switchOnHandler(evt) {
