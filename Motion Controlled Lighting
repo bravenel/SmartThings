@@ -50,7 +50,7 @@ def SelectOptions() {
 			label title: "Assign a name:", required: false
 		}
 
-    }
+	}
 }
     
 def SelectMotions() {
