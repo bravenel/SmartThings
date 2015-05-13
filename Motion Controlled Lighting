@@ -56,12 +56,12 @@ def SelectOptions() {
 def SelectMotions() {
 	dynamicPage(name: "SelectMotions", title: "Set dimmer and motion off time", install: true, uninstall: false) {
 
-    	section("You can also:"){
-    		input "dimLevel", "number", title: "Set dimmers to this level", required: false, multiple: false, description: "0 to 99"
-        	input "turnOff", "boolean", title: "Turn off when motion stops", required: false
-    		input "offMotions", "capability.motionSensor", title: "More motion sensor(s) for OFF?", required: false, multiple: true
-        	input "minutes", "number", title: "Wait this many minutes to turn off after motion stops (optional)", required: false
-    	}
+		section("You can also:"){
+			input "dimLevel", "number", title: "Set dimmers to this level", required: false, multiple: false, description: "0 to 99"
+			input "turnOff", "boolean", title: "Turn off when motion stops", required: false
+			input "offMotions", "capability.motionSensor", title: "More motion sensor(s) for OFF?", required: false, multiple: true
+			input "minutes", "number", title: "Wait this many minutes to turn off after motion stops (optional)", required: false
+		}
     
 		section(title: "More options", hidden: hideOptionsSection(), hideable: true) {
 
