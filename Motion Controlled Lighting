@@ -88,19 +88,19 @@ def updated() {
 
 def initialize() {
 	subscribe(switches, "switch.on", switchOnHandler)
-    subscribe(switches, "switch.off", switchOffHandler)
+	subscribe(switches, "switch.off", switchOffHandler)
 	subscribe(motions, "motion.active", motionOnHandler)
 	if(turnOff) {
-    	subscribe(motions, "motion.inactive", motionOffHandler)
-        subscribe(offMotions, "motion.inactive", motionOffHandler)
-    }
+		subscribe(motions, "motion.inactive", motionOffHandler)
+		subscribe(offMotions, "motion.inactive", motionOffHandler)
+	}
 	state.switchesOn = false
     state.motionOffDismissed = true			// this state variable replaces unschedule()
 }
 
 def switchOnHandler(evt) {
 	state.switchesOn = true
-    state.motionOffDismissed = true
+	state.motionOffDismissed = true
 }
 
 def switchOffHandler(evt) {
@@ -108,20 +108,20 @@ def switchOffHandler(evt) {
 }
 
 def motionOnHandler(evt) {
-    state.motionOffDismissed = true
-    if(state.switchesOn) return
-    if(allOk) {
-    	if(dimLevel) switches.each {if(it.currentLevel) it.setLevel(dimLevel) else it.on()} else switches.on()
+	state.motionOffDismissed = true
+	if(state.switchesOn) return
+	if(allOk) {
+		if(dimLevel) switches.each {if(it.currentLevel) it.setLevel(dimLevel) else it.on()} else switches.on()
 		state.switchesOn = true
-    }
+	}
 }
 
 def switchesOff() {
 	if(state.motionOffDismissed) return
-    if(allOk) {
+	if(allOk) {
 		state.switchesOn = false
 		switches.off()
-    }
+	}
 }
 
 def motionOffHandler(evt) {
