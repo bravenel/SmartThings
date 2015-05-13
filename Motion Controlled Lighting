@@ -38,13 +38,13 @@ preferences {
 def SelectOptions() {
 	dynamicPage(name: "SelectOptions", title: "Choose switches and motion sensor(s)", nextPage: "SelectMotions", uninstall: true) {
 
-		section("") {
+		section {
 			input "switches", "capability.switch", title: "Choose switches", required: true, multiple: true
 		}
     
-    	section("") {
-    		input "motions", "capability.motionSensor", title: "Choose motion sensor(s) for ON", required: true, multiple: true
-    	}
+		section {
+			input "motions", "capability.motionSensor", title: "Choose motion sensor(s) for ON", required: true, multiple: true
+		}
         
 		section {
 			label title: "Assign a name:", required: false
