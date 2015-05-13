@@ -128,7 +128,7 @@ def motionOffHandler(evt) {
 	if(allOk) {
 		def noMotion = true
 		motions.each {noMotion = noMotion && it.currentMotion == "inactive"}
-		if(noMotion && offMotions) offMotions.each {noMotion = noMotion && it.currentMotion == "inactive"}
+		if(noMotion) offMotions.each {noMotion = noMotion && it.currentMotion == "inactive"}
 		if(noMotion) {
 			state.motionOffDismissed = false
 			if(minutes) runIn(minutes*60, switchesOff) else switchesOff()
