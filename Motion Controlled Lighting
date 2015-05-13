@@ -100,7 +100,7 @@ def initialize() {
 
 def switchOnHandler(evt) {
 	state.switchesOn = true
-	state.motionOffDismissed = true
+	state.motionOffDismissed = true			// disarm switchesOff()
 }
 
 def switchOffHandler(evt) {
@@ -108,7 +108,7 @@ def switchOffHandler(evt) {
 }
 
 def motionOnHandler(evt) {
-	state.motionOffDismissed = true
+	state.motionOffDismissed = true			// disarm switchesOff()
 	if(state.switchesOn) return
 	if(allOk) {
 		if(dimLevel) switches.each {if(it.currentLevel) it.setLevel(dimLevel) else it.on()} else switches.on()
@@ -130,7 +130,7 @@ def motionOffHandler(evt) {
 		motions.each {noMotion = noMotion && it.currentMotion == "inactive"}
 		if(noMotion) offMotions.each {noMotion = noMotion && it.currentMotion == "inactive"}
 		if(noMotion) {
-			state.motionOffDismissed = false
+			state.motionOffDismissed = false	// arm switchesOff()
 			if(minutes) runIn(minutes*60, switchesOff) else switchesOff()
 		}
 	}
