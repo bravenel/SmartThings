@@ -180,8 +180,7 @@ private getTimeOk() {
 	result
 }
 
-private hhmm(time, fmt = "h:mm a")
-{
+private hhmm(time, fmt = "h:mm a") {
 	def t = timeToday(time, location.timeZone)
 	def f = new java.text.SimpleDateFormat(fmt)
 	f.setTimeZone(location.timeZone ?: timeZone(time))
