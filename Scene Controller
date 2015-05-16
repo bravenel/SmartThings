@@ -314,7 +314,7 @@ def turnDim(devices, level) {
 	devices.setLevel(level)
 }
 
-def adjustFan(device) {  for 3 speed ceiling fans
+def adjustFan(device) { // for 3 speed ceiling fans
 	log.debug "adjust: $device = ${device.currentLevel}"
     
     def currentLevel = device.currentLevel
