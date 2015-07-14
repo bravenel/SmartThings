@@ -18,6 +18,7 @@ metadata {
 		capability "Refresh"
 		capability "Actuator"
         capability "doorControl"
+        capability "Switch"
 
         command "up"
         command "down"
@@ -123,6 +124,22 @@ def down() {
 def stop() {
 	delayBetween([
     	zwave.switchMultilevelV1.switchMultilevelStopLevelChange().format(),
+		zwave.switchMultilevelV1.switchMultilevelGet().format()
+    ], 1000)
+}
+
+def on() {
+	state.up = true
+	delayBetween([
+    	zwave.basicV1.basicSet(value: 0xFF).format(),
+		zwave.switchMultilevelV1.switchMultilevelGet().format()
+    ], 1000)
+}
+
+def off() {
+	state.up = false
+	delayBetween([
+    	zwave.basicV1.basicSet(value: 0x00).format(),
 		zwave.switchMultilevelV1.switchMultilevelGet().format()
     ], 1000)
 }
