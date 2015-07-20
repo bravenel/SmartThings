@@ -41,9 +41,9 @@ def meterHandler(evt) {
 	def thresholdValue = threshold as int
 	if(meterValue > thresholdValue) {
 		if(state.notNotified) {
-			state.notNotified = false
 			def msg = "Power on $evt.displayName is $meterValue"
 			if(phone) sendSms(phone, msg) else sendNotification(msg)
+			state.notNotified = false
 		}
 	} else state.notNotified = true
 }
