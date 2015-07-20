@@ -1,0 +1,49 @@
+definition(
+    name: "Power Alert",
+    namespace: "public",
+    author: "SmartThings and B Ravenel",
+    description: "Notify if power exceeds a threshold",
+    category: "Convenience",
+    iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
+    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
+    iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
+
+
+preferences {
+	section ("Power Alert") {
+    input(name: "meter", type: "capability.powerMeter", title: "When This Power Meter...", required: true, multiple: false, description: null)
+    input(name: "threshold", type: "number", title: "Reports Above...", required: true, description: "in either watts or kw.")
+  }
+    
+	section("Text me at (optional, sends a push notification if not specified)...") {
+	  input "phone", "phone", title: "Phone number?", required: false
+	}
+}
+
+def installed() {
+  initialize()
+}
+
+def updated() {
+  unsubscribe()
+  initialize()
+}
+
+def initialize() {
+	subscribe(meter, "power", meterHandler)
+  state.notNotified = true
+}
+
+// notifies on first incursion above threshold, but not again until power falls below threshold and then rises again
+
+def meterHandler(evt) {
+	def meterValue = evt.value as double
+	def thresholdValue = threshold as int
+	if(meterValue > thresholdValue) {
+    if(state.notNotified) {
+      state.notNotified = false
+      def msg = "Power on $evt.displayName is $meterValue"
+      if(phone) sendSms(phone, msg) else sendNotification(msg)
+    }
+  } else state.notNotified = true
+}
