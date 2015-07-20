@@ -20,7 +20,7 @@ preferences {
 	}
 }
 
-def installed() {
+def installed() { 
 	initialize()
 }
 
