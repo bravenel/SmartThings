@@ -163,7 +163,6 @@ def updated() {
 
 def initialize() {
 	subscribe(buttonDevice, "button", buttonEvent)
-    state.goingUp = true
     state.lastshadesUp = true
 }
 
@@ -320,19 +319,10 @@ def adjustFan(device) {
     
     def currentLevel = device.currentLevel
 
-    if(device.currentSwitch == 'off') {
-    	device.setLevel(15)
-        state.goingUp = true
-    } else if (currentLevel < 34) {
-    	if(state.goingUp) device.setLevel(50)
-    	else device.off()
-  	} else if (currentLevel < 67) {
-  		if (state.goingUp) device.setLevel(90)
-        else device.setLevel(15)
-    } else {
-    	device.setLevel(50)
-      	state.goingUp = false
-    }
+    if(device.currentSwitch == 'off') device.setLevel(15)
+    else if (currentLevel < 34) device.setLevel(50)
+  	else if (currentLevel < 67) device.setLevel(90)
+    else device.off()
 }
 
 def adjustShade(device) {
