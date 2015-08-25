@@ -104,12 +104,12 @@ def getButtonSections(buttonNumber) {
 			input "lightV2l_${buttonNumber}_held", "number", title: "DimLevel 2", multiple: false, required: false, description: "0 to 99"
 		}
 		section("Fan to Adjust - Low, Medium, High, Off") {
-			input "autoFanAdjust_${buttonNumber}_pushed", "capability.switchLevel", title: "Pushed", multiple: false, required: false
-			input "autoFanAdjust_${buttonNumber}_held", "capability.switchLevel", title: "Held", multiple: false, required: false
+			input "fanAdjust_${buttonNumber}_pushed", "capability.switchLevel", title: "Pushed", multiple: false, required: false
+			input "fanAdjust_${buttonNumber}_held", "capability.switchLevel", title: "Held", multiple: false, required: false
 		}
-		section("Shades to Adjust - Up, Down, or Stop") {
-			input "shadesAdjust_${buttonNumber}_pushed", "capability.doorControl", title: "Pushed", multiple: false, required: false
-			input "shadesAdjust_${buttonNumber}_held", "capability.doorControl", title: "Held", multiple: false, required: false
+		section("Shade to Adjust - Up, Down, or Stop") {
+			input "shadeAdjust_${buttonNumber}_pushed", "capability.doorControl", title: "Pushed", multiple: false, required: false
+			input "shadeAdjust_${buttonNumber}_held", "capability.doorControl", title: "Held", multiple: false, required: false
 		}
 		section("Locks") {
 			input "locks_${buttonNumber}_pushed", "capability.lock", title: "Pushed", multiple: true, required: false
@@ -180,8 +180,8 @@ def buttonConfigured(idx) {
         settings["lightVal_$idx_pushed"] ||
         settings["lightD2m_$idx_pushed"] ||
         settings["lightV2l_$idx_pushed"] ||
-        settings["autoFanAdjust_$idx_pushed"] ||
-        settings["shadesAdjust_$idx_pushed"] ||
+        settings["fanAdjust_$idx_pushed"] ||
+        settings["shadeAdjust_$idx_pushed"] ||
 	settings["locks_$idx_pushed"] ||
 	settings["sonos_$idx_pushed"] ||
 	settings["mode_$idx_pushed"] ||
