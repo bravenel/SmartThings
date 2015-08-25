@@ -77,7 +77,7 @@ def getButtonSections(buttonNumber) {
 			input "lights_${buttonNumber}_pushed", "capability.switch", title: "Pushed", multiple: true, required: false
 			input "lights_${buttonNumber}_held", "capability.switch", title: "Held", multiple: true, required: false
 		}
-		section("Lights to Dim & Toggle") {
+		section("Dimmers to Toggle") {
 			input "lightsDT_${buttonNumber}_pushed", "capability.switchLevel", title: "Pushed", multiple: true, required: false
 			input "lightsDTVal_${buttonNumber}_pushed", "number", title: "Dim Level", required: false, description: "0 to 99"
 			input "lightsDT_${buttonNumber}_held", "capability.switchLevel", title: "Held", multiple: true, required: false
@@ -87,30 +87,30 @@ def getButtonSections(buttonNumber) {
 			input "lightOn_${buttonNumber}_pushed", "capability.switch", title: "Pushed", multiple: true, required: false
 			input "lightOn_${buttonNumber}_held", "capability.switch", title: "Held", multiple: true, required: false
 		}
-        section("Lights to Turn Off") {
+		section("Lights to Turn Off") {
 			input "lightOff_${buttonNumber}_pushed", "capability.switch", title: "Pushed", multiple: true, required: false
 			input "lightOff_${buttonNumber}_held", "capability.switch", title: "Held", multiple: true, required: false
 		}
-        section("Lights to Dim Level 1") {
+		section("Dimmers to DimLevel 1") {
 			input "lightDim_${buttonNumber}_pushed", "capability.switchLevel", title: "Pushed", multiple: true, required: false
-			input "lightVal_${buttonNumber}_pushed", "number", title: "Dim Level 1", multiple: false, required: false, description: "0 to 99"
+			input "lightVal_${buttonNumber}_pushed", "number", title: "DimLevel 1", multiple: false, required: false, description: "0 to 99"
 			input "lightDim_${buttonNumber}_held", "capability.switchLevel", title: "Held", multiple: true, required: false
-			input "lightVal_${buttonNumber}_held", "number", title: "Dim Level 1", multiple: false, required: false, description: "0 to 99"
+			input "lightVal_${buttonNumber}_held", "number", title: "DimLevel 1", multiple: false, required: false, description: "0 to 99"
 		}
-        section("Lights to Dim Level 2") {
+		section("Dimmers to DimLevel 2") {
 			input "lightD2m_${buttonNumber}_pushed", "capability.switchLevel", title: "Pushed", multiple: true, required: false
-			input "lightV2l_${buttonNumber}_pushed", "number", title: "Dim Level 2", multiple: false, required: false, description: "0 to 99"
+			input "lightV2l_${buttonNumber}_pushed", "number", title: "DimLevel 2", multiple: false, required: false, description: "0 to 99"
 			input "lightD2m_${buttonNumber}_held", "capability.switchLevel", title: "Held", multiple: true, required: false
-			input "lightV2l_${buttonNumber}_held", "number", title: "Dim Level 2", multiple: false, required: false, description: "0 to 99"
+			input "lightV2l_${buttonNumber}_held", "number", title: "DimLevel 2", multiple: false, required: false, description: "0 to 99"
 		}
-        section("Fan to Adjust Speed") {
+		section("Fan to Adjust - Low, Medium, High, Off") {
 			input "autoFanAdjust_${buttonNumber}_pushed", "capability.switchLevel", title: "Pushed", multiple: false, required: false
 			input "autoFanAdjust_${buttonNumber}_held", "capability.switchLevel", title: "Held", multiple: false, required: false
-        }
-        section("Shades to Adjust") {
-        	input "shadesAdjust_${buttonNumber}_pushed", "capability.doorControl", title: "Pushed", multiple: false, required: false
+		}
+		section("Shades to Adjust - Up, Down, or Stop") {
+			input "shadesAdjust_${buttonNumber}_pushed", "capability.doorControl", title: "Pushed", multiple: false, required: false
 			input "shadesAdjust_${buttonNumber}_held", "capability.doorControl", title: "Held", multiple: false, required: false
-        }
+		}
 		section("Locks") {
 			input "locks_${buttonNumber}_pushed", "capability.lock", title: "Pushed", multiple: true, required: false
 			input "locks_${buttonNumber}_held", "capability.lock", title: "Held", multiple: true, required: false
@@ -131,24 +131,24 @@ def getButtonSections(buttonNumber) {
 				input "phrase_${buttonNumber}_held", "enum", title: "Held", required: false, options: phrases
 			}
 		}
-        section("Sirens") {
-            input "sirens_${buttonNumber}_pushed","capability.alarm" ,title: "Pushed", multiple: true, required: false
-            input "sirens_${buttonNumber}_held", "capability.alarm", title: "Held", multiple: true, required: false
-        }
+		section("Sirens") {
+			input "sirens_${buttonNumber}_pushed","capability.alarm" ,title: "Pushed", multiple: true, required: false
+			input "sirens_${buttonNumber}_held", "capability.alarm", title: "Held", multiple: true, required: false
+		}
 
 		section("Custom Message") {
 			input "textMessage_${buttonNumber}", "text", title: "Message", required: false
 		}
 
-        section("Push Notifications") {
-            input "notifications_${buttonNumber}_pushed","bool" ,title: "Pushed", required: false, defaultValue: false
-            input "notifications_${buttonNumber}_held", "bool", title: "Held", required: false, defaultValue: false
-        }
+		section("Push Notifications") {
+			input "notifications_${buttonNumber}_pushed","bool" ,title: "Pushed", required: false, defaultValue: false
+			input "notifications_${buttonNumber}_held", "bool", title: "Held", required: false, defaultValue: false
+		}
 
-        section("Sms Notifications") {
-            input "phone_${buttonNumber}_pushed","phone" ,title: "Pushed", required: false
-            input "phone_${buttonNumber}_held", "phone", title: "Held", required: false
-        }
+		section("Sms Notifications") {
+			input "phone_${buttonNumber}_pushed","phone" ,title: "Pushed", required: false
+			input "phone_${buttonNumber}_held", "phone", title: "Held", required: false
+		}
 	}
 }
 
