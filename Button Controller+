@@ -2,7 +2,7 @@
  *	Button Controller+
  *
  *	Author: SmartThings, modified by Bruce Ravenel
- *	Date: 2015-5-10
+ *	Date: 2015-8-25
  */
 definition(
     name: "Button Controller+",
@@ -67,17 +67,21 @@ def configureButton3() {
 		nextPage: "configureButton4", uninstall: configured(), getButtonSections(3))
 }
 def configureButton4() {
-	dynamicPage(name: "configureButton4", title: "If you have a fouth button, you rule, and can set it up here",
+	dynamicPage(name: "configureButton4", title: "If you have a fourth button, you rule, and can set it up here",
 		install: true, uninstall: true, getButtonSections(4))
 }
 
 def getButtonSections(buttonNumber) {
 	return {
-    	section("Button number $buttonNumber") { } //correct for ST bug with page title
-
 		section("Lights to Toggle") {
 			input "lights_${buttonNumber}_pushed", "capability.switch", title: "Pushed", multiple: true, required: false
 			input "lights_${buttonNumber}_held", "capability.switch", title: "Held", multiple: true, required: false
+		}
+		section("Lights to Dim & Toggle") {
+			input "lightsDT_${buttonNumber}_pushed", "capability.switchLevel", title: "Pushed", multiple: true, required: false
+            input "lightsDTVal_${buttonNumber}_pushed", "number", title: "Dim Level", required: false, description: "0 to 99"
+			input "lightsDT_${buttonNumber}_held", "capability.switchLevel", title: "Held", multiple: true, required: false
+            input "lightsDTVal_${buttonNumber}_held", "number", title: "Dim Level", required: false, description: "0 to 99"
 		}
 		section("Lights to Turn On") {
 			input "lightOn_${buttonNumber}_pushed", "capability.switch", title: "Pushed", multiple: true, required: false
@@ -169,6 +173,8 @@ def configured() {
 
 def buttonConfigured(idx) {
 	return settings["lights_$idx_pushed"] ||
+    	settings["lightsDT_$idx_pushed"] ||
+        settings["lightsDTVal_$idx_pushed"] ||
     	settings["lightOn_$idx_pushed"] ||
     	settings["lightOff_$idx_pushed"] ||
         settings["lightDim_$idx_pushed"] ||
@@ -221,7 +227,11 @@ def executeHandlers(buttonNumber, value) {
 	log.debug "executeHandlers: $buttonNumber - $value"
 
 	def lights = find('lights', buttonNumber, value)
-	if (lights != null) toggle(lights)
+	if (lights) toggle(lights)
+
+	def lightsDT = find('lightsDT', buttonNumber, value)
+    def dimTVal = find('lightsDTVal', buttonNumber, value)
+	if (lightsDT) dimToggle(lightsDT, dimTVal)
 
 	def lights1 = find('lightOn', buttonNumber, value)
 	if (lights1) turnOn(lights1)
@@ -244,16 +254,16 @@ def executeHandlers(buttonNumber, value) {
     if (shade) adjustShade(shade)
 
 	def locks = find('locks', buttonNumber, value)
-	if (locks != null) toggle(locks)
+	if (locks) toggle(locks)
 
 	def sonos = find('sonos', buttonNumber, value)
-	if (sonos != null) toggle(sonos)
+	if (sonos) toggle(sonos)
 
 	def mode = find('mode', buttonNumber, value)
-	if (mode != null) changeMode(mode)
+	if (mode) changeMode(mode)
 
 	def phrase = find('phrase', buttonNumber, value)
-	if (phrase != null) location.helloHome.execute(phrase)
+	if (phrase) location.helloHome.execute(phrase)
 
 	def textMessage = findMsg('textMessage', buttonNumber)
 
@@ -261,10 +271,10 @@ def executeHandlers(buttonNumber, value) {
 	if (notifications?.toBoolean()) sendPush(textMessage ?: "Button $buttonNumber was pressed" )
 
 	def phone = find('phone', buttonNumber, value)
-	if (phone != null) sendSms(phone, textMessage ?:"Button $buttonNumber was pressed")
+	if (phone) sendSms(phone, textMessage ?:"Button $buttonNumber was pressed")
 
     def sirens = find('sirens', buttonNumber, value)
-    if (sirens != null) toggle(sirens)
+    if (sirens) toggle(sirens)
 }
 
 def find(type, buttonNumber, value) {
@@ -358,6 +368,13 @@ def toggle(devices) {
 	}
 }
 
+def dimToggle(devices, dimLevel) {
+	log.debug "dimToggle: $devices = ${devices*.currentValue('switch')}"
+
+	if (devices*.currentValue('switch').contains('on')) devices.off()
+	else devices.setLevel(dimLevel)
+}
+
 def changeMode(mode) {
 	log.debug "changeMode: $mode, location.mode = $location.mode, location.modes = $location.modes"
 
@@ -406,7 +423,8 @@ private getTimeOk() {
 	result
 }
 
-private hhmm(time, fmt = "h:mm a") {
+private hhmm(time, fmt = "h:mm a")
+{
 	def t = timeToday(time, location.timeZone)
 	def f = new java.text.SimpleDateFormat(fmt)
 	f.setTimeZone(location.timeZone ?: timeZone(time))
