@@ -79,9 +79,9 @@ def getButtonSections(buttonNumber) {
 		}
 		section("Lights to Dim & Toggle") {
 			input "lightsDT_${buttonNumber}_pushed", "capability.switchLevel", title: "Pushed", multiple: true, required: false
-            input "lightsDTVal_${buttonNumber}_pushed", "number", title: "Dim Level", required: false, description: "0 to 99"
+			input "lightsDTVal_${buttonNumber}_pushed", "number", title: "Dim Level", required: false, description: "0 to 99"
 			input "lightsDT_${buttonNumber}_held", "capability.switchLevel", title: "Held", multiple: true, required: false
-            input "lightsDTVal_${buttonNumber}_held", "number", title: "Dim Level", required: false, description: "0 to 99"
+			input "lightsDTVal_${buttonNumber}_held", "number", title: "Dim Level", required: false, description: "0 to 99"
 		}
 		section("Lights to Turn On") {
 			input "lightOn_${buttonNumber}_pushed", "capability.switch", title: "Pushed", multiple: true, required: false
@@ -182,9 +182,9 @@ def buttonConfigured(idx) {
         settings["lightV2l_$idx_pushed"] ||
         settings["autoFanAdjust_$idx_pushed"] ||
         settings["shadesAdjust_$idx_pushed"] ||
-		settings["locks_$idx_pushed"] ||
-		settings["sonos_$idx_pushed"] ||
-		settings["mode_$idx_pushed"] ||
+	settings["locks_$idx_pushed"] ||
+	settings["sonos_$idx_pushed"] ||
+	settings["mode_$idx_pushed"] ||
         settings["notifications_$idx_pushed"] ||
         settings["sirens_$idx_pushed"] ||
         settings["notifications_$idx_pushed"]   ||
@@ -229,7 +229,7 @@ def executeHandlers(buttonNumber, value) {
 	if (lights) toggle(lights)
 
 	def lightsDT = find('lightsDT', buttonNumber, value)
-    def dimTVal = find('lightsDTVal', buttonNumber, value)
+	def dimTVal = find('lightsDTVal', buttonNumber, value)
 	if (lightsDT) dimToggle(lightsDT, dimTVal)
 
 	def lights1 = find('lightOn', buttonNumber, value)
@@ -239,18 +239,18 @@ def executeHandlers(buttonNumber, value) {
 	if (lights2) turnOff(lights2)
 
 	def lights3 = find('lightDim', buttonNumber, value)
-    def dimval3 = find('lightVal', buttonNumber, value)
+	def dimval3 = find('lightVal', buttonNumber, value)
 	if (lights3) turnDim(lights3,dimval3)
 
 	def lights4 = find('lightD2m', buttonNumber, value)
-    def dimval4 = find('lightV2l', buttonNumber, value)
+	def dimval4 = find('lightV2l', buttonNumber, value)
 	if (lights4) turnDim(lights4,dimval4)
 
 	def fan = find('autoFanAdjust', buttonNumber, value)
-    if (fan) adjustFan(fan)
+	if (fan) adjustFan(fan)
     
-    def shade = find('shadesAdjust', buttonNumber, value)
-    if (shade) adjustShade(shade)
+	def shade = find('shadesAdjust', buttonNumber, value)
+	if (shade) adjustShade(shade)
 
 	def locks = find('locks', buttonNumber, value)
 	if (locks) toggle(locks)
@@ -272,8 +272,8 @@ def executeHandlers(buttonNumber, value) {
 	def phone = find('phone', buttonNumber, value)
 	if (phone) sendSms(phone, textMessage ?:"Button $buttonNumber was pressed")
 
-    def sirens = find('sirens', buttonNumber, value)
-    if (sirens) toggle(sirens)
+	def sirens = find('sirens', buttonNumber, value)
+	if (sirens) toggle(sirens)
 }
 
 def find(type, buttonNumber, value) {
@@ -317,12 +317,12 @@ def turnDim(devices, level) {
 def adjustFan(device) {
 	log.debug "adjust: $device = ${device.currentLevel}"
     
-    def currentLevel = device.currentLevel
+	def currentLevel = device.currentLevel
 
-    if(device.currentSwitch == 'off') device.setLevel(15)
-    else if (currentLevel < 34) device.setLevel(50)
+	if(device.currentSwitch == 'off') device.setLevel(15)
+	else if (currentLevel < 34) device.setLevel(50)
   	else if (currentLevel < 67) device.setLevel(90)
-    else device.off()
+	else device.off()
 }
 
 def adjustShade(device) {
