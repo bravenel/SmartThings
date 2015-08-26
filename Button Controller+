@@ -164,7 +164,7 @@ def updated() {
 
 def initialize() {
 	subscribe(buttonDevice, "button", buttonEvent)
-    state.lastshadesUp = true
+	state.lastshadesUp = true
 }
 
 def configured() {
@@ -183,9 +183,9 @@ def buttonConfigured(idx) {
         settings["lightV2l_$idx_pushed"] ||
         settings["fanAdjust_$idx_pushed"] ||
         settings["shadeAdjust_$idx_pushed"] ||
-		settings["locks_$idx_pushed"] ||
-		settings["sonos_$idx_pushed"] ||
-		settings["mode_$idx_pushed"] ||
+	settings["locks_$idx_pushed"] ||
+	settings["sonos_$idx_pushed"] ||
+	settings["mode_$idx_pushed"] ||
         settings["notifications_$idx_pushed"] ||
         settings["sirens_$idx_pushed"] ||
         settings["notifications_$idx_pushed"]   ||
