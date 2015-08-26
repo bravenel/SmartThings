@@ -137,7 +137,8 @@ def getButtonSections(buttonNumber) {
 		}
 
 		section("Custom Message") {
-			input "textMessage_${buttonNumber}", "text", title: "Message", required: false
+			input "textMessage_${buttonNumber}_pushed", "text", title: "Pushed", required: false
+			input "textMessage_${buttonNumber}_held", "text", title: "Held", required: false
 		}
 
 		section("Push Notifications") {
