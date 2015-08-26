@@ -183,9 +183,9 @@ def buttonConfigured(idx) {
         settings["lightV2l_$idx_pushed"] ||
         settings["fanAdjust_$idx_pushed"] ||
         settings["shadeAdjust_$idx_pushed"] ||
-	settings["locks_$idx_pushed"] ||
-	settings["sonos_$idx_pushed"] ||
-	settings["mode_$idx_pushed"] ||
+		settings["locks_$idx_pushed"] ||
+		settings["sonos_$idx_pushed"] ||
+		settings["mode_$idx_pushed"] ||
         settings["notifications_$idx_pushed"] ||
         settings["sirens_$idx_pushed"] ||
         settings["notifications_$idx_pushed"]   ||
@@ -265,7 +265,7 @@ def executeHandlers(buttonNumber, value) {
 	def phrase = find('phrase', buttonNumber, value)
 	if (phrase) location.helloHome.execute(phrase)
 
-	def textMessage = findMsg('textMessage', buttonNumber)
+	def textMessage = findMsg('textMessage', buttonNumber, value)
 
 	def notifications = find('notifications', buttonNumber, value)
 	if (notifications?.toBoolean()) sendPush(textMessage ?: "Button $buttonNumber was pressed" )
@@ -287,8 +287,8 @@ def find(type, buttonNumber, value) {
 	return pref
 }
 
-def findMsg(type, buttonNumber) {
-	def preferenceName = type + "_" + buttonNumber
+def findMsg(type, buttonNumber, value) {
+	def preferenceName = type + "_" + buttonNumber + "_" + value
 	def pref = settings[preferenceName]
 	if(pref != null) {
 		log.debug "Found: $pref for $preferenceName"
