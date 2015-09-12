@@ -247,7 +247,7 @@ def executeHandlers(buttonNumber, value) {
 	def dimval4 = find('lightV2l', buttonNumber, value)
 	if (lights4) turnDim(lights4,dimval4)
 
-	def fan = find('autoFanAdjust', buttonNumber, value)
+	def fan = find('fanAdjust', buttonNumber, value)
 	if (fan) adjustFan(fan)
     
 	def shade = find('shadesAdjust', buttonNumber, value)
