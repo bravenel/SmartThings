@@ -200,6 +200,7 @@ def switchesOff() {
 }
 
 def motionOffHandler(evt) {  				// called when motion goes inactive, check all sensors
+	if(state.motionDisabled) return
 	if(allOk) {
 		def noMotion = true
 		motions.each {noMotion = noMotion && it.currentMotion == "inactive"}
