@@ -146,13 +146,13 @@ def initialize() {
 	state.modeLevels = [:]
 	def level = 0
 	for(m in modesX) {
-    		level = settings.find {it.key == "level$m"}
-        	state.modeLevels << [(m):level.value]
+		level = settings.find {it.key == "level$m"}
+		state.modeLevels << [(m):level.value]
 	}
 
 	if(location.mode in modesX) {
-    	state.currentMode = location.mode
-        state.dimLevel = state.modeLevels[location.mode]
+    		state.currentMode = location.mode
+        	state.dimLevel = state.modeLevels[location.mode]
 	} else {
     		state.currentMode = modes[0]
         	state.dimLevel = state.modeLevels[modes[0]]
