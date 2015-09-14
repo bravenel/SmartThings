@@ -210,8 +210,8 @@ def motionOffHandler(evt) {  				// called when motion goes inactive, check all 
 
 def modeChangeHandler(evt) {
 	if(state.currentMode == location.mode || !(location.mode in modesX)) return   // no change or not one of our modes
-	state.dimLevel = state.modeLevels[location.mode]
 	state.currentMode = location.mode			   
+	state.dimLevel = state.modeLevels[state.currentMode]
 // the next two lines brighten any lights on when new mode is brighter than previous
 	if(master.currentSwitch == "on" && master.currentLevel < state.dimLevel) master.setLevel(state.dimLevel)
 	slaves.each {if(it.currentSwitch == "on" && it.currentLevel < state.dimLevel) it.setLevel(state.dimLevel)}
