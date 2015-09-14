@@ -1,4 +1,5 @@
-    This app sets the dimmer levels for a group of lights based on modes.  The dimmer levels are selected for each mode.
+    This app sets the dimmer levels for a group of lights based on modes.  The dimmer levels are 
+    selected for each mode.  You can use any number of modes you want, two or more.  I use three.
     It supports motion sensors that turn on the group, and turns them off after a specified period,
     and has provision for linking to button controllers and Routines, through a button device.
     The location can have other modes, but this app only adjusts the lights for the selected modes.
@@ -14,15 +15,16 @@
     If motion sensors(s) are specified, they turn on the master and all slaves to the 
     current mode dimmer level.  The motion activation can be conditioned on times of day,
     days of week, or modes.  Optionally, the master and slaves can be turned off some minutes
-    moton stops.  A switch (possibly virtual) can be turned on to disable motion activation.
+    after motion stops.  A switch (possibly virtual) can be turned on to disable motion activation.
     
     The app adjusts dimmer levels on each mode change to the level selcted for that mode.
-    A mode change to some other mode has no effect on the dimmer levels. 
+    A mode change to some other mode has no effect on the dimmer levels. If the lights are on at
+    a mode change, and the new mode is brighter than the previous mode, it will brighten the lights.
     
     The app allows manual changing of the dimmer level, either by the physical switch or mobile app.  
     For example, in the evening, a woman wants to put on makeup and the light isn't bright enough.  
     She turns up the dimmer.  That event is responded to by temporarily adjusting the 
-    dimmer level for both master and slaves to that new level.
+    dimmer level for both master and slaves to that new level (short delay typical).
     
     How to set default values for modes and dimLevels:
     
@@ -31,11 +33,11 @@
     
     To set default modes:
         Remove the comment (//) from line 55, and place the comment mark on line 56 instead.
-        Edit the list of modes in [brackets] to be your default modes.
+        Edit the list of modes in [brackets] to be your modes.
         
     To set default levels:
         Remove the comments from lines 63 through 68, and place a comment mark on line 69 instead.
-        Edit the list of levels in [brackets] to be your default levels.
+        Edit the list of levels in [brackets] to be your levels.
     
 
 
