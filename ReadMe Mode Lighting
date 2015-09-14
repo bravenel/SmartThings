@@ -24,5 +24,18 @@
     She turns up the dimmer.  That event is responded to by temporarily adjusting the 
     dimmer level for both master and slaves to that new level.
     
+    How to set default values for modes and dimLevels:
+    
+    If you are going to install multiple instances of this, it's convenient for it to fill in default values 
+    for you.  You can always change from the defaults, but most lighting areas are similar.
+    
+    To set default modes:
+        Remove the comment (//) from line 55, and place the comment mark on line 56 instead.
+        Edit the list of modes in [brackets] to be your default modes.
+        
+    To set default levels:
+        Remove the comments from lines 63 through 68, and place a comment mark on line 69 instead.
+        Edit the list of levels in [brackets] to be your default levels.
+    
 
 
