@@ -17,7 +17,7 @@ definition(
     name: "Turn off after some minutes",
     namespace: "bravenel",
     author: "Bruce Ravenel",
-    description: "Turn switch off after some number of minutes",
+    description: "Turn switches off after some number of minutes",
     category: "My Apps",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
@@ -26,7 +26,7 @@ definition(
 
 preferences {
 	section("Turn switch off after some minutes") {
-		input "mySwitch", "capability.switch", title: "Switch", multiple: false, required:true
+		input "mySwitch", "capability.switch", title: "Switch", multiple: true, required:true
         input "minutes", "number", title: "Minutes", required: true
 	}
 }
