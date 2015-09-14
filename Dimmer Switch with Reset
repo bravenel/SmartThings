@@ -175,7 +175,7 @@ def resetLevel(value) {
     def level = Math.min(value as Integer, 99)
 	delayBetween ([
     	delayBetween ([	zwave.basicV1.basicSet(value: level).format(),
-        				zwave.basicV1.basicSet(value: 0x00).format()], 100),	
+        				zwave.basicV1.basicSet(value: 0x00).format()], 10),	
     	zwave.switchMultilevelV1.switchMultilevelGet().format()], 5000)
 }
 
