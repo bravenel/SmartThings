@@ -52,19 +52,21 @@ def selectDimmers() {
 		}
 
 		section("With dimmer levels") {
-        	input "modesX", "mode", multiple: true, title: "For these modes", required: true, defaultValue: ["Day", "Evening", "Night"]
+//        	input "modesX", "mode", multiple: true, title: "For these modes", required: true, defaultValue: ["Day", "Evening", "Night"]
+        	input "modesX", "mode", multiple: true, title: "For these modes", required: true
         }
 	}
 }
 
 def selectLevels() {
 	dynamicPage(name: "selectLevels", title: "Select your level for each mode", nextPage: "motionSettings", uninstall: false) {
-    	def defaults = [90, 30, 10]
-        def n = 0
-		modesX.each {
-        	setModeLevel(it, "level$it", defaults[n])
-            n = n + 1
-        }
+//    	def defaults = [90, 30, 10]
+//        def n = 0
+//		modesX.each {
+//        	setModeLevel(it, "level$it", defaults[n])
+//            n = n + 1
+//        }
+	modesX.each {setModeLevel(it, "level$it", 0)
     }
 }
 
