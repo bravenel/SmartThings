@@ -73,8 +73,8 @@ def selectLevels() {
 def setModeLevel(thisMode, modeVar, defaults) {
 	def result = section("When mode is $thisMode") {
 		input modeVar, "number", title: "Set this level", required: true, defaultValue: defaults > 0 ? defaults : null
-    }
-    return result
+	}
+	return result
 }
 
 def motionSettings() {
