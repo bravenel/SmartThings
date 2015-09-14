@@ -27,8 +27,8 @@ definition(
 preferences {
 	section("Select Switches, Motions and Minutes") {
 		input "switches", "capability.switch", title: "Switches", required: true, multiple: true
-        input "motions", "capability.motionSensor", title: "Motions", required: true, multiple: true
-        input "minutes", "number", title: "Minutes", required: true
+		input "motions", "capability.motionSensor", title: "Motions", required: true, multiple: true
+		input "minutes", "number", title: "Minutes", required: true
 	}
 }
 
@@ -43,8 +43,8 @@ def updated() {
 
 def initialize() {
 	subscribe(motions, "motion.active", activeHandler)
-    subscribe(motions, "motion.inactive", inactiveHandler)
-    state.pending = false
+	subscribe(motions, "motion.inactive", inactiveHandler)
+	state.pending = false
 }
 
 def activeHandler(evt) {
@@ -53,11 +53,11 @@ def activeHandler(evt) {
 
 def inactiveHandler(evt) {
 	def noMotion = true
-    motions.each {noMotion = noMotion && it.currentMotion == "inactive"}
-    if(noMotion) {
-    	runIn(minutes*60, switchesOff)
-        state.pending = true
-    } else state.pending = false
+	motions.each {noMotion = noMotion && it.currentMotion == "inactive"}
+	if(noMotion) {
+		runIn(minutes*60, switchesOff)
+		state.pending = true
+	} else state.pending = false
 }
 
 def switchesOff() {
