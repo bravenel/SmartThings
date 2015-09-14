@@ -27,7 +27,7 @@ definition(
 preferences {
 	section("Turn switch off after some minutes") {
 		input "mySwitch", "capability.switch", title: "Switch", multiple: true, required:true
-        input "minutes", "number", title: "Minutes", required: true
+		input "minutes", "number", title: "Minutes", required: true
 	}
 }
 
