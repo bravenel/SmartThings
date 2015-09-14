@@ -192,8 +192,8 @@ def switchOffHandler(evt) {
 	state.dimLevel = state.modeLevels[state.currentMode]
 }
 
-def switchesOff() {                    		
-	if(state.motionOffDismissed) return     // intervening On, kill this Off. Replaces use of unschedule()
+def switchesOff() {
+	if(state.motionOffDismissed || state.motionDisabled) return  
 	if(allOk) {
 		master.off()
 		slaves?.off()
