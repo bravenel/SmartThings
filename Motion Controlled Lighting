@@ -93,6 +93,7 @@ def initialize() {
 	if(turnOff) {
 		subscribe(motions, "motion.inactive", motionOffHandler)
 		subscribe(offMotions, "motion.inactive", motionOffHandler)
+		subscribe(offMotions, "motion.active", offMotionHandler)
 	}
 	state.switchesOn = false
 	state.motionOffDismissed = true			// this state variable replaces unschedule()
@@ -131,10 +132,13 @@ def motionOffHandler(evt) {
 		if(noMotion) {
 			state.motionOffDismissed = false	// arm switchesOff()
 			if(minutes) runIn(minutes*60, switchesOff) else switchesOff()
-		}
+		} else state.motionOffDismissed = true
 	}
 }
 
+def offMotionHandler(evt) {
+	state.motionOffDismissed = true
+}
 
 
 // execution filter methods
