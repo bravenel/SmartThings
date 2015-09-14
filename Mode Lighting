@@ -153,10 +153,12 @@ def initialize() {
 	state.dimLevel = state.modeLevels[state.currentMode]
 	state.motionOffDismissed = true
 	state.motionDisabled = (disable) ? disable.currentSwitch == "on" : false
+	state.masterOn = master.currentSwitch == "on"
 }
 
 def switchesOn() {
 	state.motionOffDismissed = true    		// use this variable instead of unschedule() to kill pending off()
+	if(state.masterOn) return else state.masterOn = false
 	master.setLevel(state.dimLevel)
 	slaves.each {it.setLevel(state.dimLevel)}
 }
@@ -182,6 +184,7 @@ def levelHandler(evt) {      				// allows a dimmer to change the current dimLev
 
 def switchOffHandler(evt) {
 	state.dimLevel = state.modeLevels[state.currentMode]
+	state.masterOn = false
 	slaves?.off()
 	offSwitches?.off()
 }
@@ -190,6 +193,7 @@ def switchesOff() {
 	if(state.motionOffDismissed || state.motionDisabled) return  
 	if(allOk) {
 		state.dimLevel = state.modeLevels[state.currentMode]
+		state.masterOn = false
 		master.off()
 		slaves?.off()
 		offSwitches?.off()
