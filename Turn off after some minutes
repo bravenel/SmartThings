@@ -41,11 +41,11 @@ def updated() {
 }
 
 def initialize() {
-	subscribe(switches, "switch.on", onHandler)
+	subscribe(switches, "switch", onHandler)
 }
 
 def onHandler(evt) {
-	runIn(minutes*60, turnOff)
+	if(evt.value in ["on", "dimLevel"]) runIn(minutes*60, turnOff)
 }
 
 def turnOff() {
