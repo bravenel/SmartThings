@@ -1,11 +1,8 @@
-    This app sets the dimmer levels for a group of lights based on one of three lighting modes.
+    This app sets the dimmer levels for a group of lights based on modes.  The dimmer levels are selected for each mode.
     It supports motion sensors that turn on the group, and turns them off after a specified period,
-    and has provision for linking to button controllers and Hello Home phrases, through a button device.
-    The location can have other modes, but this app only adjusts the lights for three selected modes.
+    and has provision for linking to button controllers and Routines, through a button device.
+    The location can have other modes, but this app only adjusts the lights for the selected modes.
 
-    The dim levels for all three modes are entered as a single 6 digit number, e.g. 903510,
-    which would mean 90 for Day, 35 for Evening, and 10 for Night (or your corresponding modes).
-    
     The app has a master dimmer and some slave dimmers. The idea is that sometimes the master dimmer physical 
     switch is used to turn on the lights -- the slaves follow, or likewise to turn off some lights.  
     The app also allows you to specify additional switches that are turned off when the master dimmer is turned off.  
@@ -14,34 +11,18 @@
     one must use an instant reporting z-wave dimmer.  One such dimmer is the Leviton VRMX1 
     (which must be included directly to the hub to have instant reporting).
     
-    This app relies on the custom device type "Dimmer Switch with Reset" for instances of the app that are not
-    controlled by motion sensors.  This device type replaces the standard "Dimmer Switch" device type;
-    its function is to reset the dimLevel of a dimmer that is off or about to be turned off.
-    
     If motion sensors(s) are specified, they turn on the master and all slaves to the 
     current mode dimmer level.  The motion activation can be conditioned on times of day,
-    days of week, or modes.  The same or other sensors can be used for turning off after x minutes.
+    days of week, or modes.  Optionally, the master and slaves can be turned off some minutes
+    moton stops.  A switch (possibly virtual) can be turned on to disable motion activation.
     
-    The app adjusts dimmer levels on each mode change to one of the three predefined modes.
-    A mode change to some other mode has no effect on the dimmer levels, which allows for
-    extra modes that can be used to disable motion entirely at times. For an instance of the
-    app without motion, if the lights are off at mode change, the app will adjust their
-    dimmer levels using the "Dimmer Switch with Reset" device type.  This is so that the next time
-    the lights are turned on using the physical switch, they come on to the right level.  
-    Without this feature, the light would come on to its previous dimmer level, and then
-    adjust the level once ST sees the lights-on event.  This can be a number of seconds 
-    after the physical switch is pressed.  What you don't want is for someone to go into
-    the bathroom in the middle of the night, turn on a switch, and have the light come on
-    bright for a few seconds before it dims to the correct subdued level.
+    The app adjusts dimmer levels on each mode change to the level selcted for that mode.
+    A mode change to some other mode has no effect on the dimmer levels. 
     
     The app allows manual changing of the dimmer level, either by the physical switch or mobile app.  
     For example, in the evening, a woman wants to put on makeup and the light isn't bright enough.  
     She turns up the dimmer.  That event is responded to by temporarily adjusting the 
     dimmer level for both master and slaves to that new level.
     
-    On line 42 of the source code there is an option, commented out, to set default modes.
-    I use this feature so that I don't have to enter the modes each time I install the app.
-    If you want default modes, remove the // that starts the comment, and edit the modes
-    in quotes to match your three modes.
 
 
