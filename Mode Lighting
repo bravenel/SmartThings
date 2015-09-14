@@ -187,18 +187,18 @@ def levelHandler(evt) {      				// allows a dimmer to change the current dimLev
 }
 
 def switchOffHandler(evt) {
+	state.dimLevel = state.modeLevels[state.currentMode]
 	slaves?.off()
 	offSwitches?.off()
-	state.dimLevel = state.modeLevels[state.currentMode]
 }
 
 def switchesOff() {
 	if(state.motionOffDismissed || state.motionDisabled) return  
 	if(allOk) {
+		state.dimLevel = state.modeLevels[state.currentMode]
 		master.off()
 		slaves?.off()
 		offSwitches?.off()
-		state.dimLevel = state.modeLevels[state.currentMode]
 	}
 }
 
