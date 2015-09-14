@@ -20,7 +20,7 @@ definition(
     name: "Mode Lighting",
     namespace: "bravenel",
     author: "Bruce Ravenel",
-    description: "Set Dimmer Levels Based on Modes, with Motion on/off/disabled, button on, and Master on/off",
+    description: "Set Dimmer Levels Based on Modes, with Motion on/off/disable, button on, and Master on/off",
     category: "Convenience",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/MyApps/Cat-MyApps.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/MyApps/Cat-MyApps@2x.png"
