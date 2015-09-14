@@ -144,9 +144,8 @@ def initialize() {
 	subscribe(button, "switch.on", switchOnHandler)
     
 	state.modeLevels = [:]
-	def level = 0
 	for(m in modesX) {
-		level = settings.find {it.key == "level$m"}
+		def level = settings.find {it.key == "level$m"}
 		state.modeLevels << [(m):level.value]
 	}
 
