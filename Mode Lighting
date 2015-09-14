@@ -60,14 +60,14 @@ def selectDimmers() {
 
 def selectLevels() {
 	dynamicPage(name: "selectLevels", title: "Select your level for each mode", nextPage: "motionSettings", uninstall: false) {
-//    	def defaults = [90, 30, 10]
-//        def n = 0
+//		def defaults = [90, 30, 10]
+//		def n = 0
 //		modesX.each {
-//        	setModeLevel(it, "level$it", defaults[n])
-//            n = n + 1
-//        }
-	modesX.each {setModeLevel(it, "level$it", 0)
-    }
+//        		setModeLevel(it, "level$it", defaults[n])
+//			n = n + 1
+//		}
+		modesX.each {setModeLevel(it, "level$it", 0)
+	}
 }
 
 def setModeLevel(thisMode, modeVar, defaults) {
