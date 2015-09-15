@@ -150,6 +150,10 @@ def getButtonSections(buttonNumber) {
 			input "phone_${buttonNumber}_pushed","phone" ,title: "Pushed", required: false
 			input "phone_${buttonNumber}_held", "phone", title: "Held", required: false
 		}
+        section("Associate a Momentary Button"){
+        	input "virtB_${buttonNumber}_pushed","capability.momentary",title: "Pushed", required: false
+            input "virtB_${buttonNumber}_held","capability.momentary",title: "Held", required: false
+        }
 	}
 }
 
@@ -164,7 +168,15 @@ def updated() {
 
 def initialize() {
 	subscribe(buttonDevice, "button", buttonEvent)
-	state.lastshadesUp = true
+    subscribe(virtB_1_pushed,"momentary.pushed",fakebutton1Event)
+    subscribe(virtB_2_pushed,"momentary.pushed",fakebutton2Event)
+    subscribe(virtB_3_pushed,"momentary.pushed",fakebutton3Event)
+    subscribe(virtB_4_pushed,"momentary.pushed",fakebutton4Event)
+    subscribe(virtB_1_held,"momentary.pushed",fakebutton1hEvent)
+    subscribe(virtB_2_held,"momentary.pushed",fakebutton2hEvent)
+    subscribe(virtB_3_held,"momentary.pushed",fakebutton3hEvent)
+    subscribe(virtB_4_held,"momentary.pushed",fakebutton4hEvent)
+    state.lastshadesUp = true
 }
 
 def configured() {
@@ -183,13 +195,45 @@ def buttonConfigured(idx) {
         settings["lightV2l_$idx_pushed"] ||
         settings["fanAdjust_$idx_pushed"] ||
         settings["shadeAdjust_$idx_pushed"] ||
-	settings["locks_$idx_pushed"] ||
-	settings["sonos_$idx_pushed"] ||
-	settings["mode_$idx_pushed"] ||
+		settings["locks_$idx_pushed"] ||
+		settings["sonos_$idx_pushed"] ||
+		settings["mode_$idx_pushed"] ||
         settings["notifications_$idx_pushed"] ||
         settings["sirens_$idx_pushed"] ||
         settings["notifications_$idx_pushed"]   ||
         settings["phone_$idx_pushed"]
+}
+
+def fakebutton1Event(evt) {
+    executeHandlers(1, "pushed")
+}
+
+def fakebutton2Event(evt) {
+    executeHandlers(2, "pushed")
+}
+
+def fakebutton3Event(evt) {
+    executeHandlers(3, "pushed")
+}
+
+def fakebutton4Event(evt) {
+    executeHandlers(4, "pushed")
+}
+
+def fakebutton1hEvent(evt) {
+    executeHandlers(1, "held")
+}
+
+def fakebutton2hEvent(evt) {
+    executeHandlers(2, "held")
+}
+
+def fakebutton3hEvent(evt) {
+    executeHandlers(3, "held")
+}
+
+def fakebutton4hEvent(evt) {
+    executeHandlers(4, "held")
 }
 
 def buttonEvent(evt){
@@ -333,8 +377,9 @@ def adjustShade(device) {
     	state.lastshadesUp = device.currentMotor == "up"
     	device.stop()
     } else {
-    	if(state.lastshadesUp) device.down()
-        else device.up()
+    	state.lastshadesUp ? device.down() : device.up()
+//    	if(state.lastshadesUp) device.down()
+//        else device.up()
         state.lastshadesUp = !state.lastshadesUp
     }
 }
