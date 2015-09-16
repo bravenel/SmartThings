@@ -54,10 +54,8 @@ def activeHandler(evt) {
 def inactiveHandler(evt) {
 	def noMotion = true
 	motions.each {noMotion = noMotion && it.currentMotion == "inactive"}
-	if(noMotion) {
-		runIn(minutes*60, switchesOff)
-		state.pending = true
-	} else state.pending = false
+	state.pending = noMotion
+	if(noMotion) runIn(minutes*60, switchesOff)
 }
 
 def switchesOff() {
