@@ -51,7 +51,7 @@ def selectDimmers() {
 		}
 
 		section("With dimmer levels") {
-//        	input "modesX", "mode", multiple: true, title: "For these modes", required: true, defaultValue: ["Day", "Evening", "Night"], submitOnChange: true
+//        	input "modesX", "mode", multiple: true, title: "for these modes", required: true, defaultValue: ["Day", "Evening", "Night"], submitOnChange: true
         	input "modesX", "mode", multiple: true, title: "For these modes", required: true, submitOnChange: true
         
 			if(modesX) {
@@ -73,15 +73,15 @@ def setModeLevel(thisMode, modeVar, defaults) {
 }
 
 def motionSettings() {
-	dynamicPage(name:"motionSettings",title: "Select your motion sensor(s)", nextPage: "otherSettings", uninstall: false) {
+	dynamicPage(name:"motionSettings",title: "Motion sensor(s)", nextPage: "otherSettings", uninstall: false) {
     
 		section("Turn them on when there is motion") {
 			input "motions", "capability.motionSensor", title: "On these motion sensors", required: false, multiple: true
 			input "disable", "capability.switch", title: "Switch to disable motion", required: false, multiple: false
 		}
         
-		section("Turn them off when there is no motion") {
-			input "turnOff", "boolean", title: "Turn off when no motion", required: false, defaultValue: false
+		section("Turn them off") {
+			input "turnOff", "boolean", title: "When there is no motion", required: false, defaultValue: false
 			input "minutes", "number", title: "For this many minutes", required: false, multiple: false
 		}
 	
@@ -103,11 +103,11 @@ def otherSettings() {
 	dynamicPage(name:"otherSettings", uninstall: false, install: true) {
 
 		section("Turn master and slaves on with this") {
-			input "button", "capability.momentary", title: "Button to turn them on", multiple: false, required: false
+			input "button", "capability.momentary", title: "button", multiple: false, required: false
 		}
 
 		section("These extra switches will be turned off") {
-			input "offSwitches", "capability.switch", title: "When the master is turned off", multiple: true, required: false
+			input "offSwitches", "capability.switch", title: "when the master is turned off", multiple: true, required: false
 		}
         
 		section {
