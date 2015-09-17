@@ -3,7 +3,7 @@
  *
  *  Copyright 2015 Bruce Ravenel
  *
- *	09-13-2015 0.8
+ *	09-17-2015 0.9
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -20,7 +20,7 @@ definition(
     name: "Mode Lighting",
     namespace: "bravenel",
     author: "Bruce Ravenel",
-    description: "Set Dimmer Levels Based on Modes, with Motion on/off/disable, button on, and Master on/off",
+    description: "Set Dimmer Levels Based on Modes, with Motion on/off/disabled, button on, and Master on/off",
     category: "Convenience",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/MyApps/Cat-MyApps.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/MyApps/Cat-MyApps@2x.png"
@@ -28,7 +28,6 @@ definition(
 
 preferences {
     page(name: "selectDimmers")
-    page(name: "selectLevels")
     page(name: "motionSettings")
     page(name: "otherSettings")
 	
@@ -41,10 +40,10 @@ preferences {
 }
 
 def selectDimmers() {
-	dynamicPage(name: "selectDimmers", title: "Select your dimmers and modes", nextPage: "selectLevels", uninstall: true) {
+	dynamicPage(name: "selectDimmers", title: "Dimmers, modes and levels", nextPage: "motionSettings", uninstall: true) {
 
-		section("When this") { 
-			input "master", "capability.switchLevel", multiple: false, title: "Master dimmer is turned on", required: true
+		section("When this master dimmer") { 
+			input "master", "capability.switchLevel", multiple: false, title: "Is turned on", required: true, submitOnChange: true
 		}
 
 		section("These slave dimmers") {
@@ -52,29 +51,25 @@ def selectDimmers() {
 		}
 
 		section("With dimmer levels") {
-//        	input "modesX", "mode", multiple: true, title: "For these modes", required: true, defaultValue: ["Day", "Evening", "Night"]
-        	input "modesX", "mode", multiple: true, title: "For these modes", required: true
+//        	input "modesX", "mode", multiple: true, title: "For these modes", required: true, defaultValue: ["Day", "Evening", "Night"], submitOnChange: true
+        	input "modesX", "mode", multiple: true, title: "For these modes", required: true, submitOnChange: true
+        
+        	if(modesX) {
+//    			def defaults = [90, 30, 10]
+    			def defaults = [0, 0, 0]
+        		def n = 0
+				modesX.each {
+        			setModeLevel(it, "level$it", defaults[n])
+            		n = n + 1        	
+        		}
+        	}
         }
 	}
 }
 
-def selectLevels() {
-	dynamicPage(name: "selectLevels", title: "Select your level for each mode", nextPage: "motionSettings", uninstall: false) {
-//		def defaults = [90, 30, 10]
-//		def n = 0
-//		modesX.each {
-//        		setModeLevel(it, "level$it", defaults[n])
-//			n = n + 1
-//		}
-		modesX.each {setModeLevel(it, "level$it", 0)}
-	}
-}
-
 def setModeLevel(thisMode, modeVar, defaults) {
-	def result = section("When mode is $thisMode") {
-		input modeVar, "number", title: "Set this level", required: true, defaultValue: defaults > 0 ? defaults : null
-	}
-	return result
+	def result = input modeVar, "number", title: "Level for $thisMode", required: true, defaultValue: defaults > 0 ? defaults : null
+    return result
 }
 
 def motionSettings() {
@@ -82,11 +77,11 @@ def motionSettings() {
     
 		section("Turn them on when there is motion") {
 			input "motions", "capability.motionSensor", title: "On these motion sensors", required: false, multiple: true
-			input "disable", "capability.switch", title: "Switch to disable motion", required: false, multiple: false
+            input "disable", "capability.switch", title: "Switch to disable motion", required: false, multiple: false
 		}
         
 		section("Turn them off when there is no motion") {
-        		input "turnOff", "boolean", title: "Turn off when no motion", required: false, defaultValue: false
+        	input "turnOff", "boolean", title: "Turn off when no motion", required: false, defaultValue: false
 			input "minutes", "number", title: "For this many minutes", required: false, multiple: false
 		}
 	
@@ -139,38 +134,38 @@ def initialize() {
 	slaves.each {subscribe(it, "level", levelHandler)}
 	subscribe(location, modeChangeHandler)
 	subscribe(motions, "motion.active", motionOnHandler)
-	subscribe(disable, "switch", disableHandler)
-	if(turnOff) {subscribe(motions, "motion.inactive", motionOffHandler)}
+    subscribe(disable, "switch", disableHandler)
+    if(turnOff) {subscribe(motions, "motion.inactive", motionOffHandler)}
 	subscribe(button, "switch.on", switchOnHandler)
     
 	state.modeLevels = [:]
-	for(m in modesX) {
-		def level = settings.find {it.key == "level$m"}
-		state.modeLevels << [(m):level.value]
-	}
+    for(m in modesX) {
+    	def level = settings.find {it.key == "level$m"}
+        state.modeLevels << [(m):level.value]
+    }
 
-	state.currentMode = location.mode in modesX ? location.mode : modes[0]
-	state.dimLevel = state.modeLevels[state.currentMode]
+    state.currentMode = location.mode in modesX ? location.mode : modes[0]
+    state.dimLevel = state.modeLevels[state.currentMode]
 	state.motionOffDismissed = true
-	state.motionDisabled = (disable) ? disable.currentSwitch == "on" : false
-	state.masterOff = master.currentSwitch == "off"
+    state.motionDisabled = (disable) ? disable.currentSwitch == "on" : false
+    state.masterOff = master.currentSwitch == "off"
 }
 
 def switchesOn() {
 	state.motionOffDismissed = true    		// use this variable instead of unschedule() to kill pending off()
-	state.masterOff = false
+    state.masterOff = false
 	master.setLevel(state.dimLevel)
 	slaves.each {it.setLevel(state.dimLevel)}
 }
 
 def switchOnHandler(evt) {
-	if(state.masterOff) switchesOn() 
+    if(state.masterOff) switchesOn() 
 }
 
 def motionOnHandler(evt) {
-	if(state.motionDisabled) return
+    if(state.motionDisabled) return
 	state.motionOffDismissed = true
-	if(allOk && state.masterOff) switchesOn() 
+    if(allOk && state.masterOff) switchesOn() 
 }
 
 def disableHandler(evt) {
@@ -179,33 +174,33 @@ def disableHandler(evt) {
 
 def levelHandler(evt) {      				// allows a dimmer to change the current dimLevel
 	if(evt.value == state.dimLevel) return
-	state.dimLevel = evt.value
+    state.dimLevel = evt.value
 	switchesOn()
 }
 
 def switchOffHandler(evt) {
-	state.dimLevel = state.modeLevels[state.currentMode]
-	state.masterOff = true
+    state.dimLevel = state.modeLevels[state.currentMode]
+    state.masterOff = true
 	slaves?.off()
 	offSwitches?.off()
 }
 
-def switchesOff() {
+def switchesOff() {                    		
 	if(state.motionOffDismissed || state.motionDisabled) return  
-	if(allOk) {
-		state.dimLevel = state.modeLevels[state.currentMode]
-		state.masterOff = true
+    if(allOk) {
+    	state.dimLevel = state.modeLevels[state.currentMode]
+        state.masterOff = true
 		master.off()
 		slaves?.off()
 		offSwitches?.off()
-	}
+    }
 }
 
 def motionOffHandler(evt) {  				// called when motion goes inactive, check all sensors
 	if(state.motionDisabled) return
 	if(allOk) {
 		def noMotion = true
-		motions.each {noMotion = noMotion && it.currentMotion == "inactive"}
+    	motions.each {noMotion = noMotion && it.currentMotion == "inactive"}
 		if(noMotion) {
 			state.motionOffDismissed = false
 			if(minutes) runIn(minutes*60, switchesOff) else switchesOff()
@@ -214,11 +209,11 @@ def motionOffHandler(evt) {  				// called when motion goes inactive, check all 
 }
 
 def modeChangeHandler(evt) {
-	if(state.currentMode == location.mode || !(location.mode in modesX)) return   // no change or not one of our modes
-	state.currentMode = location.mode			   
-	state.dimLevel = state.modeLevels[state.currentMode]
-// the next two lines brighten any lights on when new mode is brighter than previous
-	if(master.currentSwitch == "on" && master.currentLevel < state.dimLevel) master.setLevel(state.dimLevel)
+    if(state.currentMode == location.mode || !(location.mode in modesX)) return   // no change or not one of our modes
+    state.currentMode = location.mode			   
+    state.dimLevel = state.modeLevels[state.currentMode]
+    // the next two lines brighten any lights on when new mode is brighter than previous
+    if(master.currentSwitch == "on" && master.currentLevel < state.dimLevel) master.setLevel(state.dimLevel)
 	slaves.each {if(it.currentSwitch == "on" && it.currentLevel < state.dimLevel) it.setLevel(state.dimLevel)}
 }
 
