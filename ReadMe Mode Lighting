@@ -32,11 +32,11 @@
     for you.  You can always change from the defaults, but most lighting areas are similar.
     
     To set default modes:
-        Remove the comment (//) from line 55, and place the comment mark on line 56 instead.
+        Remove the comment (//) from line 54, and place the comment mark on line 55 instead.
         Edit the list of modes in [brackets] to be your modes.
         
     To set default levels:
-        Remove the comments from lines 63 through 68, and place a comment mark on line 69 instead.
+        Remove the comment from line 58, and place a comment mark on line 59 instead.
         Edit the list of levels in [brackets] to be your levels.
     
 
