@@ -51,7 +51,7 @@ def selectDimmers() {
 		}
 
 		section("With dimmer levels") {
-//        	input "modesX", "mode", multiple: true, title: "for these modes", required: true, defaultValue: ["Day", "Evening", "Night"], submitOnChange: true
+//        	input "modesX", "mode", multiple: true, title: "For these modes", required: true, defaultValue: ["Day", "Evening", "Night"], submitOnChange: true
         	input "modesX", "mode", multiple: true, title: "For these modes", required: true, submitOnChange: true
         
 			if(modesX) {
@@ -68,7 +68,7 @@ def selectDimmers() {
 
 def setModeLevel(thisMode, modeVar, defaults) {
 	def result = input modeVar, "number", title: "Level for $thisMode", required: true, defaultValue: defaults > 0 ? defaults : null
-    return result
+	return result
 }
 
 def motionSettings() {
