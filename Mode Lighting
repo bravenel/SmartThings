@@ -102,11 +102,11 @@ def otherSettings() {
 	dynamicPage(name:"otherSettings", uninstall: false, install: true) {
 
 		section("Turn master and slaves on with this") {
-			input "button", "capability.momentary", title: "button", multiple: false, required: false
+			input "button", "capability.momentary", title: "Button", multiple: false, required: false
 		}
 
 		section("These extra switches will be turned off") {
-			input "offSwitches", "capability.switch", title: "when the master is turned off", multiple: true, required: false
+			input "offSwitches", "capability.switch", title: "When the master is turned off", multiple: true, required: false
 		}
         
 		section {
