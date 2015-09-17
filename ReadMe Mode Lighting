@@ -33,11 +33,10 @@
     
     To set default modes:
         Remove the comment (//) from line 54, and place the comment mark on line 55 instead.
-        Edit the list of modes in [brackets] to be your modes.
+        Edit the list of modes in [brackets] on line 54 to be your modes.
         
     To set default levels:
-        Remove the comment from line 58, and place a comment mark on line 59 instead.
-        Edit the list of levels in [brackets] to be your levels.
+        Edit the list of levels in [brackets] on line 58 to be your levels.
     
 
 
