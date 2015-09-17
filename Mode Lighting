@@ -77,11 +77,11 @@ def motionSettings() {
     
 		section("Turn them on when there is motion") {
 			input "motions", "capability.motionSensor", title: "On these motion sensors", required: false, multiple: true
-            input "disable", "capability.switch", title: "Switch to disable motion", required: false, multiple: false
+			input "disable", "capability.switch", title: "Switch to disable motion", required: false, multiple: false
 		}
         
 		section("Turn them off when there is no motion") {
-        	input "turnOff", "boolean", title: "Turn off when no motion", required: false, defaultValue: false
+			input "turnOff", "boolean", title: "Turn off when no motion", required: false, defaultValue: false
 			input "minutes", "number", title: "For this many minutes", required: false, multiple: false
 		}
 	
