@@ -55,7 +55,6 @@ def selectDimmers() {
         	input "modesX", "mode", multiple: true, title: "For these modes", required: true, submitOnChange: true
         
 			if(modesX) {
-//				def defaults = [90, 30, 10]
 				def defaults = [0, 0, 0]
 				def n = 0
 				modesX.each {
