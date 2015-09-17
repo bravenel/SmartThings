@@ -28,7 +28,7 @@ preferences {
 	section("Select Switches, Motions and Minutes") {
 		input "switches", "capability.switch", title: "Switches", required: true, multiple: true
 		input "motions", "capability.motionSensor", title: "Motions", required: true, multiple: true
-		input "minutes", "number", title: "Minutes", required: true
+		input "minutes", "number", title: "Minutes", required: false
 	}
 }
 
@@ -55,7 +55,7 @@ def inactiveHandler(evt) {
 	def noMotion = true
 	motions.each {noMotion = noMotion && it.currentMotion == "inactive"}
 	state.pending = noMotion
-	if(noMotion) runIn(minutes*60, switchesOff)
+	if(noMotion) {if(minutes) runIn(minutes*60, switchesOff) else switchesOff()}
 }
 
 def switchesOff() {
