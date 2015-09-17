@@ -63,7 +63,7 @@ def selectDimmers() {
             		n = n + 1        	
         		}
         	}
-        }
+		}
 	}
 }
 
