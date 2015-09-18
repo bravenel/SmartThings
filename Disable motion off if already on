@@ -45,15 +45,15 @@ def initialize() {
 	subscribe(motions, "motion.active", activeHandler)
 	subscribe(motions, "motion.inactive", inactiveHandler)
 	state.pending = false
-    state.disable = false
+	state.disable = false
 }
 
 def activeHandler(evt) {
 	def lightsOn = false
-    switches.each {lightsOn = lightsOn || it.currentSwitch == "on"}
-    state.disable = lightsOn
+	switches.each {lightsOn = lightsOn || it.currentSwitch == "on"}
+	state.disable = lightsOn
 	state.pending = false
-    switches.on()
+	switches.on()
 }
 
 def inactiveHandler(evt) {
