@@ -65,6 +65,5 @@ def inactiveHandler(evt) {
 }
 
 def switchesOff() {
-	if(state.disable) return
 	if(state.pending) switches.off()
 }
