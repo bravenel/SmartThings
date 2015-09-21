@@ -134,7 +134,7 @@ def initialize() {
 	subscribe(location, modeChangeHandler)
 	subscribe(motions, "motion.active", motionOnHandler)
 	subscribe(disable, "switch", disableHandler)
-	if(turnOff) {subscribe(motions, "motion.inactive", motionOffHandler)}
+	if(turnOff) subscribe(motions, "motion.inactive", motionOffHandler)
 	subscribe(button, "switch.on", switchOnHandler)
     
 	state.modeLevels = [:]
