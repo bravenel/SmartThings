@@ -37,7 +37,7 @@ preferences {
 }
 
 def settings() {
-	dynamicPage(name: "settings", title: "Turn switches off after some minutes", uninstall: true, nextPage: "certainTime", install: true) {
+	dynamicPage(name: "settings", title: "Turn switches off after some minutes", uninstall: true, install: true) {
 		section {
 			input "switches", "capability.switch", title: "Switches", multiple: true, required:true
 			input "minutes", "number", title: "Minutes", required: true
