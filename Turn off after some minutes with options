@@ -131,9 +131,9 @@ private getDaysOk() {
 private getTimeOk() {
 	def result = true
 	if ((starting && ending) ||
-    	(starting && endingX in ["Sunrise", "Sunset"]) ||
-        (startingX in ["Sunrise", "Sunset"] && ending) ||
-        (startingX in ["Sunrise", "Sunset"] && endingX in ["Sunrise", "Sunset"])) {
+	(starting && endingX in ["Sunrise", "Sunset"]) ||
+	(startingX in ["Sunrise", "Sunset"] && ending) ||
+	(startingX in ["Sunrise", "Sunset"] && endingX in ["Sunrise", "Sunset"])) {
 		def currTime = now()
 		def s = getSunriseAndSunset(zipCode: zipCode, sunriseOffset: startSunriseOffset, sunsetOffset: startSunsetOffset)
 		if(startingX == "Sunrise") def start = s.sunrise.time
