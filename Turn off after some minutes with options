@@ -63,22 +63,23 @@ def settings() {
 def certainTime() {
 	dynamicPage(name:"certainTime",title: "Only during a certain time", uninstall: false) {
     	section() {
-        	input "startingX", "enum", title: "Starting at", options: ["A specific time", "Sunrise", "Sunset"], defaultValue: "A specific time", submitOnChange: true
+			input "startingX", "enum", title: "Starting at", options: ["A specific time", "Sunrise", "Sunset"], defaultValue: "A specific time", submitOnChange: true
 			if(startingX in [null, "A specific time"]) input "starting", "time", title: "Start time", required: false
-            else {
-            	if(startingX == "Sunrise") input "startSunriseOffset", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
-            	else if(startingX == "Sunset") input "startSunsetOffset", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
-            }
-        }
-    	section() {
-        	input "endingX", "enum", title: "Ending at", options: ["A specific time", "Sunrise", "Sunset"], defaultValue: "A specific time", submitOnChange: true
-            if(endingX in [null, "A specific time"]) input "ending", "time", title: "End time", required: false
-            else {
-            	if(endingX == "Sunrise") input "endSunriseOffset", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
-            	else if(endingX == "Sunset") input "endSunsetOffset", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
-            }
-        }
-    }
+			else {
+				if(startingX == "Sunrise") input "startSunriseOffset", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
+				else if(startingX == "Sunset") input "startSunsetOffset", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
+			}
+		}
+		
+		section() {
+			input "endingX", "enum", title: "Ending at", options: ["A specific time", "Sunrise", "Sunset"], defaultValue: "A specific time", submitOnChange: true
+			if(endingX in [null, "A specific time"]) input "ending", "time", title: "End time", required: false
+			else {
+				if(endingX == "Sunrise") input "endSunriseOffset", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
+				else if(endingX == "Sunset") input "endSunsetOffset", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
+			}
+		}
+	}
 }
 
 def installed() {
