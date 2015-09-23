@@ -137,12 +137,12 @@ private getTimeOk() {
 		def currTime = now()
 		def s = getSunriseAndSunset(zipCode: zipCode, sunriseOffset: startSunriseOffset, sunsetOffset: startSunsetOffset)
 		if(startingX == "Sunrise") def start = s.sunrise.time
-        else if(startingX == "Sunset") def start = s.sunset.time
-        else if(starting) def start = timeToday(starting,location.timeZone).time
+		else if(startingX == "Sunset") def start = s.sunset.time
+		else if(starting) def start = timeToday(starting,location.timeZone).time
 		s = getSunriseAndSunset(zipCode: zipCode, sunriseOffset: endSunriseOffset, sunsetOffset: endSunsetOffset)
 		if(endingX == "Sunrise") def stop = s.sunrise.time
 		else if(endingX == "Sunset") def stop = s.sunset.time
-        else if(ending) def stop = timeToday(ending,location.timeZone).time
+		else if(ending) def stop = timeToday(ending,location.timeZone).time
 //        log.debug "TURN OFF start: $start currTime: $currTime stop: $stop"
 		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
 	}
