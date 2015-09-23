@@ -26,6 +26,7 @@ definition(
 
 preferences {
 	page(name: "settings")
+    page(name: "certainTime")
 
 	page(name: "timeIntervalInput", title: "Only during a certain time") {
 		section {
@@ -36,7 +37,7 @@ preferences {
 }
 
 def settings() {
-	dynamicPage(name: "settings", title: "Turn switches off after some minutes", uninstall: true, install: true) {
+	dynamicPage(name: "settings", title: "Turn switches off after some minutes", uninstall: true, nextPage: "certainTime", install: true) {
 		section {
 			input "switches", "capability.switch", title: "Switches", multiple: true, required:true
 			input "minutes", "number", title: "Minutes", required: true
@@ -49,13 +50,34 @@ def settings() {
 
 			def timeLabel = timeIntervalLabel()
 
-			href "timeIntervalInput", title: "Only during a certain time", description: timeLabel ?: "Tap to set", state: timeLabel ? "complete" : null
+			href "startingAtInput", title: "Only during a certain time", description: timeLabel ?: "Tap to set", state: timeLabel ? "complete" : null, page: "certainTime"
 
 			input "days", "enum", title: "Only on certain days of the week", multiple: true, required: false,
 				options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 			input "modes", "mode", title: "Only when mode is", multiple: true, required: false
    		}
+    }
+}
+
+def certainTime() {
+	dynamicPage(name:"certainTime",title: "Only during a certain time", uninstall: false) {
+    	section() {
+        	input "startingX", "enum", title: "Starting at", options: ["A specific time", "Sunrise", "Sunset"], defaultValue: "A specific time", submitOnChange: true
+			if(startingX in [null, "A specific time"]) input "starting", "time", title: "Start time", required: false
+            else {
+            	if(startingX == "Sunrise") input "startSunriseOffset", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
+            	else if(startingX == "Sunset") input "startSunsetOffset", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
+            }
+        }
+    	section() {
+        	input "endingX", "enum", title: "Ending at", options: ["A specific time", "Sunrise", "Sunset"], defaultValue: "A specific time", submitOnChange: true
+            if(endingX in [null, "A specific time"]) input "ending", "time", title: "End time", required: false
+            else {
+            	if(endingX == "Sunrise") input "endSunriseOffset", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
+            	else if(endingX == "Sunset") input "endSunsetOffset", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
+            }
+        }
     }
 }
 
@@ -88,7 +110,7 @@ private getAllOk() {
 private getModeOk() {
 	def result = !modes || modes.contains(location.mode)
 //	log.trace "modeOk = $result"
-	result
+    return result
 }
 
 private getDaysOk() {
@@ -105,22 +127,32 @@ private getDaysOk() {
 		result = days.contains(day)
 	}
 //	log.trace "daysOk = $result"
-	result
+    return result
 }
 
 private getTimeOk() {
 	def result = true
-	if (starting && ending) {
+	if ((starting && ending) ||
+    	(starting && endingX in ["Sunrise", "Sunset"]) ||
+        (startingX in ["Sunrise", "Sunset"] && ending) ||
+        (startingX in ["Sunrise", "Sunset"] && endingX in ["Sunrise", "Sunset"])) {
 		def currTime = now()
 //  ST had a bug with respect to time zones.  may be fixed now        
 //		def start = timeToday(starting).time
 		def start = timeToday(starting,location.timeZone).time
+		def s = getSunriseAndSunset(zipCode: zipCode, sunriseOffset: startSunriseOffset, sunsetOffset: startSunsetOffset)
+		if(startingX == "Sunrise") start = s.sunrise.time
+        else if(startingX == "Sunset") start = s.sunset.time
 //		def stop = timeToday(ending).time
 		def stop = timeToday(ending,location.timeZone).time
+		s = getSunriseAndSunset(zipCode: zipCode, sunriseOffset: endSunriseOffset, sunsetOffset: endSunsetOffset)
+		if(endingX == "Sunrise") stop = s.sunrise.time
+        else if(endingX == "Sunset") stop = s.sunset.time 
+//        log.debug "TURN OFF start: $start currTime: $currTime stop: $stop"
 		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
 	}
-//	log.trace "timeOk = $result"
-	result
+//    log.trace "getTimeOk = $result"
+    return result
 }
 
 private hhmm(time, fmt = "h:mm a") {
@@ -131,9 +163,22 @@ private hhmm(time, fmt = "h:mm a") {
 }
 
 private hideOptionsSection() {
-	(starting || ending || days || modes) ? false : true
+	(starting || ending || days || modes || startingX || endingX) ? false : true
+}
+
+private offset(value) {
+	def result = value ? ((value > 0 ? "+" : "") + value + " min") : ""
 }
 
 private timeIntervalLabel() {
-	(starting && ending) ? hhmm(starting) + "-" + hhmm(ending, "h:mm a z") : ""
+	def result = ""
+    if (startingX == "Sunrise" && endingX == "Sunrise") result = "Sunrise" + offset(startSunriseOffset) + " to " + "Sunrise" + offset(endSunriseOffset)
+    else if (startingX == "Sunrise" && endingX == "Sunset") result = "Sunrise" + offset(startSunriseOffset) + " to " + "Sunset" + offset(endSunsetOffset)
+    else if (startingX == "Sunset" && endingX == "Sunrise") result = "Sunset" + offset(startSunsetOffset) + " to " + "Sunrise" + offset(endSunriseOffset)
+    else if (startingX == "Sunset" && endingX == "Sunset") result = "Sunset" + offset(startSunsetOffset) + " to " + "Sunset" + offset(endSunsetOffset)
+    else if (startingX == "Sunrise" && ending) result = "Sunrise" + offset(startSunriseOffset) + " to " + hhmm(ending, "h:mm a z")
+    else if (startingX == "Sunset" && ending) result = "Sunset" + offset(startSunsetOffset) + " to " + hhmm(ending, "h:mm a z")
+    else if (starting && endingX == "Sunrise") result = hhmm(starting) + " to " + "Sunrise" + offset(endSunriseOffset)
+    else if (starting && endingX == "Sunset") result = hhmm(starting) + " to " + "Sunset" + offset(endSunsetOffset)
+	else if (starting && ending) result = hhmm(starting) + " to " + hhmm(ending, "h:mm a z")
 }
