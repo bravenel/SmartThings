@@ -143,7 +143,7 @@ private getTimeOk() {
 		if(endingX == "Sunrise") def stop = s.sunrise.time
 		else if(endingX == "Sunset") def stop = s.sunset.time
 		else if(ending) def stop = timeToday(ending,location.timeZone).time
-//        log.debug "TURN OFF start: $start currTime: $currTime stop: $stop"
+//		log.debug "TURN OFF start: $start currTime: $currTime stop: $stop"
 		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
 	}
 //	log.trace "getTimeOk = $result"
