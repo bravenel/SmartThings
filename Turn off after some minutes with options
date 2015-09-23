@@ -26,7 +26,7 @@ definition(
 
 preferences {
 	page(name: "settings")
-    page(name: "certainTime")
+	page(name: "certainTime")
 
 	page(name: "timeIntervalInput", title: "Only during a certain time") {
 		section {
