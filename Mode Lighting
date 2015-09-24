@@ -259,18 +259,20 @@ private getDaysOk() {
 private getTimeOk() {
 	def result = true
 	if ((starting && ending) ||
-    	(starting && endingX in ["Sunrise", "Sunset"]) ||
-        (startingX in ["Sunrise", "Sunset"] && ending) ||
-        (startingX in ["Sunrise", "Sunset"] && endingX in ["Sunrise", "Sunset"])) {
+	(starting && endingX in ["Sunrise", "Sunset"]) ||
+	(startingX in ["Sunrise", "Sunset"] && ending) ||
+	(startingX in ["Sunrise", "Sunset"] && endingX in ["Sunrise", "Sunset"])) {
 		def currTime = now()
+		def start = null
+		def stop = null
 		def s = getSunriseAndSunset(zipCode: zipCode, sunriseOffset: startSunriseOffset, sunsetOffset: startSunsetOffset)
-		if(startingX == "Sunrise") def start = s.sunrise.time
-		else if(startingX == "Sunset") def start = s.sunset.time
-		else if(starting) def start = timeToday(starting,location.timeZone).time
+		if(startingX == "Sunrise") start = s.sunrise.time
+		else if(startingX == "Sunset") start = s.sunset.time
+		else if(starting) start = timeToday(starting,location.timeZone).time
 		s = getSunriseAndSunset(zipCode: zipCode, sunriseOffset: endSunriseOffset, sunsetOffset: endSunsetOffset)
-		if(endingX == "Sunrise") def stop = s.sunrise.time
-		else if(endingX == "Sunset") def stop = s.sunset.time
-		else if(ending) def stop = timeToday(ending,location.timeZone).time
+		if(endingX == "Sunrise") stop = s.sunrise.time
+		else if(endingX == "Sunset") stop = s.sunset.time
+		else if(ending) stop = timeToday(ending,location.timeZone).time
 //		log.debug "TURN OFF start: $start currTime: $currTime stop: $stop"
 		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
 	}
