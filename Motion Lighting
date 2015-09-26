@@ -169,7 +169,6 @@ def switchOnHandler(evt) {
 def motionOnHandler(evt) {
 	if(state.motionDisabled) return
 	state.motionOffDismissed = true
-    log.debug "MOTION ON for $evt.displayName: starting: $starting ending: $ending"
 	if(allOk && state.masterOff) switchesOn() 
 }
 
@@ -265,7 +264,6 @@ private getTimeOk() {
 		if(endingX == "Sunrise") stop = s.sunrise.time
 		else if(endingX == "Sunset") stop = s.sunset.time
 		else if(ending) stop = timeToday(ending,location.timeZone).time
-//		log.debug "TURN OFF start: $start currTime: $currTime stop: $stop"
 		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
 	}
 //	log.trace "getTimeOk = $result"
