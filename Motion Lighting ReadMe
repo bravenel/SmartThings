@@ -1,0 +1,29 @@
+    This app sets the dimmer levels for a group of lights (master plus slaves) based on modes.  The dimmer  
+    levels are selected for each mode.  You can use any number of modes you want, one or more.
+    It supports motion sensors that turn on the group, which can be disabled with an external switch, 
+    and turns them off after a specified period.
+    It has a provision for linking an external button to activate the group.
+    The location can have other modes, but this app only adjusts the lights for the selected modes.
+
+    The app has a master dimmer and some slave dimmers. The idea is that sometimes the master dimmer physical 
+    switch is used to turn on the lights -- the slaves follow, or likewise to turn off some lights.  
+    The app also allows you to specify additional switches that are turned off when the master dimmer is turned off.  
+    
+    It should be noted that for this master switch function to work with near instant response, 
+    one must use an instant reporting z-wave dimmer.  One such dimmer is the Leviton VRMX1 
+    (which must be included directly to the hub to have instant reporting).
+    
+    If motion sensors(s) are specified, they turn on the master and all slaves to the 
+    current mode dimmer level.  The motion activation can be conditioned on times of day,
+    days of week, or modes.  Optionally, the master and slaves can be turned off some minutes
+    after motion stops.  A switch (possibly virtual) can be turned on to disable motion activation.
+    
+    The app adjusts dimmer levels on each mode change to the level selcted for that mode.
+    A mode change to some other mode has no effect on the dimmer levels. If the lights are on at
+    a mode change, and the new mode is brighter than the previous mode, it will brighten the lights.
+    
+    The app allows manual changing of the dimmer level, either by the physical switch or mobile app.  
+    For example, in the evening, a woman wants to put on makeup and the light isn't bright enough.  
+    She turns up the dimmer.  That event is responded to by temporarily adjusting the 
+    dimmer level for both master and slaves to that new level (short delay typical).
+    
