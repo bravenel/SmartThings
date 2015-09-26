@@ -45,8 +45,10 @@ def selectDimmers() {
 		}
 
 		section("With dimmer levels") {
-        	input "modesX", "mode", multiple: true, title: "For these modes", required: true, submitOnChange: true
-        	modesX.each {setModeLevel(it, "level$it", 0)}
+			def m = location.mode
+			input "modesX", "mode", multiple: true, title: "For these modes", required: true, defaultValue: [m], submitOnChange: true
+			setModeLevel(m, "level$m", 0)
+			modesX.each {if(it != m) setModeLevel(it, "level$it", 0)}
 		}
 	}
 }
