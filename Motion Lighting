@@ -186,21 +186,20 @@ def levelHandler(evt) {      				// allows a dimmer to change the current dimLev
 }
 
 def switchOffHandler(evt) {
-	state.dimLevel = state.modeLevels[state.currentMode]
-	state.masterOff = true
-	slaves?.off()
-	offSwitches?.off()
+	switchesOffNow(false)
 }
 
-def switchesOff() {                    		
+def switchesOffLater() {                    		
 	if(state.motionOffDismissed || state.motionDisabled) return  
-	if(allOk) {
-		state.dimLevel = state.modeLevels[state.currentMode]
-		state.masterOff = true
-		master.off()
-		slaves?.off()
-		offSwitches?.off()
-	}
+	if(allOk) switchesOffNow(true)
+}
+
+def switchesOffNow(mstr) {
+	state.dimLevel = state.modeLevels[state.currentMode]
+	state.masterOff = true
+	if(mstr) master.off()
+	slaves?.off()
+	offSwitches?.off()
 }
 
 def motionOffHandler(evt) {  				// called when motion goes inactive, check all sensors
@@ -209,7 +208,7 @@ def motionOffHandler(evt) {  				// called when motion goes inactive, check all 
 		def noMotion = true
 		motions.each {noMotion = noMotion && it.currentMotion == "inactive"}
 		state.motionOffDismissed = !noMotion
-		if(noMotion) {if(minutes) runIn(minutes*60, switchesOff) else switchesOff()}
+		if(noMotion) {if(minutes) runIn(minutes*60, switchesOffLater) else switchesOffNow(true)}
 	}
 }
 
