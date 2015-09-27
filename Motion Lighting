@@ -151,7 +151,7 @@ def initialize() {
 		state.modeLevels << [(m):level.value]
 	}
 
-	state.currentMode = location.mode in modesX ? location.mode : modes[0]
+	state.currentMode = location.mode in modesX ?: modes[0]
 	state.dimLevel = state.modeLevels[state.currentMode]
 	state.motionOffDismissed = true
 	state.motionDisabled = (disable) ? disable.currentSwitch == "on" : false
