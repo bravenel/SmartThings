@@ -48,9 +48,11 @@ def selectDimmers() {
 			def m = location.mode
 			def myModes = []
 			location.modes.each {myModes << "$it"}
-			input "modesX", "enum", multiple: true, title: "For these modes", submitOnChange: true, options: myModes.sort(), defaultValue: [m]
-			if(!modesX) setModeLevel(m, "level$m")
-			modesX.each {setModeLevel(it, "level$it")}
+			input "modesX", "enum", multiple: true, title: "Select mode(s)", submitOnChange: true, options: myModes.sort(), defaultValue: [m]
+			def sortModes = modesX
+			if(!sortModes) setModeLevel(m, "level$m")
+			else sortModes = sortModes.sort()
+			sortModes.each {setModeLevel(it, "level$it")}
 		}
 	}
 }
