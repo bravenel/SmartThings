@@ -64,9 +64,9 @@ def motionSettings() {
 	dynamicPage(name:"motionSettings",title: "Motion sensor(s) (optional)", nextPage: "otherSettings", uninstall: true) {
     
 		section("Turn them on when there is motion") {
-			input "motions", "capability.motionSensor", title: "On these motion sensors", required: false, multiple: true, submitOnChange: true
+			input "motions", "capability.motionSensor", title: "Select motion sensor(s)", required: false, multiple: true, submitOnChange: true
 			if (motions) {
-				input "disable", "capability.switch", title: "Switch to disable motion", required: false, multiple: false
+				input "disable", "capability.switch", title: "Switch to disable motion (optional)", required: false, multiple: false
 				input "turnOff", "bool", title: "Turn off when motion stops?", required: false, submitOnChange: true
 				if(turnOff) input "minutes", "number", title: "After this many minutes", required: false, multiple: false
 			}
