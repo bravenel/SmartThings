@@ -173,8 +173,7 @@ def switchOnHandler(evt) {
 
 def motionOnHandler(evt) {
 	if(state.motionDisabled) return
-	state.motionOffDismissed = true
-	if(allOk && state.masterOff) switchesOn() 
+	if(allOk && state.masterOff) switchesOn() else state.motionOffDismissed = true 
 }
 
 def disableHandler(evt) {
