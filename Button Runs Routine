@@ -31,14 +31,14 @@ preferences {
 
 def selections() {
 	dynamicPage(name: "selections", title: "Select your button and routine", uninstall: true, install: true) {
-    	def phrases = location.helloHome?.getPhrases()*.label
-        section() {
-        	input "myButton", "capability.momentary", title: "Button", required: true
-            if(phrases) input "myPhrase", "enum", title: "Routine", required: true, options: phrases.sort()
-            label title: "Assign a name:", required: false
-        }
+		def phrases = location.helloHome?.getPhrases()*.label
+		section() {
+			input "myButton", "capability.momentary", title: "Button", required: true
+			if(phrases) input "myPhrase", "enum", title: "Routine", required: true, options: phrases.sort()
+			label title: "Assign a name:", required: false
+		}
         
-        section(title: "More options", hidden: hideOptionsSection(), hideable: true) {
+		section(title: "More options", hidden: hideOptionsSection(), hideable: true) {
 
 			def timeLabel = timeIntervalLabel()
 
@@ -49,7 +49,7 @@ def selections() {
 
 			input "modes", "mode", title: "Only when mode is", multiple: true, required: false
    		}    
-    }
+	}
 }
 
 def certainTime() {
