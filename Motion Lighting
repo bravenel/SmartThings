@@ -1,5 +1,5 @@
 /**
- *  Mode Lighting
+ *  Motion Lighting
  *
  *  Copyright 2015 Bruce Ravenel
  *
@@ -17,10 +17,10 @@
  */
 
 definition(
-    name: "Mode Lighting",
+    name: "Motion Lighting",
     namespace: "bravenel",
     author: "Bruce Ravenel",
-    description: "Set Dimmer Levels Based on Modes, with Motion on/off/disabled, button on, and Master on/off",
+    description: "Set Dimmer Levels by mode, with Motion on/off/disabled, button on, and Master on/off",
     category: "Convenience",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/MyApps/Cat-MyApps.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/MyApps/Cat-MyApps@2x.png"
@@ -40,43 +40,39 @@ def selectDimmers() {
 			input "master", "capability.switchLevel", multiple: false, title: "Is turned on", required: true, submitOnChange: true
 		}
 
-		section("These slave dimmers") {
+		section("These slave dimmers (optional)") {
 			input "slaves", "capability.switchLevel", multiple: true, title: "Will also be turned on", required: false
 		}
 
 		section("With dimmer levels") {
-        	input "modesX", "mode", multiple: true, title: "For these modes", required: true, defaultValue: ["Day", "Evening", "Night"], submitOnChange: true
-        
-			if(modesX) {
-				def defaults = [90, 30, 10]
-				def n = 0
-				modesX.each {
-					setModeLevel(it, "level$it", defaults[n])
-					n = n + 1        	
-				}
-			}
+			def m = location.mode
+			def myModes = []
+			location.modes.each {myModes << "$it"}
+			input "modesX", "enum", multiple: true, title: "Select mode(s)", submitOnChange: true, options: myModes.sort(), defaultValue: [m]
+			def sortModes = modesX
+			if(!sortModes) setModeLevel(m, "level$m")
+			else sortModes = sortModes.sort()
+			sortModes.each {setModeLevel(it, "level$it")}
 		}
 	}
 }
 
-def setModeLevel(thisMode, modeVar, defaults) {
-	def result = input modeVar, "number", title: "Level for $thisMode", required: true, defaultValue: defaults > 0 ? defaults : null
-	return result
+def setModeLevel(thisMode, modeVar) {
+	def result = input modeVar, "number", range: "0..99", title: "Level for $thisMode", required: true
 }
 
 def motionSettings() {
-	dynamicPage(name:"motionSettings",title: "Motion sensor(s)", nextPage: "otherSettings", uninstall: false) {
+	dynamicPage(name:"motionSettings",title: "Motion sensor(s) (optional)", nextPage: "otherSettings", uninstall: true) {
     
 		section("Turn them on when there is motion") {
-			input "motions", "capability.motionSensor", title: "On these motion sensors", required: false, multiple: true
-			input "disable", "capability.switch", title: "Switch to disable motion", required: false, multiple: false
+			input "motions", "capability.motionSensor", title: "Select motion sensor(s)", required: false, multiple: true, submitOnChange: true
+			if (motions) {
+				input "disable", "capability.switch", title: "Switch to disable motion (optional)", required: false, multiple: false
+				input "turnOff", "bool", title: "Turn off when motion stops?", required: false, submitOnChange: true
+				if(turnOff) input "minutes", "number", title: "After this many minutes", required: false, multiple: false
+			}
 		}
         
-		section("Turn them off") {
-			input "turnOff", "bool", title: "When there is no motion", required: false
-			input "minutes", "number", title: "For this many minutes", required: false, multiple: false
-		}
-	
 		section(title: "Motion options", hidden: hideOptionsSection(), hideable: true) {
 
 			def timeLabel = timeIntervalLabel()
@@ -92,13 +88,13 @@ def motionSettings() {
 }
 
 def otherSettings() {
-	dynamicPage(name:"otherSettings", uninstall: false, install: true) {
+	dynamicPage(name:"otherSettings", uninstall: true, install: true) {
 
 		section("Turn master and slaves on with this") {
 			input "button", "capability.momentary", title: "Button", multiple: false, required: false
 		}
 
-		section("These extra switches will be turned off") {
+		section("Turn these extra switches off") {
 			input "offSwitches", "capability.switch", title: "When the master is turned off", multiple: true, required: false
 		}
         
@@ -177,8 +173,7 @@ def switchOnHandler(evt) {
 
 def motionOnHandler(evt) {
 	if(state.motionDisabled) return
-	state.motionOffDismissed = true
-	if(allOk && state.masterOff) switchesOn() 
+	if(allOk && state.masterOff) switchesOn() else state.motionOffDismissed = true 
 }
 
 def disableHandler(evt) {
@@ -192,21 +187,20 @@ def levelHandler(evt) {      				// allows a dimmer to change the current dimLev
 }
 
 def switchOffHandler(evt) {
-	state.dimLevel = state.modeLevels[state.currentMode]
-	state.masterOff = true
-	slaves?.off()
-	offSwitches?.off()
+	switchesOffNow(false)
 }
 
-def switchesOff() {                    		
+def switchesOffLater() {                    		
 	if(state.motionOffDismissed || state.motionDisabled) return  
-	if(allOk) {
-		state.dimLevel = state.modeLevels[state.currentMode]
-		state.masterOff = true
-		master.off()
-		slaves?.off()
-		offSwitches?.off()
-	}
+	if(allOk) switchesOffNow(true)
+}
+
+def switchesOffNow(mstr) {
+	state.dimLevel = state.modeLevels[state.currentMode]
+	state.masterOff = true
+	if(mstr) master.off()
+	slaves?.off()
+	offSwitches?.off()
 }
 
 def motionOffHandler(evt) {  				// called when motion goes inactive, check all sensors
@@ -215,7 +209,7 @@ def motionOffHandler(evt) {  				// called when motion goes inactive, check all 
 		def noMotion = true
 		motions.each {noMotion = noMotion && it.currentMotion == "inactive"}
 		state.motionOffDismissed = !noMotion
-		if(noMotion) {if(minutes) runIn(minutes*60, switchesOff) else switchesOff()}
+		if(noMotion) {if(minutes) runIn(minutes*60, switchesOffLater) else switchesOffNow(true)}
 	}
 }
 
@@ -243,12 +237,8 @@ private getDaysOk() {
 	def result = true
 	if (days) {
 		def df = new java.text.SimpleDateFormat("EEEE")
-		if (location.timeZone) {
-			df.setTimeZone(location.timeZone)
-		}
-		else {
-			df.setTimeZone(TimeZone.getTimeZone("America/New_York"))
-		}
+		if (location.timeZone) df.setTimeZone(location.timeZone)
+		else df.setTimeZone(TimeZone.getTimeZone("America/New_York"))
 		def day = df.format(new Date())
 		result = days.contains(day)
 	}
@@ -273,7 +263,6 @@ private getTimeOk() {
 		if(endingX == "Sunrise") stop = s.sunrise.time
 		else if(endingX == "Sunset") stop = s.sunset.time
 		else if(ending) stop = timeToday(ending,location.timeZone).time
-//		log.debug "TURN OFF start: $start currTime: $currTime stop: $stop"
 		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
 	}
 //	log.trace "getTimeOk = $result"

@@ -1,5 +1,5 @@
 /**
- *  Turn off after some minutes with options
+ *  Button Runs Routine
  *
  *  Copyright 2015 Bruce Ravenel
  *
@@ -14,10 +14,10 @@
  *
  */
 definition(
-    name: "Turn off after some minutes with options",
+    name: "Button Runs Routine",
     namespace: "bravenel",
     author: "Bruce Ravenel",
-    description: "Turn switches off after some number of minutes with options",
+    description: "A momentary button causes a Routine to run",
     category: "My Apps",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
@@ -25,17 +25,19 @@ definition(
 
 
 preferences {
-	page(name: "settings")
+	page(name: "selections")
 	page(name: "certainTime")
 }
 
-def settings() {
-	dynamicPage(name: "settings", title: "Turn switches off after some minutes", uninstall: true, install: true) {
-		section {
-			input "switches", "capability.switch", title: "Switches", multiple: true, required:true
-			input "minutes", "number", range: "1..*", title: "Minutes", required: true
-			label title: "Assign a name:", required: false 
+def selections() {
+	dynamicPage(name: "selections", title: "Select your button and routine", uninstall: true, install: true) {
+		def phrases = location.helloHome?.getPhrases()*.label
+		section() {
+			input "myButton", "capability.momentary", title: "Button", required: true
+			if(phrases) input "myPhrase", "enum", title: "Routine", required: true, options: phrases.sort()
+			label title: "Assign a name:", required: false
 		}
+        
 		section(title: "More options", hidden: hideOptionsSection(), hideable: true) {
 
 			def timeLabel = timeIntervalLabel()
@@ -46,7 +48,7 @@ def settings() {
 				options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 			input "modes", "mode", title: "Only when mode is", multiple: true, required: false
-   		}
+   		}    
 	}
 }
 
@@ -82,15 +84,11 @@ def updated() {
 }
 
 def initialize() {
-	subscribe(switches, "switch", onHandler)
+	subscribe(myButton, "switch.on", buttonHandler)
 }
 
-def onHandler(evt) {
-	if(evt.value in ["on", "setLevel"]) runIn(minutes*60, turnOff)
-}
-
-def turnOff() {
-	if(allOk) switches.off()
+def buttonHandler(evt) {
+	if(allOk) location.helloHome.execute(myPhrase)
 }
 
 // execution filter methods
@@ -108,12 +106,8 @@ private getDaysOk() {
 	def result = true
 	if (days) {
 		def df = new java.text.SimpleDateFormat("EEEE")
-		if (location.timeZone) {
-			df.setTimeZone(location.timeZone)
-		}
-		else {
-			df.setTimeZone(TimeZone.getTimeZone("America/New_York"))
-		}
+		if (location.timeZone) df.setTimeZone(location.timeZone)
+		else df.setTimeZone(TimeZone.getTimeZone("America/New_York"))
 		def day = df.format(new Date())
 		result = days.contains(day)
 	}
@@ -138,7 +132,6 @@ private getTimeOk() {
 		if(endingX == "Sunrise") stop = s.sunrise.time
 		else if(endingX == "Sunset") stop = s.sunset.time
 		else if(ending) stop = timeToday(ending,location.timeZone).time
-//		log.debug "TURN OFF start: $start currTime: $currTime stop: $stop"
 		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
 	}
 //	log.trace "getTimeOk = $result"
