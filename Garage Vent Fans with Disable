@@ -74,7 +74,8 @@ def evalTemps() {
 		}
 	} else if(!state.ventOff) {
 		ventSwitch.off()
-		  }
+		state.ventOff = true
+	}
 }
 
 def tempHandler(evt) {
