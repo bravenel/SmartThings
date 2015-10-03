@@ -25,22 +25,23 @@ definition(
 
 
 preferences {
-  section("Select Thermometers") {
+	section("Select Thermometers") {
 		input "insideTemp", "capability.temperatureMeasurement", title: "Indside thermometer?", required: true
 		input "outsideTemp", "capability.temperatureMeasurement", title: "Outside thermometer?", required: true
 	}
+	
 	section("Select Vent Fan Switch") {
-    	input "ventSwitch", "capability.switch", title: "Which vent switch?", required: true
-  }
+		input "ventSwitch", "capability.switch", title: "Which vent switch?", required: true
+	}
   
-  section("Set Temperatures") {
-    input "baseTemp", "decimal", title: "Minimum temperature required?", required: true, defaultValue: 75
-    input "differential", "decimal", title: "How many degrees differential?", required: true, defaultValue: 2
-  }
+	section("Set Temperatures") {
+		input "baseTemp", "decimal", title: "Minimum temperature required?", required: true, defaultValue: 75
+		input "differential", "decimal", title: "How many degrees differential?", required: true, defaultValue: 2
+	}
   
-  section("Select Disable Switch (Optional)") {
-    input "disableSwitch", "capability.switch", title: "Disable switch", required: false, multiple: false
-  }
+	section("Select Disable Switch (Optional)") {
+		input "disableSwitch", "capability.switch", title: "Disable switch", required: false, multiple: false
+	}
 }
 
 def installed() {
@@ -55,26 +56,25 @@ def updated() {
 def initialize() {
 	subscribe(insideTemp, "temperature", tempHandler)
 	subscribe(outsideTemp, "temperature", tempHandler)
-  subscribe(disableSwitch, "switch", disableHandler)
-  ventSwitch.off()
-  state.ventOff = true
-  if(disableSwitch) state.enabled = disableSwitch.currentSwitch == "off"
-  if(state.enabled) evalTemps()
+	subscribe(disableSwitch, "switch", disableHandler)
+	ventSwitch.off()
+	state.ventOff = true
+	if(disableSwitch) state.enabled = disableSwitch.currentSwitch == "off"
+	if(state.enabled) evalTemps()
 }
 
 def evalTemps() {
 	def inTemp = insideTemp.currentTemperature
-  def outTemp = outsideTemp.currentTemperature
-  log.debug "evalTemps in: $inTemp out: $outTemp"
-  if((inTemp > outTemp + differential) && (inTemp > baseTemp)) {
-    if(state.ventOff) {
-      ventSwitch.on()
-      state.ventOff = false
-    }
-  } else if(!state.ventOff) {
-    ventSwitch.off()
-    state.ventOff = true
-  }
+	def outTemp = outsideTemp.currentTemperature
+	log.debug "evalTemps in: $inTemp out: $outTemp"
+	if((inTemp > outTemp + differential) && (inTemp > baseTemp)) {
+		if(state.ventOff) {
+			ventSwitch.on()
+			state.ventOff = false
+		}
+	} else if(!state.ventOff) {
+		ventSwitch.off()
+		  }
 }
 
 def tempHandler(evt) {
