@@ -29,9 +29,9 @@ preferences {
 	section("Or, turn on when one of these contacts opened"){
 		input "contacts", "capability.contactSensor", multiple: true, title: "Select Contacts", required: false
 	}
-    section("Or, turn on when this momentary button is pressed"){
-    	input "button", "capability.momentary", multiple: false, title: "Select Button", required: false
-    }
+	section("Or, turn on when this momentary button is pressed"){
+		input "button", "capability.momentary", multiple: false, title: "Select Button", required: false
+	}
 	section("And off after no more triggers after..."){
 		input "minutes1", "number", title: "Minutes?", defaultValue: "5"
 	}
@@ -46,9 +46,9 @@ def installed()
 	subscribe(switches, "switch", switchChange)
 	subscribe(motions, "motion", motionHandler)
 	subscribe(contacts, "contact", contactHandler)
-    subscribe(button, "switch", buttonHandler)
+	subscribe(button, "switch", buttonHandler)
 	schedule("0 * * * * ?", "scheduleCheck")
-    state.myState = "ready"
+	state.myState = "ready"
 }
 
 
@@ -56,11 +56,11 @@ def updated()
 {
 	unsubscribe()
 	subscribe(motions, "motion", motionHandler)
-    subscribe(switches, "switch", switchChange)
+	subscribe(switches, "switch", switchChange)
 	subscribe(contacts, "contact", contactHandler)
 
-    state.myState = "ready"
-    log.debug "state: " + state.myState
+	state.myState = "ready"
+	log.debug "state: " + state.myState
 }
 
 def switchChange(evt) {
