@@ -117,7 +117,7 @@ def buttonHandler(evt) {
         }
    } else if (evt.value == "off") {
         if (!state.inactiveAt && state.myState == "active" || state.myState == "activating") {
-			// When contact closes, we reset the timer if not already set
+			// When button turns off, we reset the timer if not already set
             setActiveAndSchedule()
         }
     }
