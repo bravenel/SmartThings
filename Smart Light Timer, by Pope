@@ -106,7 +106,7 @@ def contactHandler(evt) {
 }
 
 def buttonHandler(evt) {
-	log.debug "contactHandler: $evt.name: $evt.value"
+	log.debug "buttonHandler: $evt.name: $evt.value"
     
     if (evt.value == "on") {
         if(state.myState == "ready") {
