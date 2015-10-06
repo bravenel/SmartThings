@@ -17,7 +17,7 @@ definition(
     name: "Turn off after some minutes unless already on",
     namespace: "bravenel",
     author: "Bruce Ravenel",
-    description: "Turn switches off after some number of minutes with restriction options",
+    description: "Turn switches off after some number of minutes, unless already on",
     category: "My Apps",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
@@ -30,11 +30,11 @@ preferences {
 }
 
 def settings() {
-	dynamicPage(name: "settings", title: "Turn switches off after some minutes", uninstall: true, install: true) {
+	dynamicPage(name: "settings", title: "Turn switches off after some minutes, unless already on", uninstall: true, install: true) {
 		section {
 			input "switches", "capability.switch", title: "Switches", multiple: true, required:true
 			input "minutes", "number", range: "1..*", title: "Minutes", required: true, defaultValue: 5
-            input "trigger", "capability.momentary", title: "Button to activate", required: true, multiple: false
+			input "trigger", "capability.momentary", title: "Button to activate", required: true, multiple: false
 			label title: "Assign a name:", required: false 
 		}
 		section(title: "More options", hidden: hideOptionsSection(), hideable: true) {
