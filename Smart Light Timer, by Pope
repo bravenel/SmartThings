@@ -58,6 +58,7 @@ def updated()
 	subscribe(motions, "motion", motionHandler)
 	subscribe(switches, "switch", switchChange)
 	subscribe(contacts, "contact", contactHandler)
+	subscribe(button, "switch", buttonHandler)
 
 	state.myState = "ready"
 	log.debug "state: " + state.myState
