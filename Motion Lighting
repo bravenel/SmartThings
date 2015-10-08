@@ -140,7 +140,7 @@ def initialize() {
 	subscribe(master, "switch.on", switchOnHandler)
 	subscribe(master, "switch.off", switchOffHandler)
 	subscribe(master, "level", levelHandler)
-	slaves.each {subscribe(it, "level", levelHandler)}
+	subscribe(slaves, "level", levelHandler)
 	subscribe(location, modeChangeHandler)
 	subscribe(motions, "motion.active", motionOnHandler)
 	subscribe(disable, "switch", disableHandler)
