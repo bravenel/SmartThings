@@ -206,17 +206,16 @@ def switchesOffNow(mstr) {
 def motionOffHandler(evt) {  				// called when motion goes inactive, check all sensors
 	if(state.motionDisabled) return
 	if(allOk) {
-		def noMotion = true
-		motions.each {noMotion = noMotion && it.currentMotion == "inactive"}
-		state.motionOffDismissed = !noMotion
-		if(noMotion) {if(minutes) runIn(minutes*60, switchesOffLater) else switchesOffNow(true)}
+		def someMotion = "active" in motions.currentMotion
+		state.motionOffDismissed = someMotion
+		if(!someMotion) {if(minutes) runIn(minutes*60, switchesOffLater) else switchesOffNow(true)}
 	}
 }
 
 def modeChangeHandler(evt) {
-	if(state.currentMode == location.mode || !(location.mode in modesX)) return   // no change or not one of our modes
-	state.currentMode = location.mode			   
-	state.dimLevel = state.modeLevels[state.currentMode]
+	if(state.currentMode == evt.value || !(evt.value in modesX)) return   // no change or not one of our modes
+	state.currentMode = evt.value			   
+	state.dimLevel = state.modeLevels[evt.value]
 // the next two lines brighten any lights on when new mode is brighter than previous
 	if(master.currentSwitch == "on" && master.currentLevel < state.dimLevel) master.setLevel(state.dimLevel)
 	slaves.each {if(it.currentSwitch == "on" && it.currentLevel < state.dimLevel) it.setLevel(state.dimLevel)}
