@@ -60,7 +60,7 @@ def initialize() {
 	subscribe(disabled, "switch", disableHandler)
 	ventSwitch.off()
 	state.ventOff = true
-	state.disabled = (disabled) ? disabled.currentSwitch == "on : false
+	state.disabled = (disabled) ? disabled.currentSwitch == "on" : false
 	evalTemps()
 }
 
