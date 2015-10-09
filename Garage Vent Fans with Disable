@@ -81,7 +81,7 @@ def evalTemps() {
 }
 
 def disableHandler(evt) {
-	state.disbled = evt.value == "on"
+	state.disabled = evt.value == "on"
 }
 
 def tempHandler(evt) {
