@@ -165,7 +165,7 @@ def switchesOn() {
 	state.motionOffDismissed = true    		// use this variable instead of unschedule() to kill pending off()
 	state.masterOff = false
 	master.setLevel(state.dimLevel)
-	slaves.each {it.setLevel(state.dimLevel)}
+	slaves?.setLevel(state.dimLevel)
 }
 
 def switchOnHandler(evt) {
