@@ -3,7 +3,7 @@
  *
  *  Copyright 2015 Bruce Ravenel
  *
- *	09-23-2015 1.0
+ *	10-09-2015 1.1
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -40,11 +40,11 @@ def selectDimmers() {
 			input "master", "capability.switchLevel", multiple: false, title: "Is turned on", required: true, submitOnChange: true
 		}
 
-		section("These slave dimmers (optional)") {
+		section("These other dimmers (optional)") {
 			input "slaves", "capability.switchLevel", multiple: true, title: "Will also be turned on", required: false
 		}
 
-		section("With dimmer levels") {
+		section("Set to a dimmer level selected for each mode") {
 			def m = location.mode
 			def myModes = []
 			location.modes.each {myModes << "$it"}
@@ -58,7 +58,7 @@ def selectDimmers() {
 }
 
 def setModeLevel(thisMode, modeVar) {
-	def result = input modeVar, "number", range: "0..99", title: "Level for $thisMode", required: true
+	def result = input modeVar, "number", range: "0..100", title: "Level for $thisMode", required: true, description: "1..100"
 }
 
 def motionSettings() {
@@ -67,9 +67,8 @@ def motionSettings() {
 		section("Turn them on when there is motion") {
 			input "motions", "capability.motionSensor", title: "Select motion sensor(s)", required: false, multiple: true, submitOnChange: true
 			if (motions) {
-				input "disable", "capability.switch", title: "Switch to disable motion (optional)", required: false, multiple: false
-				input "turnOff", "bool", title: "Turn off when motion stops?", required: false, submitOnChange: true
-				if(turnOff) input "minutes", "number", title: "After this many minutes", required: false, multiple: false
+				input "turnOff", "bool", title: "Turn off after motion stops?", required: false, submitOnChange: true
+				if(turnOff) input "minutes", "number", title: "After how many minutes?", required: false, multiple: false
 			}
 		}
         
@@ -83,6 +82,8 @@ def motionSettings() {
 				options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 			input "modes", "mode", title: "Only when mode is", multiple: true, required: false
+            
+			input "disabled", "capability.switch", title: "Switch to disable motion", required: false, multiple: false
    		}    
 	}
 }
@@ -94,8 +95,8 @@ def otherSettings() {
 			input "button", "capability.momentary", title: "Button", multiple: false, required: false
 		}
 
-		section("Turn these extra switches off") {
-			input "offSwitches", "capability.switch", title: "When the master is turned off", multiple: true, required: false
+		section("When the master is turned off") {
+			input "offSwitches", "capability.switch", title: "Turn these other switches off", multiple: true, required: false
 		}
         
 		section {
@@ -138,14 +139,14 @@ def updated() {
 
 def initialize() {
 	subscribe(master, "switch.on", switchOnHandler)
+	subscribe(button, "switch.on", switchOnHandler)
 	subscribe(master, "switch.off", switchOffHandler)
 	subscribe(master, "level", levelHandler)
 	subscribe(slaves, "level", levelHandler)
-	subscribe(location, modeChangeHandler)
 	subscribe(motions, "motion.active", motionOnHandler)
-	subscribe(disable, "switch", disableHandler)
+	subscribe(disabled, "switch", disableHandler)
 	if(turnOff) subscribe(motions, "motion.inactive", motionOffHandler)
-	subscribe(button, "switch.on", switchOnHandler)
+	subscribe(location, modeChangeHandler)
     
 	state.modeLevels = [:]
 	for(m in modesX) {
@@ -153,7 +154,7 @@ def initialize() {
 		state.modeLevels << [(m):level.value]
 	}
 
-	state.currentMode = location.mode in modesX ? location.mode : modes[0]
+	state.currentMode = location.mode in modesX ? location.mode : modesX[0]
 	state.dimLevel = state.modeLevels[state.currentMode]
 	state.motionOffDismissed = true
 	state.motionDisabled = (disable) ? disable.currentSwitch == "on" : false
@@ -173,7 +174,7 @@ def switchOnHandler(evt) {
 
 def motionOnHandler(evt) {
 	if(state.motionDisabled) return
-	if(allOk && state.masterOff) switchesOn() else state.motionOffDismissed = true 
+	if(allOk && state.masterOff) switchesOn() else state.motionOffDismissed = true
 }
 
 def disableHandler(evt) {
@@ -276,7 +277,7 @@ private hhmm(time, fmt = "h:mm a") {
 }
 
 private hideOptionsSection() {
-	(starting || ending || days || modes || startingX || endingX) ? false : true
+	(starting || ending || days || modes || startingX || endingX || disabled) ? false : true
 }
 
 private offset(value) {
