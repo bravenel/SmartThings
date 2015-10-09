@@ -37,7 +37,7 @@ preferences {
     		input "differential", "decimal", title: "How many degrees differential?", required: true, defaultValue: 2
 	}
 	section("Select Disable Switch") {
-	  input "disabled", "capability.switch", title: "Which switch to disable", required: false, multiple: false
+		input "disabled", "capability.switch", title: "Which switch to disable", required: false, multiple: false
 	}
 }
 
@@ -65,23 +65,23 @@ def initialize() {
 }
 
 def evalTemps() {
-  if(state.disabled) return
+	if(state.disabled) return
 	def inTemp = insideTemp.currentTemperature
 	def outTemp = outsideTemp.currentTemperature
 	log.debug "evalTemps in: $inTemp out: $outTemp"
 	if((inTemp > outTemp + differential) && (inTemp > baseTemp)) {
-    if(state.ventOff) {
-    ventSwitch.on()
-    state.ventOff = false
-    }
+		if(state.ventOff) {
+			ventSwitch.on()
+			state.ventOff = false
+		}
 	} else if(!state.ventOff) {
-    ventSwitch.off()
-    state.ventOff = true
-  }
+		ventSwitch.off()
+		state.ventOff = true
+	}
 }
 
 def disableHandler(evt) {
-  state.disbled = evt.value == "on"
+	state.disbled = evt.value == "on"
 }
 
 def tempHandler(evt) {
