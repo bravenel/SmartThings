@@ -58,7 +58,7 @@ def selectDimmers() {
 }
 
 def setModeLevel(thisMode, modeVar) {
-	def result = input modeVar, "number", range: "0..100", title: "Level for $thisMode", required: true, description: "1..100"
+	def result = input modeVar, "number", range: "0..100", title: "Level for $thisMode", required: true
 }
 
 def motionSettings() {
