@@ -17,7 +17,7 @@ definition(
     name: "Turn off after motion stops",
     namespace: "bravenel",
     author: "Bruce Ravenel",
-    description: "Turn off some switches minutes after motion stops",
+    description: "Turn some switches off some minutes after motion stops",
     category: "My Apps",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
