@@ -57,7 +57,7 @@ def certainTime() {
 			if(startingX in [null, "A specific time"]) input "starting", "time", title: "Start time", required: false
 			else {
 				if(startingX == "Sunrise") input "startSunriseOffset", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
-				else if(startingX == "Sunset") input "startSunsetOffset", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
+				else input "startSunsetOffset", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
 			}
 		}
 		
