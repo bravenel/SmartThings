@@ -44,7 +44,6 @@ def updated() {
 def initialize() {
 	subscribe(motions, "motion.active", activeHandler)
 	subscribe(motions, "motion.inactive", inactiveHandler)
-	state.pending = false
 }
 
 def activeHandler(evt) {
@@ -52,10 +51,8 @@ def activeHandler(evt) {
 }
 
 def inactiveHandler(evt) {
-	def noMotion = true
-	motions.each {noMotion = noMotion && it.currentMotion == "inactive"}
-	state.pending = noMotion
-	if(noMotion) {if(minutes) runIn(minutes*60, switchesOff) else switchesOff()}
+	state.pending = !("active" in motions.currentMotion)
+	if(state.pending) {if(minutes) runIn(minutes*60, switchesOff) else switchesOff()}
 }
 
 def switchesOff() {
