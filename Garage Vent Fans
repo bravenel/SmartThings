@@ -63,12 +63,11 @@ def evalTemps() {
 	def inTemp = insideTemp.currentTemperature
 	def outTemp = outsideTemp.currentTemperature
 	log.debug "evalTemps in: $inTemp out: $outTemp"
-	if((inTemp > outTemp + differential) && (inTemp > baseTemp)) {
-    		if(state.ventOff) {
-			ventSwitch.on()
-			state.ventOff = false
-        	}
-	} else if(!state.ventOff) {
+	if((inTemp > outTemp + differential) && (inTemp > baseTemp) && state.ventOff) {
+		ventSwitch.on()
+		state.ventOff = false
+	}
+	if((inTemp <= outTemp || inTemp < baseTemp) && !state.ventOff) {
 		ventSwitch.off()
 		state.ventOff = true
 	}
