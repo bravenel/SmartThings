@@ -6,7 +6,9 @@ There are two device types that may be of value:
 
 This can be used to change the dimmer level on the switch, and then immediately turning the switch off.  Dimmers come
 on to their last value -- this command changes that last value so that the next time the switch is turned on, it
-comes on at the desired dimmer level.
+comes on at the desired dimmer level.  NB, there is an issue with this: it does not reliably change the value of 
+device.currentValue("level").  This is due to the fast timing of resetting the level and then turning the dimmer
+off again.  The dimmer level has been reset, but that won't be reflected in the currentState of the dimmer.
 
 "Aeon Motor Controller" is a new device type for the Aeon Micro Motor Controller (DSC-14104 ZWUS).  It provides
 the three commands the device is capable of, Up, Down, and Stop.  There is a ReadMe for the device type with details.
