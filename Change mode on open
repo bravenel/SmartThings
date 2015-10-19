@@ -32,8 +32,8 @@ preferences {
 def settings() {
 	dynamicPage(name: "settings", title: "Change mode upon open", uninstall: true, install: true) {
 		section {
-            input "door", "capability.contactSensor", title: "Contact sensor", multiple: false, required: true
-            input "newMode", "mode", title: "New mode", multiple: false, required: true
+			input "door", "capability.contactSensor", title: "Contact sensor", multiple: false, required: true
+			input "newMode", "mode", title: "New mode", multiple: false, required: true
 			label title: "Assign a name:", required: false 
 		}
 		section(title: "More options", hidden: hideOptionsSection(), hideable: true) {
