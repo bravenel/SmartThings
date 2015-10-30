@@ -83,6 +83,7 @@ def disableHandler(evt) {
 }
 
 def tempHandler(evt) {
-	log.debug "tempHandler: $evt.displayName $evt.value"
+	log.debug "tempHandler: $evt.displayName $evt.value, disabled: $state.disabled"
+	if(state.disabled) return
 	evalTemps()
 }
