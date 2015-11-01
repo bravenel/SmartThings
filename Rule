@@ -27,6 +27,7 @@ definition(
 preferences {
     page(name: "selectRule")
 	page(name: "selectConditions")
+    page(name: "certainTime")
 }
 
 def selectRule() {
@@ -37,42 +38,72 @@ def selectRule() {
 			href "selectConditions", title: "Select Conditions", description: condLabel ?: "Tap to set", state: condLabel ? "complete" : null
             input "rule", "text", title: "Define the Rule", required: true
 			label title: "Name the Rule", required: false
-            input "mySwitch", "capability.switch", title: "Switch for Rule Result", required: true
+            def phrases = location.helloHome?.getPhrases()*.label
+            input "myPhrase", "enum", title: "Routine to run when true", required: true, options: phrases
 		}
     }
 }
 
 def getName(myName, n) {
-	def result = input myName, "text", title: "Conditions Name #$n", required: true
+	def result = input myName, "text", title: "Name condition #$n", required: true
 }
 
-def getDevs(myCapab, dev, n) {
-	def result = input dev, myCapab, title: "Device #$n", required: true, multiple: true
+def getDevs(myCapab, dev) {
+    def thisName = ""
+	switch(myCapab) {
+		case "switch":
+			thisName = "Switches"
+			break
+		case "motionSensor":
+			thisName = "Motion sensors"
+			break
+		case "contactSensor":
+			thisName = "Contact sensors"
+			break
+		case "presenceSensor":
+			thisName = "Presence sensors"
+			break
+		case "lock":
+			thisName = "Locks"
+	}
+	def result = input dev, "capability.$myCapab", title: thisName, required: true, multiple: true
 }
 
 def getCapab(myCapab) {
-	def result = input myCapab, "enum", title: "Select capability", required: true, options: ["switch", "motionSensor", "contactSensor", "presenceSensor", "lock"], submitOnChange: true
+	def result = input myCapab, "enum", title: "Select capability", required: true, 
+    	options: ["switch", "motionSensor", "contactSensor", "presenceSensor", "lock", "time of day", "days of week", "modes"], submitOnChange: true
 }
 
 def getState(myCapab, n) {
 	def result = null
-                        switch(myCapab) {
-                        	case "switch":
-                            	result = input "state$n", "enum", title: "switch state", options: ["on", "off"]
-                                return
-                            case "motionSensor":
-                            	result = input "state$n", "enum", title: "motion state", options: ["active", "inactive"]
-                                return
-                            case "contactSensor":
-                            	result = input "state$n", "enum", title: "contact state", options: ["open", "closed"]
-                                return
-                            case "presenceSensor":
-                            	result = input "state$n", "enum", title: "presence state", options: ["present", "not present"]
-                                return
-                            case "lock":
-                            	result = input "state$n", "enum", title: "lock state", options: ["locked", "unlocked"]
-                                return
-                        }
+	switch(myCapab) {
+		case "switch":
+			result = input "state$n", "enum", title: "switch state", options: ["on", "off"]
+			return
+		case "motionSensor":
+			result = input "state$n", "enum", title: "motion state", options: ["active", "inactive"]
+			return
+		case "contactSensor":
+			result = input "state$n", "enum", title: "contact state", options: ["open", "closed"]
+			return
+		case "presenceSensor":
+			result = input "state$n", "enum", title: "presence state", options: ["present", "not present"]
+			return
+		case "lock":
+			result = input "state$n", "enum", title: "lock state", options: ["locked", "unlocked"]
+			return
+        case "time of day":
+        	def timeLabel = timeIntervalLabel()
+			href "certainTime", title: "During a certain time", description: timeLabel ?: "Tap to set", state: timeLabel ? "complete" : null
+			return
+        case "days of week":
+        	result = input "days", "enum", title: "On certain days of the week", multiple: true, required: false,
+				options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+			return
+		case "modes":
+        	result = input "modes", "mode", title: "When mode is", multiple: true, required: false
+            return
+	}
 }
 
 def selectConditions() {
@@ -88,9 +119,10 @@ def selectConditions() {
                 	def myCapab = settings.find {it.key == thisCapab}
                 	if(myCapab) {
                 		def xCapab = myCapab.value
-                		log.debug "myCapab $xCapab"
-                    	def thisDev = "rDev$i"
-                    	getDevs("capability.$xCapab", thisDev, i + 1)
+                        if(!(xCapab in ["time of day", "days of week", "modes"])) {
+                    		def thisDev = "rDev$i"
+                    		getDevs(xCapab, thisDev)
+                        }
                         getState(xCapab, i)
                     }
                 }
@@ -99,6 +131,27 @@ def selectConditions() {
 	}
 }
 
+def certainTime() {
+	dynamicPage(name:"certainTime",title: "Only during a certain time", uninstall: false) {
+		section() {
+			input "startingX", "enum", title: "Starting at", options: ["A specific time", "Sunrise", "Sunset"], defaultValue: "A specific time", submitOnChange: true
+			if(startingX in [null, "A specific time"]) input "starting", "time", title: "Start time", required: false
+			else {
+				if(startingX == "Sunrise") input "startSunriseOffset", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
+				else if(startingX == "Sunset") input "startSunsetOffset", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
+			}
+		}
+		
+		section() {
+			input "endingX", "enum", title: "Ending at", options: ["A specific time", "Sunrise", "Sunset"], defaultValue: "A specific time", submitOnChange: true
+			if(endingX in [null, "A specific time"]) input "ending", "time", title: "End time", required: false
+			else {
+				if(endingX == "Sunrise") input "endSunriseOffset", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
+				else if(endingX == "Sunset") input "endSunsetOffset", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
+			}
+		}
+	}
+}
 
 def installed() {
 	initialize()
@@ -120,11 +173,37 @@ private conditionLabel() {
 	for (int i = 0; i < howMany; i++) {
     	def thisName = settings.find {it.key == "rName$i"}
         result = result + thisName.value + ": "
-        def thisDev = settings.find {it.key == "rDev$i"}
-        result = result + thisDev.value + " = "
-        def thisState = settings.find {it.key == "state$i"}
-        result = result + thisState.value
+        def thisCapab = settings.find {it.key == "rCapab$i"}
+        if(thisCapab.value == "time of day") {
+        	result = result + "time of day = " + timeIntervalLabel()
+        } else if(thisCapab.value == "days of week") {
+        	result = result + "days of week in " + days
+        } else if (thisCapab.value == "modes") {
+        	result = result + "mode in " + modes
+        } else {
+        	def thisDev = settings.find {it.key == "rDev$i"}
+        	result = result + thisDev.value + " = "
+        	def thisState = settings.find {it.key == "state$i"}
+        	result = result + thisState.value
+        }
         if((i + 1) < howMany) result = result + "\n"
     }
     return result
+}
+
+private offset(value) {
+	def result = value ? ((value > 0 ? "+" : "") + value + " min") : ""
+}
+
+private timeIntervalLabel() {
+	def result = ""
+	if (startingX == "Sunrise" && endingX == "Sunrise") result = "Sunrise" + offset(startSunriseOffset) + " to Sunrise" + offset(endSunriseOffset)
+	else if (startingX == "Sunrise" && endingX == "Sunset") result = "Sunrise" + offset(startSunriseOffset) + " to Sunset" + offset(endSunsetOffset)
+	else if (startingX == "Sunset" && endingX == "Sunrise") result = "Sunset" + offset(startSunsetOffset) + " to Sunrise" + offset(endSunriseOffset)
+	else if (startingX == "Sunset" && endingX == "Sunset") result = "Sunset" + offset(startSunsetOffset) + " to Sunset" + offset(endSunsetOffset)
+	else if (startingX == "Sunrise" && ending) result = "Sunrise" + offset(startSunriseOffset) + " to " + hhmm(ending, "h:mm a z")
+	else if (startingX == "Sunset" && ending) result = "Sunset" + offset(startSunsetOffset) + " to " + hhmm(ending, "h:mm a z")
+	else if (starting && endingX == "Sunrise") result = hhmm(starting) + " to Sunrise" + offset(endSunriseOffset)
+	else if (starting && endingX == "Sunset") result = hhmm(starting) + " to Sunset" + offset(endSunsetOffset)
+	else if (starting && ending) result = hhmm(starting) + " to " + hhmm(ending, "h:mm a z")
 }
