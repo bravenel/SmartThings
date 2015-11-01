@@ -1,0 +1,130 @@
+/**
+ *  Rule
+ *
+ *  Copyright 2015 Bruce Ravenel
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License. You may obtain a copy of the License at:
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+ *  for the specific language governing permissions and limitations under the License.
+ *
+ */
+definition(
+    name: "Rule",
+    namespace: "bravenel",
+    author: "Bruce Ravenel",
+    description: "Rule builder",
+    category: "My Apps",
+    iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
+    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
+    iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
+
+
+preferences {
+    page(name: "selectRule")
+	page(name: "selectConditions")
+}
+
+def selectRule() {
+	dynamicPage(name: "selectRule", title: "Select Conditions and Rule", uninstall: true, install: true) {
+    	
+		section() {     
+			def condLabel = conditionLabel()
+			href "selectConditions", title: "Select Conditions", description: condLabel ?: "Tap to set", state: condLabel ? "complete" : null
+            input "rule", "text", title: "Define the Rule", required: true
+			label title: "Name the Rule", required: false
+            input "mySwitch", "capability.switch", title: "Switch for Rule Result", required: true
+		}
+    }
+}
+
+def getName(myName, n) {
+	def result = input myName, "text", title: "Conditions Name #$n", required: true
+}
+
+def getDevs(myCapab, dev, n) {
+	def result = input dev, myCapab, title: "Device #$n", required: true, multiple: true
+}
+
+def getCapab(myCapab) {
+	def result = input myCapab, "enum", title: "Select capability", required: true, options: ["switch", "motionSensor", "contactSensor", "presenceSensor", "lock"], submitOnChange: true
+}
+
+def getState(myCapab, n) {
+	def result = null
+                        switch(myCapab) {
+                        	case "switch":
+                            	result = input "state$n", "enum", title: "switch state", options: ["on", "off"]
+                                return
+                            case "motionSensor":
+                            	result = input "state$n", "enum", title: "motion state", options: ["active", "inactive"]
+                                return
+                            case "contactSensor":
+                            	result = input "state$n", "enum", title: "contact state", options: ["open", "closed"]
+                                return
+                            case "presenceSensor":
+                            	result = input "state$n", "enum", title: "presence state", options: ["present", "not present"]
+                                return
+                            case "lock":
+                            	result = input "state$n", "enum", title: "lock state", options: ["locked", "unlocked"]
+                                return
+                        }
+}
+
+def selectConditions() {
+	dynamicPage(name: "selectConditions", title: "Select Conditions", uninstall: false) {
+		section("") {input "howMany", "number", title: "How many conditions?", required: true, submitOnChange: true}
+        if(howMany) {
+			for (int i = 0; i < howMany; i++) {
+				def thisCapab = "rCapab$i"
+            	section("") {
+					def thisName = "rName$i"
+					getName(thisName, i + 1)
+                    getCapab(thisCapab)
+                	def myCapab = settings.find {it.key == thisCapab}
+                	if(myCapab) {
+                		def xCapab = myCapab.value
+                		log.debug "myCapab $xCapab"
+                    	def thisDev = "rDev$i"
+                    	getDevs("capability.$xCapab", thisDev, i + 1)
+                        getState(xCapab, i)
+                    }
+                }
+			}
+        }
+	}
+}
+
+
+def installed() {
+	initialize()
+}
+
+def updated() {
+	unsubscribe()
+	initialize()
+}
+
+def initialize() {
+	// TODO: subscribe to attributes, devices, locations, etc.
+}
+
+// TODO: implement event handlers
+
+private conditionLabel() {
+	def result = ""
+	for (int i = 0; i < howMany; i++) {
+    	def thisName = settings.find {it.key == "rName$i"}
+        result = result + thisName.value + ": "
+        def thisDev = settings.find {it.key == "rDev$i"}
+        result = result + thisDev.value + " = "
+        def thisState = settings.find {it.key == "state$i"}
+        result = result + thisState.value
+        if((i + 1) < howMany) result = result + "\n"
+    }
+    return result
+}
