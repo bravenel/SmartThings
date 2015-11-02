@@ -17,7 +17,7 @@ definition(
     name: "Rule",
     namespace: "bravenel",
     author: "Bruce Ravenel",
-    description: "Rule builder",
+    description: "Rule Routines",
     category: "My Apps",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
@@ -28,79 +28,119 @@ preferences {
     page(name: "selectRule")
 	page(name: "selectConditions")
     page(name: "certainTime")
+    page(name: "defineRule")
 }
 
 def selectRule() {
-	dynamicPage(name: "selectRule", title: "Select Conditions and Rule", uninstall: true, install: true) {
+	dynamicPage(name: "selectRule", title: "Select Conditions, Rule and Routines", uninstall: true, install: true) {
     	
 		section() {     
+			label title: "Name the Rule", required: true
 			def condLabel = conditionLabel()
-			href "selectConditions", title: "Select Conditions", description: condLabel ?: "Tap to set", state: condLabel ? "complete" : null
-            input "rule", "text", title: "Define the Rule", required: true
-			label title: "Name the Rule", required: false
+			href "selectConditions", title: "Select Conditions", description: condLabel ?: "Tap to set", required: true, state: condLabel ? "complete" : null
+			href "defineRule", title: "Define the Rule", description: state.str ? state.str + "\n\n$state.eval": "Tap to set", state: state.str ? "complete" : null
             def phrases = location.helloHome?.getPhrases()*.label
-            input "myPhrase", "enum", title: "Routine to run when true", required: true, options: phrases
+            input "myPhraseTrue", "enum", title: "Routine to run when true", required: false, options: phrases.sort()
+            input "myPhraseFalse", "enum", title: "Routine to run when false", required: false, options: phrases.sort()
 		}
     }
 }
 
-def getName(myName, n) {
-	def result = input myName, "text", title: "Name condition #$n", required: true
-}
-
 def getDevs(myCapab, dev) {
     def thisName = ""
+    def thisCapab = ""
 	switch(myCapab) {
-		case "switch":
+		case "Switch":
 			thisName = "Switches"
+            thisCapab = "switch"
 			break
-		case "motionSensor":
+		case "Motion":
 			thisName = "Motion sensors"
+            thisCapab = "motionSensor"
 			break
-		case "contactSensor":
+        case "Acceleration":
+			thisName = "Acceleration sensors"
+            thisCapab = "accelerationSensor"
+			break        
+		case "Contact":
 			thisName = "Contact sensors"
+            thisCapab = "contactSensor"
 			break
-		case "presenceSensor":
+		case "Presence":
 			thisName = "Presence sensors"
+            thisCapab = "presenceSensor"
 			break
-		case "lock":
+		case "Lock":
 			thisName = "Locks"
+            thisCapab = "lock"
+            break
+        case "Temperature":
+        	thisName = "Temperature sensors"
+        	thisCapab = "temperatureMeasurement"
+            break
+        case "Humidity":
+        	thisName = "Humidity sensors"
+        	thisCapab = "relativeHumidityMeasurement"
+            break
+        case "Illuminance":
+        	thisName = "Illuminance sensors"
+            thisCapab = "illuminanceMeasurement"
 	}
-	def result = input dev, "capability.$myCapab", title: thisName, required: true, multiple: true
+	def result = input dev, "capability.$thisCapab", title: thisName, required: true, multiple: true, submitOnChange: true
+}
+
+def getAnyAll(myDev) {
+    def result = input "All$myDev", "bool", title: "All of these?", defaultValue: false
+}
+
+def getRelational(myDev) {
+	def result = input "Rel$myDev", "enum", title: "Choose comparison", required: true, options: ["=", "!=", "<", ">", "<=", ">="]
 }
 
 def getCapab(myCapab) {
-	def result = input myCapab, "enum", title: "Select capability", required: true, 
-    	options: ["switch", "motionSensor", "contactSensor", "presenceSensor", "lock", "time of day", "days of week", "modes"], submitOnChange: true
+	def myOptions = ["Switch", "Motion", "Acceleration", "Contact", "Presence", "Lock", "Temperature", "Humidity", "Illuminance", "Time of day", "Days of week", "Mode"]
+	def result = input myCapab, "enum", title: "Select capability", required: true, options: myOptions.sort(), submitOnChange: true
 }
 
 def getState(myCapab, n) {
 	def result = null
 	switch(myCapab) {
-		case "switch":
-			result = input "state$n", "enum", title: "switch state", options: ["on", "off"]
+		case "Switch":
+			result = input "state$n", "enum", title: "Switch state", options: ["on", "off"]
 			return
-		case "motionSensor":
-			result = input "state$n", "enum", title: "motion state", options: ["active", "inactive"]
+		case "Motion":
+			result = input "state$n", "enum", title: "Motion state", options: ["active", "inactive"]
 			return
-		case "contactSensor":
-			result = input "state$n", "enum", title: "contact state", options: ["open", "closed"]
+		case "Acceleration":
+			result = input "state$n", "enum", title: "Acceleration state", options: ["active", "inactive"]
 			return
-		case "presenceSensor":
-			result = input "state$n", "enum", title: "presence state", options: ["present", "not present"]
+		case "Contact":
+			result = input "state$n", "enum", title: "Contact state", options: ["open", "closed"]
 			return
-		case "lock":
-			result = input "state$n", "enum", title: "lock state", options: ["locked", "unlocked"]
+		case "Presence":
+			result = input "state$n", "enum", title: "Presence state", options: ["present", "not present"]
 			return
-        case "time of day":
+		case "Lock":
+			result = input "state$n", "enum", title: "Lock state", options: ["locked", "unlocked"]
+			return
+        case "Temperature":
+        	result = input "state$n", "number", title: "Temperature"
+            return
+        case "Humidity":
+        	result = input "state$n", "number", title: "Humidity"
+            return
+        case "Illuminance":
+        	result = input "state$n", "number", title: "Illuminance"
+            return
+        case "Time of day":
         	def timeLabel = timeIntervalLabel()
 			href "certainTime", title: "During a certain time", description: timeLabel ?: "Tap to set", state: timeLabel ? "complete" : null
 			return
-        case "days of week":
+        case "Days of week":
         	result = input "days", "enum", title: "On certain days of the week", multiple: true, required: false,
 				options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 			return
-		case "modes":
+		case "Mode":
         	result = input "modes", "mode", title: "When mode is", multiple: true, required: false
             return
 	}
@@ -110,18 +150,21 @@ def selectConditions() {
 	dynamicPage(name: "selectConditions", title: "Select Conditions", uninstall: false) {
 		section("") {input "howMany", "number", title: "How many conditions?", required: true, submitOnChange: true}
         if(howMany) {
-			for (int i = 0; i < howMany; i++) {
+			for (int i = 1; i <= howMany; i++) {
 				def thisCapab = "rCapab$i"
-            	section("") {
-					def thisName = "rName$i"
-					getName(thisName, i + 1)
+            	section("Condtion #$i") {
                     getCapab(thisCapab)
                 	def myCapab = settings.find {it.key == thisCapab}
                 	if(myCapab) {
                 		def xCapab = myCapab.value
-                        if(!(xCapab in ["time of day", "days of week", "modes"])) {
+						if(!(xCapab in ["Time of day", "Days of week", "Mode"])) {
                     		def thisDev = "rDev$i"
                     		getDevs(xCapab, thisDev)
+                            def myDev = settings.find {it.key == thisDev}
+                            if(myDev) {
+                            	if(myDev.value.size() > 1) getAnyAll(thisDev)
+                            }
+                            if(xCapab in ["Temperature", "Humidity", "Illuminance"]) getRelational(thisDev)
                         }
                         getState(xCapab, i)
                     }
@@ -129,6 +172,73 @@ def selectConditions() {
 			}
         }
 	}
+}
+
+def inputLeft() {
+	def conds = []
+    for (int i = 1; i <= howMany; i++) conds << conditionLabelN(i)
+    input "subCondL$state.n", "bool", title: "Enter sub rule for left?", submitOnChange: true
+    if(settings["subCondL$state.n"]) inputLeftAndRight(true)
+    else {
+    	input "condL$state.n", "enum", title: "Which condition?", options: conds, submitOnChange: true
+        if(settings["condL$state.n"]) {
+            state.str = state.str + settings["condL$state.n"]
+            state.eval << i
+            paragraph(state.str)
+        }
+    }
+}
+
+def inputRight() {
+	state.n = state.n + 1
+    input "operator$state.n", "enum", title: "Choose: AND,  OR,  Done", options: ["AND", "OR", "Done"], submitOnChange: true
+    if(settings["operator$state.n"]) if(settings["operator$state.n"] != "Done") {
+    	state.str = state.str + " " + settings["operator$state.n"] + " "
+        state.eval << settings["operator$state.n"]
+        paragraph(state.str)
+		def conds = []
+    	for (int i = 1; i <= howMany; i++) conds << conditionLabelN(i)
+    	input "subCondR$state.n", "bool", title: "Enter sub rule for right?", submitOnChange: true
+    	if(settings["subCondR$state.n"]) inputLeftAndRight(true)
+    	else {
+			input "condR$state.n", "enum", title: "Which condition?", options: conds, submitOnChange: true
+        	if(settings["condR$state.n"]) {
+            	state.str = state.str + settings["condR$state.n"]
+                state.eval << i
+            	paragraph(state.str)
+            }
+			input "moreConds$state.n", "bool", title: "More conditions?", submitOnChange: true
+    		if(settings["moreConds$state.n"]) inputRight()
+        }
+    } 
+}
+
+def inputLeftAndRight(sub) {
+	state.n = state.n + 1
+    if(sub) {
+    	state.str = state.str + "("
+        state.eval << "("
+    }
+	inputLeft()
+    inputRight()
+    if(sub) {
+    	state.str = state.str + ")"
+        state.eval << ")"
+    }
+}
+
+def defineRule() {
+	dynamicPage(name:"defineRule",title: "Define the Rule", uninstall: false) {
+    	state.n = 0
+        state.str = ""
+        state.eval = []
+    	section() {
+			inputLeftAndRight(false)
+        }
+        section() {
+        	paragraph("$state.eval")
+        }
+    }
 }
 
 def certainTime() {
@@ -170,24 +280,56 @@ def initialize() {
 
 private conditionLabel() {
 	def result = ""
-	for (int i = 0; i < howMany; i++) {
-    	def thisName = settings.find {it.key == "rName$i"}
-        result = result + thisName.value + ": "
+	for (int i = 1; i <= howMany; i++) {
         def thisCapab = settings.find {it.key == "rCapab$i"}
-        if(thisCapab.value == "time of day") {
-        	result = result + "time of day = " + timeIntervalLabel()
-        } else if(thisCapab.value == "days of week") {
-        	result = result + "days of week in " + days
-        } else if (thisCapab.value == "modes") {
-        	result = result + "mode in " + modes
+        log.debug "thisCapab = $thisCapab"
+        if(thisCapab.value == "Time of day") {
+        	result = result + "Time between " + timeIntervalLabel()
+        } else if(thisCapab.value == "Days of week") {
+        	result = result + "Day i" + (days.size() > 1 ? "n " + days : "s " + days[0])
+        } else if (thisCapab.value == "Mode") {
+        	result = result + "Mode i" + (modes.size() > 1 ? "n " + modes : "s " + modes[0])
         } else {
         	def thisDev = settings.find {it.key == "rDev$i"}
-        	result = result + thisDev.value + " = "
+            def thisAll = settings.find {it.key == "AllrDev$i"}
+            def myAny = thisAll ? "any " : ""
+        	if(thisCapab.value == "Temperature") result = result + "Temperature of "
+            else if(thisCapab.value == "Humidity") result = result + "Humidity of "
+            else if(thisCapab.value == "Illuminance") result = result + "Illuminance of "
+        	result = result + (myAny ? thisDev.value : thisDev.value[0]) + " " + ((thisAll ? thisAll.value : false) ? "all " : myAny)
+            def thisRel = settings.find {it.key == "RelrDev$i"}
+            if(thisCapab.value in ["Temperature", "Humidity", "Illuminance"]) result = result + " " + thisRel.value + " "
         	def thisState = settings.find {it.key == "state$i"}
         	result = result + thisState.value
         }
-        if((i + 1) < howMany) result = result + "\n"
+        if((i + 1) <= howMany) result = result + "\n"
     }
+    return result
+}
+
+private conditionLabelN(i) {
+	def result = ""
+        def thisCapab = settings.find {it.key == "rCapab$i"}
+        log.debug "thisCapab = $thisCapab"
+        if(thisCapab.value == "Time of day") {
+        	result = result + "Time between " + timeIntervalLabel()
+        } else if(thisCapab.value == "Days of week") {
+        	result = result + "Day i" + (days.size() > 1 ? "n " + days : "s " + days[0])
+        } else if (thisCapab.value == "Mode") {
+        	result = result + "Mode i" + (modes.size() > 1 ? "n " + modes : "s " + modes[0])
+        } else {
+        	def thisDev = settings.find {it.key == "rDev$i"}
+            def thisAll = settings.find {it.key == "AllrDev$i"}
+            def myAny = thisAll ? "any " : ""
+        	if(thisCapab.value == "Temperature") result = result + "Temperature of "
+            else if(thisCapab.value == "Humidity") result = result + "Humidity of "
+            else if(thisCapab.value == "Illuminance") result = result + "Illuminance of "
+        	result = result + (myAny ? thisDev.value : thisDev.value[0]) + " " + ((thisAll ? thisAll.value : false) ? "all " : myAny)
+            def thisRel = settings.find {it.key == "RelrDev$i"}
+            if(thisCapab.value in ["Temperature", "Humidity", "Illuminance"]) result = result + " " + thisRel.value + " "
+        	def thisState = settings.find {it.key == "state$i"}
+        	result = result + thisState.value
+        }
     return result
 }
 
@@ -197,13 +339,13 @@ private offset(value) {
 
 private timeIntervalLabel() {
 	def result = ""
-	if (startingX == "Sunrise" && endingX == "Sunrise") result = "Sunrise" + offset(startSunriseOffset) + " to Sunrise" + offset(endSunriseOffset)
-	else if (startingX == "Sunrise" && endingX == "Sunset") result = "Sunrise" + offset(startSunriseOffset) + " to Sunset" + offset(endSunsetOffset)
-	else if (startingX == "Sunset" && endingX == "Sunrise") result = "Sunset" + offset(startSunsetOffset) + " to Sunrise" + offset(endSunriseOffset)
-	else if (startingX == "Sunset" && endingX == "Sunset") result = "Sunset" + offset(startSunsetOffset) + " to Sunset" + offset(endSunsetOffset)
-	else if (startingX == "Sunrise" && ending) result = "Sunrise" + offset(startSunriseOffset) + " to " + hhmm(ending, "h:mm a z")
-	else if (startingX == "Sunset" && ending) result = "Sunset" + offset(startSunsetOffset) + " to " + hhmm(ending, "h:mm a z")
-	else if (starting && endingX == "Sunrise") result = hhmm(starting) + " to Sunrise" + offset(endSunriseOffset)
-	else if (starting && endingX == "Sunset") result = hhmm(starting) + " to Sunset" + offset(endSunsetOffset)
-	else if (starting && ending) result = hhmm(starting) + " to " + hhmm(ending, "h:mm a z")
+	if (startingX == "Sunrise" && endingX == "Sunrise") result = "Sunrise" + offset(startSunriseOffset) + " and Sunrise" + offset(endSunriseOffset)
+	else if (startingX == "Sunrise" && endingX == "Sunset") result = "Sunrise" + offset(startSunriseOffset) + " and Sunset" + offset(endSunsetOffset)
+	else if (startingX == "Sunset" && endingX == "Sunrise") result = "Sunset" + offset(startSunsetOffset) + " and Sunrise" + offset(endSunriseOffset)
+	else if (startingX == "Sunset" && endingX == "Sunset") result = "Sunset" + offset(startSunsetOffset) + " and Sunset" + offset(endSunsetOffset)
+	else if (startingX == "Sunrise" && ending) result = "Sunrise" + offset(startSunriseOffset) + " and " + hhmm(ending, "h:mm a z")
+	else if (startingX == "Sunset" && ending) result = "Sunset" + offset(startSunsetOffset) + " and " + hhmm(ending, "h:mm a z")
+	else if (starting && endingX == "Sunrise") result = hhmm(starting) + " and Sunrise" + offset(endSunriseOffset)
+	else if (starting && endingX == "Sunset") result = hhmm(starting) + " and Sunset" + offset(endSunsetOffset)
+	else if (starting && ending) result = hhmm(starting) + " and " + hhmm(ending, "h:mm a z")
 }
