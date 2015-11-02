@@ -38,7 +38,7 @@ def selectRule() {
 			label title: "Name the Rule", required: true
 			def condLabel = conditionLabel()
 			href "selectConditions", title: "Select Conditions", description: condLabel ?: "Tap to set", required: true, state: condLabel ? "complete" : null
-			href "defineRule", title: "Define the Rule", description: state.str ? state.str + "\n\n$state.eval": "Tap to set", state: state.str ? "complete" : null
+			href "defineRule", title: "Define the Rule", description: state.str ? state.str : "Tap to set", state: state.str ? "complete" : null
             def phrases = location.helloHome?.getPhrases()*.label
             input "myPhraseTrue", "enum", title: "Routine to run when true", required: false, options: phrases.sort()
             input "myPhraseFalse", "enum", title: "Routine to run when false", required: false, options: phrases.sort()
@@ -183,7 +183,9 @@ def inputLeft() {
     	input "condL$state.n", "enum", title: "Which condition?", options: conds, submitOnChange: true
         if(settings["condL$state.n"]) {
             state.str = state.str + settings["condL$state.n"]
-            state.eval << i
+            def myCond = 0
+            for (int i = 1; i <= howMany; i++) if(conditionLabelN(i) == settings["condL$state.n"]) myCond = i
+            state.eval << myCond
             paragraph(state.str)
         }
     }
@@ -204,7 +206,9 @@ def inputRight() {
 			input "condR$state.n", "enum", title: "Which condition?", options: conds, submitOnChange: true
         	if(settings["condR$state.n"]) {
             	state.str = state.str + settings["condR$state.n"]
-                state.eval << i
+                def myCond = 0
+                for (int i = 1; i <= howMany; i++) if(conditionLabelN(i) == settings["condR$state.n"]) myCond = i
+                state.eval << myCond
             	paragraph(state.str)
             }
 			input "moreConds$state.n", "bool", title: "More conditions?", submitOnChange: true
@@ -235,9 +239,7 @@ def defineRule() {
     	section() {
 			inputLeftAndRight(false)
         }
-        section() {
-        	paragraph("$state.eval")
-        }
+        state.eval << ")"
     }
 }
 
@@ -263,6 +265,18 @@ def certainTime() {
 	}
 }
 
+def subscribeDevice(dev, cap) {
+	if     (cap == "Temperature") 	subscribe(dev, "temperature", allHandler)
+    else if(cap == "Humidity") 		subscribe(dev, "humidity", allHandler)
+    else if(cap == "Illuminance") 	subscribe(dev, "illuminance", allHandler)
+    else if(cap == "Switch") 		subscribe(dev, "switch", allHandler)
+    else if(cap == "Motion") 		subscribe(dev, "motion", allHandler)
+    else if(cap == "Acceleration") 	subscribe(dev, "acceleration", allHandler)
+    else if(cap == "Contact") 		subscribe(dev, "contact", allHandler)
+    else if(cap == "Presence") 		subscribe(dev, "presence", allHandler)
+    else if(cap == "Lock") 			subscribe(dev, "lock", allHandler)
+}
+
 def installed() {
 	initialize()
 }
@@ -273,16 +287,134 @@ def updated() {
 }
 
 def initialize() {
-	// TODO: subscribe to attributes, devices, locations, etc.
+	for (int i = 1; i <= howMany; i++) {
+    	def thisCapab = "rCapab$i"
+        def myCapab = settings.find {it.key == thisCapab}
+        def xCapab = myCapab.value
+        if(xCapab == "Mode") subscribe(location, allHandler)
+        else if(!(xCapab in ["Time of day", "Days of week"])) {
+    		def thisDev = "rDev$i"
+        	def myDev = settings.find {it.key == thisDev}
+            def thisState = "state$i"
+            def myState = settings.find {it.key == thisState}
+            subscribeDevice(myDev.value, xCapab)
+        }
+    }
+    state.success = false
 }
 
-// TODO: implement event handlers
+def compare(a, rel, b) {
+	def result = true
+	if     (rel == "=") 	result = a == b
+    else if(rel == "!=") 	result = a != b
+    else if(rel == ">") 	result = a > b
+    else if(rel == "<") 	result = a < b
+    else if(rel == ">=") 	result = a >= b
+    else if(rel == "<=") 	result = a <= b
+    return result
+}
+
+def checkCondAny(dev, state, cap, rel) {
+	def result = false
+	if     (cap == "Temperature") 	dev.currentTemperature.each {result = result || compare(it, rel, state)}
+    else if(cap == "Humidity") 		dev.currentHumidity.each {result = result || compare(it, rel, state)}
+    else if(cap == "Illuminance") 	dev.currentIlluminance.each {result = result || compare(it, rel, state)}
+    else if(cap == "Switch") 		result = state in dev.currentSwitch
+    else if(cap == "Motion") 		result = state in dev.currentMotion
+    else if(cap == "Acceleration") 	result = state in dev.currentAcceleration
+    else if(cap == "Contact") 		result = state in dev.currentContact
+    else if(cap == "Presence") 		result = state in dev.currentPresence
+    else if(cap == "Lock") 			result = state in dev.currentLock
+    return result
+}
+
+def checkCondAll(dev, state, cap, rel) {
+	def result = true
+	if     (cap == "Temperature") 	dev.currentTemperature.each {result = result && compare(it, rel, state)}
+    else if(cap == "Humidity") 		dev.currentHumidity.each {result = result && compare(it, rel, state)}
+    else if(cap == "Illuminance") 	dev.currentIlluminance.each {result = result && compare(it, rel, state)}
+    else if(cap == "Switch") 		dev.currentSwitch.each {result = result && it == state}
+    else if(cap == "Motion") 		dev.currentMotion.each {result = result && it == state}
+    else if(cap == "Acceleration") 	dev.currentAcceleration.each {result = result && it == state}
+    else if(cap == "Contact") 		dev.currentContact.each {result = result && it == state}
+    else if(cap == "Presence") 		dev.currentPresence.each {result = result && it == state}
+    else if(cap == "Lock") 			dev.currentLock.each {result = result && it == state}
+    return result
+}
+
+def getOperand(i) {
+//	log.debug "getOperand called i = $i"
+	def result = true
+    def thisCapab = "rCapab$i"
+    def myCapab = settings.find {it.key == thisCapab}
+    def xCapab = myCapab.value
+    if(xCapab == "Mode") result = getModeOk()
+    else if(!(xCapab in ["Time of day", "Days of week"])) {
+       	def thisDev = "rDev$i"
+        def myDev = settings.find {it.key == thisDev}
+        def thisState = "state$i"
+        def myState = settings.find {it.key == thisState}
+        def thisRel = "RelrDev$i"
+        def myRel = settings.find {it.key == thisRel}
+        def thisAll = "AllrDev$i"
+        def myAll = settings.find {it.key == thisAll}
+        if(myAll) {if(myAll.value) result = checkCondAll(myDev.value, myState.value, xCapab, myrel ? myRel.value : 0)}
+        else result = checkCondAny(myDev.value, myState.value, xCapab, myrel ? myRel.value : 0)
+	}
+    return result
+}
+
+def eval() {
+//	log.debug "eval called"
+    def result = true
+    def operandL = false
+    while(true) {
+		def thisTok = state.eval[state.token]
+//		log.debug "eval: $thisTok"
+    	if(thisTok == "(") {
+    		state.token = state.token + 1
+        	operandL = eval()
+            result = operandL
+        } else if(thisTok == ")") return result
+    	else if(thisTok == "OR") {
+    		state.token = state.token + 1
+            thisTok = state.eval[state.token]
+    		if(operandL) result = true
+            else result = eval() 
+    	} else if(thisTok == "AND") { 
+    		state.token = state.token + 1
+            thisTok = state.eval[state.token]
+    		if(!operandL) result = false
+            else result = operandL && eval() 
+    	} else {
+        	operandL = getOperand(thisTok)
+            result = operandL
+        }
+    	state.token = state.token + 1
+    	if(state.token >= state.eval.size) return result
+    }
+}
+
+def evaluate() {
+	state.token = 0
+	def result = eval()    
+}
+
+def allHandler(evt) {
+//	log.debug "Handler: $evt.displayName $evt.name"
+    def success = evaluate()
+    if(state.success != success) {
+    	if(success) {if(myPhraseTrue) location.helloHome.execute(myPhraseTrue)}
+        else if(myPhraseFalse) location.helloHome.execute(myPhraseFalse)
+    	state.success = success
+        log.debug (success ? "Success" : "Failure")
+    }
+}
 
 private conditionLabel() {
 	def result = ""
 	for (int i = 1; i <= howMany; i++) {
         def thisCapab = settings.find {it.key == "rCapab$i"}
-        log.debug "thisCapab = $thisCapab"
         if(thisCapab.value == "Time of day") {
         	result = result + "Time between " + timeIntervalLabel()
         } else if(thisCapab.value == "Days of week") {
@@ -310,7 +442,6 @@ private conditionLabel() {
 private conditionLabelN(i) {
 	def result = ""
         def thisCapab = settings.find {it.key == "rCapab$i"}
-        log.debug "thisCapab = $thisCapab"
         if(thisCapab.value == "Time of day") {
         	result = result + "Time between " + timeIntervalLabel()
         } else if(thisCapab.value == "Days of week") {
@@ -348,4 +479,46 @@ private timeIntervalLabel() {
 	else if (starting && endingX == "Sunrise") result = hhmm(starting) + " and Sunrise" + offset(endSunriseOffset)
 	else if (starting && endingX == "Sunset") result = hhmm(starting) + " and Sunset" + offset(endSunsetOffset)
 	else if (starting && ending) result = hhmm(starting) + " and " + hhmm(ending, "h:mm a z")
+}
+
+private getModeOk() {
+	def result = !modes || modes.contains(location.mode)
+//	log.trace "modeOk = $result"
+	return result
+}
+
+private getDaysOk() {
+	def result = true
+	if (days) {
+		def df = new java.text.SimpleDateFormat("EEEE")
+		if (location.timeZone) df.setTimeZone(location.timeZone)
+		else df.setTimeZone(TimeZone.getTimeZone("America/New_York"))
+		def day = df.format(new Date())
+		result = days.contains(day)
+	}
+//	log.trace "daysOk = $result"
+	return result
+}
+
+private getTimeOk() {
+	def result = true
+	if ((starting && ending) ||
+	(starting && endingX in ["Sunrise", "Sunset"]) ||
+	(startingX in ["Sunrise", "Sunset"] && ending) ||
+	(startingX in ["Sunrise", "Sunset"] && endingX in ["Sunrise", "Sunset"])) {
+		def currTime = now()
+		def start = null
+		def stop = null
+		def s = getSunriseAndSunset(zipCode: zipCode, sunriseOffset: startSunriseOffset, sunsetOffset: startSunsetOffset)
+		if(startingX == "Sunrise") start = s.sunrise.time
+		else if(startingX == "Sunset") start = s.sunset.time
+		else if(starting) start = timeToday(starting,location.timeZone).time
+		s = getSunriseAndSunset(zipCode: zipCode, sunriseOffset: endSunriseOffset, sunsetOffset: endSunsetOffset)
+		if(endingX == "Sunrise") stop = s.sunrise.time
+		else if(endingX == "Sunset") stop = s.sunset.time
+		else if(ending) stop = timeToday(ending,location.timeZone).time
+		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
+	}
+//	log.trace "getTimeOk = $result"
+	return result
 }
