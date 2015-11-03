@@ -24,10 +24,10 @@ definition(
 )
 
 preferences {
-    page(name: "selectRule")
+	page(name: "selectRule")
 	page(name: "selectConditions")
-    page(name: "defineRule")
-    page(name: "certainTime")
+	page(name: "defineRule")
+	page(name: "certainTime")
 }
 
 def selectRule() {
@@ -38,33 +38,31 @@ def selectRule() {
 			def condLabel = conditionLabel()
 			href "selectConditions", title: "Select Conditions", description: condLabel ?: "Tap to set", required: true, state: condLabel ? "complete" : null
 			href "defineRule", title: "Define the Rule", description: state.str ? state.str : "Tap to set", state: state.str ? "complete" : null
-            def phrases = location.helloHome?.getPhrases()*.label
-            input "myPhraseTrue", "enum", title: "Routine to run when true", required: false, options: phrases.sort()
-            input "myPhraseFalse", "enum", title: "Routine to run when false", required: false, options: phrases.sort()
+			def phrases = location.helloHome?.getPhrases()*.label
+			input "myPhraseTrue", "enum", title: "Routine to run when true", required: false, options: phrases.sort()
+			input "myPhraseFalse", "enum", title: "Routine to run when false", required: false, options: phrases.sort()
 		}
-    }
+	}
 }
 
 def selectConditions() {
 	dynamicPage(name: "selectConditions", title: "Select Conditions", uninstall: false) {
 		section("") {input "howMany", "number", title: "How many conditions?", required: true, submitOnChange: true}
-        if(howMany) {
-			for (int i = 1; i <= howMany; i++) {
-				def thisCapab = "rCapab$i"
-            	section("Condtion #$i") {
-                    getCapab(thisCapab)
-                	def myCapab = settings.find {it.key == thisCapab}
-                	if(myCapab) {
-                		def xCapab = myCapab.value
-						if(!(xCapab in ["Time of day", "Days of week", "Mode"])) {
-                    		def thisDev = "rDev$i"
-                    		getDevs(xCapab, thisDev)
-                            def myDev = settings.find {it.key == thisDev}
-                            if(myDev) {
-                            	if(myDev.value.size() > 1) getAnyAll(thisDev)
-                            }
-                            if(xCapab in ["Temperature", "Humidity", "Illuminance"]) getRelational(thisDev)
-                        }
+			if(howMany) {
+				for (int i = 1; i <= howMany; i++) {
+					def thisCapab = "rCapab$i"
+					section("Condtion #$i") {
+						getCapab(thisCapab)
+						def myCapab = settings.find {it.key == thisCapab}
+						if(myCapab) {
+							def xCapab = myCapab.value
+							if(!(xCapab in ["Time of day", "Days of week", "Mode"])) {
+								def thisDev = "rDev$i"
+								getDevs(xCapab, thisDev)
+								def myDev = settings.find {it.key == thisDev}
+								if(myDev) if(myDev.value.size() > 1) getAnyAll(thisDev)
+								if(xCapab in ["Temperature", "Humidity", "Illuminance"]) getRelational(thisDev)
+							}
                         getState(xCapab, i)
                     }
                 }
@@ -78,7 +76,7 @@ def defineRule() {
     	state.n = 0
         state.str = ""
         state.eval = []
-    	section() {
+		section() {
 			inputLeftAndRight(false)
         }
 //        state.eval << ")"
@@ -178,7 +176,7 @@ def getState(myCapab, n) {
 	else if(myCapab == "Mode") result = input "modes", "mode", title: "When mode is", multiple: true, required: false
 	else if(myCapab == "Days of week") result = input "days", "enum", title: "On certain days of the week", multiple: true, required: false, options: days
 	else if(myCapab == "Time of day") {
-        def timeLabel = timeIntervalLabel()
+		def timeLabel = timeIntervalLabel()
 		href "certainTime", title: "During a certain time", description: timeLabel ?: "Tap to set", state: timeLabel ? "complete" : null
     } 
 }
@@ -188,12 +186,12 @@ def inputLeft() {
     for (int i = 1; i <= howMany; i++) conds << conditionLabelN(i)
     input "subCondL$state.n", "bool", title: "Enter sub rule for left?", submitOnChange: true
     if(settings["subCondL$state.n"]) {
-    	state.str = state.str + "("
+		state.str = state.str + "("
         state.eval << "("
         paragraph(state.str)
         inputLeftAndRight(true)
     } else {
-    	input "condL$state.n", "enum", title: "Which condition?", options: conds, submitOnChange: true
+		input "condL$state.n", "enum", title: "Which condition?", options: conds, submitOnChange: true
         if(settings["condL$state.n"]) {
             state.str = state.str + settings["condL$state.n"]
             def myCond = 0
@@ -208,28 +206,28 @@ def inputRight() {
 	state.n = state.n + 1
     input "operator$state.n", "enum", title: "Choose: AND,  OR,  Done", options: ["AND", "OR", "Done"], submitOnChange: true
     if(settings["operator$state.n"]) if(settings["operator$state.n"] != "Done") {
-    	state.str = state.str + " " + settings["operator$state.n"] + " "
+		state.str = state.str + " " + settings["operator$state.n"] + " "
         state.eval << settings["operator$state.n"]
         paragraph(state.str)
 		def conds = []
-    	for (int i = 1; i <= howMany; i++) conds << conditionLabelN(i)
-    	input "subCondR$state.n", "bool", title: "Enter sub rule for right?", submitOnChange: true
-    	if(settings["subCondR$state.n"]) {
-    		state.str = state.str + "("
-        	state.eval << "("
+		for (int i = 1; i <= howMany; i++) conds << conditionLabelN(i)
+		input "subCondR$state.n", "bool", title: "Enter sub rule for right?", submitOnChange: true
+		if(settings["subCondR$state.n"]) {
+			state.str = state.str + "("
+			state.eval << "("
             paragraph(state.str)
-        	inputLeftAndRight(true)
-    	} else {
+			inputLeftAndRight(true)
+		} else {
 			input "condR$state.n", "enum", title: "Which condition?", options: conds, submitOnChange: true
-        	if(settings["condR$state.n"]) {
-            	state.str = state.str + settings["condR$state.n"]
+			if(settings["condR$state.n"]) {
+				state.str = state.str + settings["condR$state.n"]
                 def myCond = 0
                 for (int i = 1; i <= howMany; i++) if(conditionLabelN(i) == settings["condR$state.n"]) myCond = i
                 state.eval << myCond
-            	paragraph(state.str)
+				paragraph(state.str)
             }
 			input "moreConds$state.n", "bool", title: "More conditions?", submitOnChange: true
-    		if(settings["moreConds$state.n"]) inputRight()
+			if(settings["moreConds$state.n"]) inputRight()
         }
     } 
 }
@@ -239,7 +237,7 @@ def inputLeftAndRight(sub) {
 	inputLeft()
     inputRight()
     if(sub) {
-    	state.str = state.str + ")"
+		state.str = state.str + ")"
         state.eval << ")"
     }
 }
@@ -289,8 +287,8 @@ def initialize() {
         else if(xCapab == "Time of day") scheduleTimeOfDay()
         else if(xCapab == "Days of week") schedule("2015-01-09T00:00:10.000-0700", "runRule")
         else {
-    		def thisDev = "rDev$i"
-        	def myDev = settings.find {it.key == thisDev}
+			def thisDev = "rDev$i"
+			def myDev = settings.find {it.key == thisDev}
             def thisState = "state$i"
             def myState = settings.find {it.key == thisState}
             subscribeDevice(myDev.value, xCapab)
@@ -327,7 +325,7 @@ def checkCondAny(dev, state, cap, rel) {
 
 def checkCondAll(dev, state, cap, rel) {
     def flip = ["on": "off",
-    			"off": "on",
+				"off": "on",
                 "active": "inactive",
                 "inactive": "active",
                 "open": "closed",
@@ -382,27 +380,27 @@ def eval() {
     while(true) {
 		def thisTok = state.eval[state.token]
 //		log.debug "eval: $thisTok"
-    	if(thisTok == "(") {
-    		state.token = state.token + 1
-        	operandL = eval()
+		if(thisTok == "(") {
+			state.token = state.token + 1
+			operandL = eval()
             result = operandL
         } else if(thisTok == ")") return result
-    	else if(thisTok == "OR") {
-    		state.token = state.token + 1
+		else if(thisTok == "OR") {
+			state.token = state.token + 1
             thisTok = state.eval[state.token]
-    		if(operandL) return true
+			if(operandL) return true
             else result = eval() 
     	} else if(thisTok == "AND") { 
-    		state.token = state.token + 1
+			state.token = state.token + 1
             thisTok = state.eval[state.token]
-    		if(!operandL) return false
+			if(!operandL) return false
             else result = eval() 
-    	} else {
-        	operandL = getOperand(thisTok)
+		} else {
+			operandL = getOperand(thisTok)
             result = operandL
         }
-    	state.token = state.token + 1
-    	if(state.token >= state.eval.size) return result
+		state.token = state.token + 1
+		if(state.token >= state.eval.size) return result
     }
 }
 
@@ -410,9 +408,9 @@ def runRule() {
 	state.token = 0
     def success = eval()
     if(state.success != success) {
-    	if(success) {if(myPhraseTrue) location.helloHome.execute(myPhraseTrue)}
+		if(success) {if(myPhraseTrue) location.helloHome.execute(myPhraseTrue)}
         else if(myPhraseFalse) location.helloHome.execute(myPhraseFalse)
-    	state.success = success
+		state.success = success
         log.debug (success ? "Success" : "Failure")
     }
 }
@@ -434,7 +432,7 @@ def stopHandler() {
 private conditionLabel() {
 	def result = ""
 	for (int i = 1; i <= howMany; i++) {
-    	result = result + conditionLabelN(i)
+		result = result + conditionLabelN(i)
         if((i + 1) <= howMany) result = result + "\n"
     }
     return result
@@ -444,23 +442,23 @@ private conditionLabelN(i) {
 	def result = ""
         def thisCapab = settings.find {it.key == "rCapab$i"}
         if(thisCapab.value == "Time of day") {
-        	result = result + "Time between " + timeIntervalLabel()
+			result = result + "Time between " + timeIntervalLabel()
         } else if(thisCapab.value == "Days of week") {
-        	result = result + "Day i" + (days.size() > 1 ? "n " + days : "s " + days[0])
+			result = result + "Day i" + (days.size() > 1 ? "n " + days : "s " + days[0])
         } else if (thisCapab.value == "Mode") {
-        	result = result + "Mode i" + (modes.size() > 1 ? "n " + modes : "s " + modes[0])
+			result = result + "Mode i" + (modes.size() > 1 ? "n " + modes : "s " + modes[0])
         } else {
-        	def thisDev = settings.find {it.key == "rDev$i"}
+			def thisDev = settings.find {it.key == "rDev$i"}
             def thisAll = settings.find {it.key == "AllrDev$i"}
             def myAny = thisAll ? "any " : ""
-        	if(thisCapab.value == "Temperature") result = result + "Temperature of "
+			if(thisCapab.value == "Temperature") result = result + "Temperature of "
             else if(thisCapab.value == "Humidity") result = result + "Humidity of "
             else if(thisCapab.value == "Illuminance") result = result + "Illuminance of "
-        	result = result + (myAny ? thisDev.value : thisDev.value[0]) + " " + ((thisAll ? thisAll.value : false) ? "all " : myAny)
+			result = result + (myAny ? thisDev.value : thisDev.value[0]) + " " + ((thisAll ? thisAll.value : false) ? "all " : myAny)
             def thisRel = settings.find {it.key == "RelrDev$i"}
             if(thisCapab.value in ["Temperature", "Humidity", "Illuminance"]) result = result + " " + thisRel.value + " "
-        	def thisState = settings.find {it.key == "state$i"}
-        	result = result + thisState.value
+			def thisState = settings.find {it.key == "state$i"}
+			result = result + thisState.value
         }
     return result
 }
