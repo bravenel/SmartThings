@@ -18,17 +18,16 @@ definition(
     namespace: "bravenel",
     author: "Bruce Ravenel",
     description: "Rule Routines",
-    category: "My Apps",
-    iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
-    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
-    iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
-
+    category: "Convenience",
+    iconUrl: "https://s3.amazonaws.com/smartapp-icons/MyApps/Cat-MyApps.png",
+    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/MyApps/Cat-MyApps@2x.png"
+)
 
 preferences {
     page(name: "selectRule")
 	page(name: "selectConditions")
-    page(name: "certainTime")
     page(name: "defineRule")
+    page(name: "certainTime")
 }
 
 def selectRule() {
@@ -44,6 +43,68 @@ def selectRule() {
             input "myPhraseFalse", "enum", title: "Routine to run when false", required: false, options: phrases.sort()
 		}
     }
+}
+
+def selectConditions() {
+	dynamicPage(name: "selectConditions", title: "Select Conditions", uninstall: false) {
+		section("") {input "howMany", "number", title: "How many conditions?", required: true, submitOnChange: true}
+        if(howMany) {
+			for (int i = 1; i <= howMany; i++) {
+				def thisCapab = "rCapab$i"
+            	section("Condtion #$i") {
+                    getCapab(thisCapab)
+                	def myCapab = settings.find {it.key == thisCapab}
+                	if(myCapab) {
+                		def xCapab = myCapab.value
+						if(!(xCapab in ["Time of day", "Days of week", "Mode"])) {
+                    		def thisDev = "rDev$i"
+                    		getDevs(xCapab, thisDev)
+                            def myDev = settings.find {it.key == thisDev}
+                            if(myDev) {
+                            	if(myDev.value.size() > 1) getAnyAll(thisDev)
+                            }
+                            if(xCapab in ["Temperature", "Humidity", "Illuminance"]) getRelational(thisDev)
+                        }
+                        getState(xCapab, i)
+                    }
+                }
+			}
+        }
+	}
+}
+
+def defineRule() {
+	dynamicPage(name:"defineRule",title: "Define the Rule", uninstall: false) {
+    	state.n = 0
+        state.str = ""
+        state.eval = []
+    	section() {
+			inputLeftAndRight(false)
+        }
+//        state.eval << ")"
+    }
+}
+
+def certainTime() {
+	dynamicPage(name:"certainTime",title: "Only during a certain time", uninstall: false) {
+		section() {
+			input "startingX", "enum", title: "Starting at", options: ["A specific time", "Sunrise", "Sunset"], defaultValue: "A specific time", submitOnChange: true
+			if(startingX in [null, "A specific time"]) input "starting", "time", title: "Start time", required: false
+			else {
+				if(startingX == "Sunrise") input "startSunriseOffset", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
+				else if(startingX == "Sunset") input "startSunsetOffset", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
+			}
+		}
+		
+		section() {
+			input "endingX", "enum", title: "Ending at", options: ["A specific time", "Sunrise", "Sunset"], defaultValue: "A specific time", submitOnChange: true
+			if(endingX in [null, "A specific time"]) input "ending", "time", title: "End time", required: false
+			else {
+				if(endingX == "Sunrise") input "endSunriseOffset", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
+				else if(endingX == "Sunset") input "endSunsetOffset", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
+			}
+		}
+	}
 }
 
 def getDevs(myCapab, dev) {
@@ -104,82 +165,34 @@ def getCapab(myCapab) {
 
 def getState(myCapab, n) {
 	def result = null
-	switch(myCapab) {
-		case "Switch":
-			result = input "state$n", "enum", title: "Switch state", options: ["on", "off"]
-			return
-		case "Motion":
-			result = input "state$n", "enum", title: "Motion state", options: ["active", "inactive"]
-			return
-		case "Acceleration":
-			result = input "state$n", "enum", title: "Acceleration state", options: ["active", "inactive"]
-			return
-		case "Contact":
-			result = input "state$n", "enum", title: "Contact state", options: ["open", "closed"]
-			return
-		case "Presence":
-			result = input "state$n", "enum", title: "Presence state", options: ["present", "not present"]
-			return
-		case "Lock":
-			result = input "state$n", "enum", title: "Lock state", options: ["locked", "unlocked"]
-			return
-        case "Temperature":
-        	result = input "state$n", "number", title: "Temperature"
-            return
-        case "Humidity":
-        	result = input "state$n", "number", title: "Humidity"
-            return
-        case "Illuminance":
-        	result = input "state$n", "number", title: "Illuminance"
-            return
-        case "Time of day":
-        	def timeLabel = timeIntervalLabel()
-			href "certainTime", title: "During a certain time", description: timeLabel ?: "Tap to set", state: timeLabel ? "complete" : null
-			return
-        case "Days of week":
-        	result = input "days", "enum", title: "On certain days of the week", multiple: true, required: false,
-				options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-			return
-		case "Mode":
-        	result = input "modes", "mode", title: "When mode is", multiple: true, required: false
-            return
-	}
-}
-
-def selectConditions() {
-	dynamicPage(name: "selectConditions", title: "Select Conditions", uninstall: false) {
-		section("") {input "howMany", "number", title: "How many conditions?", required: true, submitOnChange: true}
-        if(howMany) {
-			for (int i = 1; i <= howMany; i++) {
-				def thisCapab = "rCapab$i"
-            	section("Condtion #$i") {
-                    getCapab(thisCapab)
-                	def myCapab = settings.find {it.key == thisCapab}
-                	if(myCapab) {
-                		def xCapab = myCapab.value
-						if(!(xCapab in ["Time of day", "Days of week", "Mode"])) {
-                    		def thisDev = "rDev$i"
-                    		getDevs(xCapab, thisDev)
-                            def myDev = settings.find {it.key == thisDev}
-                            if(myDev) {
-                            	if(myDev.value.size() > 1) getAnyAll(thisDev)
-                            }
-                            if(xCapab in ["Temperature", "Humidity", "Illuminance"]) getRelational(thisDev)
-                        }
-                        getState(xCapab, i)
-                    }
-                }
-			}
-        }
-	}
+    def days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+	if     (myCapab == "Switch") result = input "state$n", "enum", title: "Switch state", options: ["on", "off"]
+	else if(myCapab == "Motion") result = input "state$n", "enum", title: "Motion state", options: ["active", "inactive"]
+	else if(myCapab == "Acceleration") result = input "state$n", "enum", title: "Acceleration state", options: ["active", "inactive"]
+	else if(myCapab == "Contact") result = input "state$n", "enum", title: "Contact state", options: ["open", "closed"]
+	else if(myCapab == "Presence") result = input "state$n", "enum", title: "Presence state", options: ["present", "not present"]
+	else if(myCapab == "Lock") result = input "state$n", "enum", title: "Lock state", options: ["locked", "unlocked"]
+    else if(myCapab == "Temperature") result = input "state$n", "number", title: "Temperature"
+    else if(myCapab == "Humidity") result = input "state$n", "number", title: "Humidity"
+    else if(myCapab == "Illuminance") result = input "state$n", "number", title: "Illuminance"
+	else if(myCapab == "Mode") result = input "modes", "mode", title: "When mode is", multiple: true, required: false
+	else if(myCapab == "Days of week") result = input "days", "enum", title: "On certain days of the week", multiple: true, required: false, options: days
+	else if(myCapab == "Time of day") {
+        def timeLabel = timeIntervalLabel()
+		href "certainTime", title: "During a certain time", description: timeLabel ?: "Tap to set", state: timeLabel ? "complete" : null
+    } 
 }
 
 def inputLeft() {
 	def conds = []
     for (int i = 1; i <= howMany; i++) conds << conditionLabelN(i)
     input "subCondL$state.n", "bool", title: "Enter sub rule for left?", submitOnChange: true
-    if(settings["subCondL$state.n"]) inputLeftAndRight(true)
-    else {
+    if(settings["subCondL$state.n"]) {
+    	state.str = state.str + "("
+        state.eval << "("
+        paragraph(state.str)
+        inputLeftAndRight(true)
+    } else {
     	input "condL$state.n", "enum", title: "Which condition?", options: conds, submitOnChange: true
         if(settings["condL$state.n"]) {
             state.str = state.str + settings["condL$state.n"]
@@ -201,8 +214,12 @@ def inputRight() {
 		def conds = []
     	for (int i = 1; i <= howMany; i++) conds << conditionLabelN(i)
     	input "subCondR$state.n", "bool", title: "Enter sub rule for right?", submitOnChange: true
-    	if(settings["subCondR$state.n"]) inputLeftAndRight(true)
-    	else {
+    	if(settings["subCondR$state.n"]) {
+    		state.str = state.str + "("
+        	state.eval << "("
+            paragraph(state.str)
+        	inputLeftAndRight(true)
+    	} else {
 			input "condR$state.n", "enum", title: "Which condition?", options: conds, submitOnChange: true
         	if(settings["condR$state.n"]) {
             	state.str = state.str + settings["condR$state.n"]
@@ -219,50 +236,12 @@ def inputRight() {
 
 def inputLeftAndRight(sub) {
 	state.n = state.n + 1
-    if(sub) {
-    	state.str = state.str + "("
-        state.eval << "("
-    }
 	inputLeft()
     inputRight()
     if(sub) {
     	state.str = state.str + ")"
         state.eval << ")"
     }
-}
-
-def defineRule() {
-	dynamicPage(name:"defineRule",title: "Define the Rule", uninstall: false) {
-    	state.n = 0
-        state.str = ""
-        state.eval = []
-    	section() {
-			inputLeftAndRight(false)
-        }
-//        state.eval << ")"
-    }
-}
-
-def certainTime() {
-	dynamicPage(name:"certainTime",title: "Only during a certain time", uninstall: false) {
-		section() {
-			input "startingX", "enum", title: "Starting at", options: ["A specific time", "Sunrise", "Sunset"], defaultValue: "A specific time", submitOnChange: true
-			if(startingX in [null, "A specific time"]) input "starting", "time", title: "Start time", required: false
-			else {
-				if(startingX == "Sunrise") input "startSunriseOffset", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
-				else if(startingX == "Sunset") input "startSunsetOffset", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
-			}
-		}
-		
-		section() {
-			input "endingX", "enum", title: "Ending at", options: ["A specific time", "Sunrise", "Sunset"], defaultValue: "A specific time", submitOnChange: true
-			if(endingX in [null, "A specific time"]) input "ending", "time", title: "End time", required: false
-			else {
-				if(endingX == "Sunrise") input "endSunriseOffset", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
-				else if(endingX == "Sunset") input "endSunsetOffset", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
-			}
-		}
-	}
 }
 
 def subscribeDevice(dev, cap) {
@@ -275,6 +254,21 @@ def subscribeDevice(dev, cap) {
     else if(cap == "Contact") 		subscribe(dev, "contact", allHandler)
     else if(cap == "Presence") 		subscribe(dev, "presence", allHandler)
     else if(cap == "Lock") 			subscribe(dev, "lock", allHandler)
+}
+
+def scheduleTimeOfDay() {
+	def start = null
+	def stop = null
+	def s = getSunriseAndSunset(zipCode: zipCode, sunriseOffset: startSunriseOffset, sunsetOffset: startSunsetOffset)
+	if(startingX == "Sunrise") start = s.sunrise.time
+	else if(startingX == "Sunset") start = s.sunset.time
+	else if(starting) start = timeToday(starting,location.timeZone).time
+	s = getSunriseAndSunset(zipCode: zipCode, sunriseOffset: endSunriseOffset, sunsetOffset: endSunsetOffset)
+	if(endingX == "Sunrise") stop = s.sunrise.time
+	else if(endingX == "Sunset") stop = s.sunset.time
+	else if(ending) stop = timeToday(ending,location.timeZone).time
+    schedule(start, "startHandler")
+    schedule(stop, "stopHandler")
 }
 
 def installed() {
@@ -291,22 +285,9 @@ def initialize() {
     	def thisCapab = "rCapab$i"
         def myCapab = settings.find {it.key == thisCapab}
         def xCapab = myCapab.value
-        if(xCapab == "Mode") subscribe(location, allHandler)
-        else if(xCapab == "Time of day") {
-			def currTime = now()
-			def start = null
-			def stop = null
-			def s = getSunriseAndSunset(zipCode: zipCode, sunriseOffset: startSunriseOffset, sunsetOffset: startSunsetOffset)
-			if(startingX == "Sunrise") start = s.sunrise.time
-			else if(startingX == "Sunset") start = s.sunset.time
-			else if(starting) start = timeToday(starting,location.timeZone).time
-			s = getSunriseAndSunset(zipCode: zipCode, sunriseOffset: endSunriseOffset, sunsetOffset: endSunsetOffset)
-			if(endingX == "Sunrise") stop = s.sunrise.time
-			else if(endingX == "Sunset") stop = s.sunset.time
-			else if(ending) stop = timeToday(ending,location.timeZone).time
-            schedule(start, "startHandler")
-            schedule(stop, "stopHandler")
-        } else if(xCapab == "Days of week") schedule("2015-01-09T00:00:10.000-0700", "allHandler")
+        if     (xCapab == "Mode") subscribe(location, allHandler)
+        else if(xCapab == "Time of day") scheduleTimeOfDay()
+        else if(xCapab == "Days of week") schedule("2015-01-09T00:00:10.000-0700", "runRule")
         else {
     		def thisDev = "rDev$i"
         	def myDev = settings.find {it.key == thisDev}
@@ -340,22 +321,32 @@ def checkCondAny(dev, state, cap, rel) {
     else if(cap == "Contact") 		result = state in dev.currentContact
     else if(cap == "Presence") 		result = state in dev.currentPresence
     else if(cap == "Lock") 			result = state in dev.currentLock
-//    log.debug "CheckAny $cap $result"
+    log.debug "CheckAny $cap $result"
     return result
 }
 
 def checkCondAll(dev, state, cap, rel) {
+    def flip = ["on": "off",
+    			"off": "on",
+                "active": "inactive",
+                "inactive": "active",
+                "open": "closed",
+                "closed": "open",
+                "present": "not present",
+                "not present": "present",
+                "locked": "unlocked",
+                "unlocked": "locked"]
 	def result = true
 	if     (cap == "Temperature") 	dev.currentTemperature.each {result = result && compare(it, rel, state)}
     else if(cap == "Humidity") 		dev.currentHumidity.each {result = result && compare(it, rel, state)}
     else if(cap == "Illuminance") 	dev.currentIlluminance.each {result = result && compare(it, rel, state)}
-    else if(cap == "Switch") 		dev.currentSwitch.each {result = result && it == state}
-    else if(cap == "Motion") 		dev.currentMotion.each {result = result && it == state}
-    else if(cap == "Acceleration") 	dev.currentAcceleration.each {result = result && it == state}
-    else if(cap == "Contact") 		dev.currentContact.each {result = result && it == state}
-    else if(cap == "Presence") 		dev.currentPresence.each {result = result && it == state}
-    else if(cap == "Lock") 			dev.currentLock.each {result = result && it == state}
-//    log.debug "CheckAll $cap $result"
+    else if(cap == "Switch") 		result = !(flip[state] in dev.currentSwitch)
+    else if(cap == "Motion") 		result = !(flip[state] in dev.currentMotion)
+    else if(cap == "Acceleration") 	result = !(flip[state] in dev.currentAcceleration)
+    else if(cap == "Contact") 		result = !(flip[state] in dev.currentContact)
+    else if(cap == "Presence") 		result = !(flip[state] in dev.currentPresence)
+    else if(cap == "Lock") 			result = !(flip[state] in dev.currentLock)
+    log.debug "CheckAll $cap $result"
     return result
 }
 
@@ -365,9 +356,9 @@ def getOperand(i) {
     def thisCapab = "rCapab$i"
     def myCapab = settings.find {it.key == thisCapab}
     def xCapab = myCapab.value
-    if     (xCapab == "Mode") result = getModeOk()
-    else if(xCapab == "Time of day") result = getTimeOk()
-    else if(xCapab == "Days of week") result = getDaysOk()
+    if     (xCapab == "Mode") result = modeOk
+    else if(xCapab == "Time of day") result = timeOk
+    else if(xCapab == "Days of week") result = daysOk
     else {
        	def thisDev = "rDev$i"
         def myDev = settings.find {it.key == thisDev}
@@ -386,7 +377,6 @@ def getOperand(i) {
 }
 
 def eval() {
-//	log.debug "eval called"
     def result = true
     def operandL = false
     while(true) {
@@ -400,13 +390,13 @@ def eval() {
     	else if(thisTok == "OR") {
     		state.token = state.token + 1
             thisTok = state.eval[state.token]
-    		if(operandL) result = true
+    		if(operandL) return true
             else result = eval() 
     	} else if(thisTok == "AND") { 
     		state.token = state.token + 1
             thisTok = state.eval[state.token]
-    		if(!operandL) result = false
-            else result = operandL && eval() 
+    		if(!operandL) return false
+            else result = eval() 
     	} else {
         	operandL = getOperand(thisTok)
             result = operandL
@@ -416,14 +406,9 @@ def eval() {
     }
 }
 
-def evaluate() {
+def runRule() {
 	state.token = 0
-	def result = eval()    
-}
-
-def allHandler(evt) {
-//	log.debug "Handler: $evt.displayName $evt.name $evt.value"
-    def success = evaluate()
+    def success = eval()
     if(state.success != success) {
     	if(success) {if(myPhraseTrue) location.helloHome.execute(myPhraseTrue)}
         else if(myPhraseFalse) location.helloHome.execute(myPhraseFalse)
@@ -432,14 +417,20 @@ def allHandler(evt) {
     }
 }
 
+def allHandler(evt) {
+	log.debug "Handler: $evt.displayName $evt.name $evt.value"
+	runRule()
+}
+
 def startHandler() {
-	allHandler(null)
+	runRule()
 }
 
 def stopHandler() {
-	allHandler(null)
+	runRule()
 }
 
+//  private execution filter methods below
 private conditionLabel() {
 	def result = ""
 	for (int i = 1; i <= howMany; i++) {
