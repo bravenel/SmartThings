@@ -10,7 +10,7 @@ Next, you specify the Rule.  The Rule is going to describe a logic expression, s
     Cond1 AND (Cond2 OR Cond3)
     or
     (Cond1 AND Cond2) OR Cond3
-    etc.
+    etc. 
 You will see this prompt: Enter sub rule for left, or Enter sub rule for right.  What this means is the grouping shown above using parentheses.  As you were to build the first rule above, you would select "Enter sub rule for right" when you got to that part of the Rule description.  In the case of the second rule above you would selectd "Enter sub rule for left" at the very beginning of defining the Rule. You may string out at many conditions as you like, separated by AND and OR after each condition.  As a practical matter, you will see a lot more prompts about entering a sub rule than you need -- basically for every condition.  Your Rule can use as much nesting of parentheses (sub rules) as you need.
 
 When the Rule is installed, it will immediately run the Rule check, and take action as needed.  Evaluation of the Rule is strictly left to right at any level: main rule or sub rule.  If AND is encountered, and the evaluation of the Rule to that point is False, that rule returns False.  If OR is encountered, and the evaluation of the Rule to that point is True, that rule returns True.
