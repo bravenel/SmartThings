@@ -239,7 +239,7 @@ def defineRule() {
     	section() {
 			inputLeftAndRight(false)
         }
-        state.eval << ")"
+//        state.eval << ")"
     }
 }
 
@@ -325,6 +325,7 @@ def checkCondAny(dev, state, cap, rel) {
     else if(cap == "Contact") 		result = state in dev.currentContact
     else if(cap == "Presence") 		result = state in dev.currentPresence
     else if(cap == "Lock") 			result = state in dev.currentLock
+//    log.debug "CheckAny $cap $result"
     return result
 }
 
@@ -339,6 +340,7 @@ def checkCondAll(dev, state, cap, rel) {
     else if(cap == "Contact") 		dev.currentContact.each {result = result && it == state}
     else if(cap == "Presence") 		dev.currentPresence.each {result = result && it == state}
     else if(cap == "Lock") 			dev.currentLock.each {result = result && it == state}
+//    log.debug "CheckAll $cap $result"
     return result
 }
 
@@ -358,8 +360,10 @@ def getOperand(i) {
         def myRel = settings.find {it.key == thisRel}
         def thisAll = "AllrDev$i"
         def myAll = settings.find {it.key == thisAll}
-        if(myAll) {if(myAll.value) result = checkCondAll(myDev.value, myState.value, xCapab, myrel ? myRel.value : 0)}
-        else result = checkCondAny(myDev.value, myState.value, xCapab, myrel ? myRel.value : 0)
+        if(myAll) {
+        	if(myAll.value) result = checkCondAll(myDev.value, myState.value, xCapab, myrel ? myRel.value : 0)
+        	else result = checkCondAny(myDev.value, myState.value, xCapab, myrel ? myRel.value : 0)
+        } else result = checkCondAny(myDev.value, myState.value, xCapab, myrel ? myRel.value : 0)
 	}
     return result
 }
@@ -401,7 +405,7 @@ def evaluate() {
 }
 
 def allHandler(evt) {
-//	log.debug "Handler: $evt.displayName $evt.name"
+//	log.debug "Handler: $evt.displayName $evt.name $evt.value"
     def success = evaluate()
     if(state.success != success) {
     	if(success) {if(myPhraseTrue) location.helloHome.execute(myPhraseTrue)}
