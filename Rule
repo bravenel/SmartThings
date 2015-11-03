@@ -295,7 +295,8 @@ def initialize() {
 			subscribeDevice(myDev.value, xCapab)
 		}
 	}
-	state.success = false
+	state.success = null
+    runRule()
 }
 
 def compare(a, rel, b) {
@@ -437,11 +438,11 @@ def runRule() {
 	if(state.success != success) {
 		if(success) {
         	if(myPhraseTrue) location.helloHome.execute(myPhraseTrue)
-            switchTrue.on()
+            if(switchTrue) switchTrue.on()
         }
 		else {
         	if(myPhraseFalse) location.helloHome.execute(myPhraseFalse)
-            switchFalse.off()
+            if(switchFalse) switchFalse.off()
         }
 		state.success = success
 		log.debug (success ? "Success" : "Failure")
