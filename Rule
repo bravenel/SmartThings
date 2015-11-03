@@ -276,6 +276,7 @@ def installed() {
 }
 
 def updated() {
+	unschedule()
 	unsubscribe()
 	initialize()
 }
