@@ -73,14 +73,13 @@ def selectConditions() {
 
 def defineRule() {
 	dynamicPage(name:"defineRule",title: "Define the Rule", uninstall: false) {
-    	state.n = 0
-        state.str = ""
-        state.eval = []
-	section() {
-		inputLeftAndRight(false)
-        }
-//        state.eval << ")"
-    }
+		state.n = 0
+		state.str = ""
+		state.eval = []
+		section() {
+			inputLeftAndRight(false)
+		}
+	}
 }
 
 def certainTime() {
