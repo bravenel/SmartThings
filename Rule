@@ -443,26 +443,7 @@ def stopHandler() {
 private conditionLabel() {
 	def result = ""
 	for (int i = 1; i <= howMany; i++) {
-        def thisCapab = settings.find {it.key == "rCapab$i"}
-        if(thisCapab.value == "Time of day") {
-        	result = result + "Time between " + timeIntervalLabel()
-        } else if(thisCapab.value == "Days of week") {
-        	result = result + "Day i" + (days.size() > 1 ? "n " + days : "s " + days[0])
-        } else if (thisCapab.value == "Mode") {
-        	result = result + "Mode i" + (modes.size() > 1 ? "n " + modes : "s " + modes[0])
-        } else {
-        	def thisDev = settings.find {it.key == "rDev$i"}
-            def thisAll = settings.find {it.key == "AllrDev$i"}
-            def myAny = thisAll ? "any " : ""
-        	if(thisCapab.value == "Temperature") result = result + "Temperature of "
-            else if(thisCapab.value == "Humidity") result = result + "Humidity of "
-            else if(thisCapab.value == "Illuminance") result = result + "Illuminance of "
-        	result = result + (myAny ? thisDev.value : thisDev.value[0]) + " " + ((thisAll ? thisAll.value : false) ? "all " : myAny)
-            def thisRel = settings.find {it.key == "RelrDev$i"}
-            if(thisCapab.value in ["Temperature", "Humidity", "Illuminance"]) result = result + " " + thisRel.value + " "
-        	def thisState = settings.find {it.key == "state$i"}
-        	result = result + thisState.value
-        }
+    	result = result + conditionLabelN(i)
         if((i + 1) <= howMany) result = result + "\n"
     }
     return result
