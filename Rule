@@ -292,7 +292,22 @@ def initialize() {
         def myCapab = settings.find {it.key == thisCapab}
         def xCapab = myCapab.value
         if(xCapab == "Mode") subscribe(location, allHandler)
-        else if(!(xCapab in ["Time of day", "Days of week"])) {
+        else if(xCapab == "Time of day") {
+			def currTime = now()
+			def start = null
+			def stop = null
+			def s = getSunriseAndSunset(zipCode: zipCode, sunriseOffset: startSunriseOffset, sunsetOffset: startSunsetOffset)
+			if(startingX == "Sunrise") start = s.sunrise.time
+			else if(startingX == "Sunset") start = s.sunset.time
+			else if(starting) start = timeToday(starting,location.timeZone).time
+			s = getSunriseAndSunset(zipCode: zipCode, sunriseOffset: endSunriseOffset, sunsetOffset: endSunsetOffset)
+			if(endingX == "Sunrise") stop = s.sunrise.time
+			else if(endingX == "Sunset") stop = s.sunset.time
+			else if(ending) stop = timeToday(ending,location.timeZone).time
+            schedule(start, "startHandler")
+            schedule(stop, "stopHandler")
+        } else if(xCapab == "Days of week") schedule("2015-01-09T00:00:10.000-0700", "allHandler")
+        else {
     		def thisDev = "rDev$i"
         	def myDev = settings.find {it.key == thisDev}
             def thisState = "state$i"
@@ -350,8 +365,10 @@ def getOperand(i) {
     def thisCapab = "rCapab$i"
     def myCapab = settings.find {it.key == thisCapab}
     def xCapab = myCapab.value
-    if(xCapab == "Mode") result = getModeOk()
-    else if(!(xCapab in ["Time of day", "Days of week"])) {
+    if     (xCapab == "Mode") result = getModeOk()
+    else if(xCapab == "Time of day") result = getTimeOk()
+    else if(xCapab == "Days of week") result = getDaysOk()
+    else {
        	def thisDev = "rDev$i"
         def myDev = settings.find {it.key == thisDev}
         def thisState = "state$i"
@@ -413,6 +430,14 @@ def allHandler(evt) {
     	state.success = success
         log.debug (success ? "Success" : "Failure")
     }
+}
+
+def startHandler() {
+	allHandler(null)
+}
+
+def stopHandler() {
+	allHandler(null)
 }
 
 private conditionLabel() {
