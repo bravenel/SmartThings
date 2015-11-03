@@ -40,7 +40,9 @@ def selectRule() {
 			href "defineRule", title: "Define the Rule", description: state.str ? state.str : "Tap to set", state: state.str ? "complete" : null
 			def phrases = location.helloHome?.getPhrases()*.label
 			input "myPhraseTrue", "enum", title: "Routine to run when true", required: false, options: phrases.sort()
+			input "switchTrue", "capability.switch", title: "Switch(es) to turn on when true", required: false, multiple: true
 			input "myPhraseFalse", "enum", title: "Routine to run when false", required: false, options: phrases.sort()
+			input "switchFalse", "capability.switch", title: "Switch(es) to turn off when false", required: false, multiple: true
 		}
 	}
 }
@@ -373,33 +375,59 @@ def getOperand(i) {
 	return result
 }
 
+def findRParen() {
+	def noMatch = true
+    while(noMatch) {
+    	if(state.eval[state.token] == ")") {
+        	if(state.parenLev == 0) return
+            else state.parenLev = state.parenLev - 1
+        } else if(state.eval[state.token] == "(") state.parenLev = state.parenLev + 1
+        state.token = state.token + 1
+        if(state.token >= state.eval.size) return
+    }
+}
+
+def disEval() {
+    if(state.eval[state.token] == "(") {
+    	state.parenLev = 0
+        findRParen()
+    }
+    if(state.token >= state.eval.size) return
+    state.token = state.token + 1
+}
+
 def eval() {
 	def result = true
 	def operandL = false
 	while(true) {
+		if(state.token >= state.eval.size) return result
 		def thisTok = state.eval[state.token]
 //		log.debug "eval: $thisTok"
 		if(thisTok == "(") {
 			state.token = state.token + 1
 			operandL = eval()
-		result = operandL
-		} else if(thisTok == ")") return result
-		else if(thisTok == "OR") {
+			result = operandL
+		} else if(thisTok == ")") {
+        	state.token = state.token + 1
+        	return result
+		} else if(thisTok == "OR") {
 			state.token = state.token + 1
-			thisTok = state.eval[state.token]
-			if(operandL) return true
-			else result = eval() 
+			if(operandL) {
+            	disEval()
+            	return true
+            } else result = eval() 
 		} else if(thisTok == "AND") { 
 			state.token = state.token + 1
-			thisTok = state.eval[state.token]
-			if(!operandL) return false
-			else result = eval() 
+			if(!operandL) {
+            	disEval()
+            	return false
+			} else result = eval() 
 		} else {
 			operandL = getOperand(thisTok)
 			result = operandL
-        	}
-	state.token = state.token + 1
-	if(state.token >= state.eval.size) return result
+        }
+		state.token = state.token + 1
+		if(state.token >= state.eval.size) return result
 	}
 }
 
@@ -407,8 +435,14 @@ def runRule() {
 	state.token = 0
 	def success = eval()
 	if(state.success != success) {
-		if(success) {if(myPhraseTrue) location.helloHome.execute(myPhraseTrue)}
-		else if(myPhraseFalse) location.helloHome.execute(myPhraseFalse)
+		if(success) {
+        	if(myPhraseTrue) location.helloHome.execute(myPhraseTrue)
+            switchTrue.on()
+        }
+		else {
+        	if(myPhraseFalse) location.helloHome.execute(myPhraseFalse)
+            switchFalse.off()
+        }
 		state.success = success
 		log.debug (success ? "Success" : "Failure")
 	}
