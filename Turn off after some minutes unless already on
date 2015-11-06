@@ -35,6 +35,7 @@ def settings() {
 			input "switches", "capability.switch", title: "Switches", multiple: true, required:true
 			input "minutes", "number", range: "1..*", title: "Minutes", required: true, defaultValue: 5
 			input "trigger", "capability.momentary", title: "Button to activate", required: true, multiple: false
+			input "cancel", "capabiity.switch", title: "Optional switch to cancel", required: false, multiple: false
 			label title: "Assign a name:", required: false 
 		}
 		section(title: "More options", hidden: hideOptionsSection(), hideable: true) {
@@ -84,12 +85,17 @@ def updated() {
 
 def initialize() {
 	subscribe(trigger, "switch.on", onHandler)
+	subscribe(cancel, "switch.on", cancelHandler)
 }
 
 def onHandler(evt) {
 	def switchOn = "on" in switches.currentSwitch
   if(allOk) switches.on()
 	if(!switchOn) runIn(minutes*60, turnOff)
+}
+
+def cancelHandler(evt) {
+	unschedule()
 }
 
 def turnOff() {
