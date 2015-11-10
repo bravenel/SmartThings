@@ -1,5 +1,5 @@
 /**
- *  Rule
+ *  Rule Machine
  *
  *  Copyright 2015 Bruce Ravenel
  *
@@ -14,10 +14,10 @@
  *
  */
 definition(
-    name: "Rule",
+    name: "Rule Machine",
     namespace: "bravenel",
     author: "Bruce Ravenel",
-    description: "Rule Routines",
+    description: "Rule Machine",
     category: "Convenience",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/MyApps/Cat-MyApps.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/MyApps/Cat-MyApps@2x.png"
@@ -31,7 +31,7 @@ preferences {
 }
 
 def selectRule() {
-	dynamicPage(name: "selectRule", title: "Select Conditions, Rule and Routines", uninstall: true, install: true) {
+	dynamicPage(name: "selectRule", title: "Select Conditions, Rule and Results", uninstall: true, install: true) {
     	
 		section() {     
 			label title: "Name the Rule", required: true
@@ -40,9 +40,9 @@ def selectRule() {
 			href "defineRule", title: "Define the Rule", description: state.str ? state.str : "Tap to set", state: state.str ? "complete" : null
 			def phrases = location.helloHome?.getPhrases()*.label
 			input "myPhraseTrue", "enum", title: "Routine to run when true", required: false, options: phrases.sort()
-			input "switchTrue", "capability.switch", title: "Switch(es) to turn on when true", required: false, multiple: true
+			input "switchTrue", "capability.switch", title: "Switches to turn on when true", required: false, multiple: true
 			input "myPhraseFalse", "enum", title: "Routine to run when false", required: false, options: phrases.sort()
-			input "switchFalse", "capability.switch", title: "Switch(es) to turn off when false", required: false, multiple: true
+			input "switchFalse", "capability.switch", title: "Switches to turn off when false", required: false, multiple: true
 		}
 	}
 }
@@ -50,7 +50,7 @@ def selectRule() {
 def selectConditions() {
 	dynamicPage(name: "selectConditions", title: "Select Conditions", uninstall: false) {
 		section("") {input "howMany", "number", title: "How many conditions?", required: true, submitOnChange: true}
-			if(howMany) {
+		if(howMany) {
 			for (int i = 1; i <= howMany; i++) {
 				def thisCapab = "rCapab$i"
 				section("Condtion #$i") {
@@ -79,7 +79,7 @@ def defineRule() {
 		state.str = ""
 		state.eval = []
 		section() {
-			inputLeftAndRight(false)
+		inputLeftAndRight(false)
 		}
 	}
 }
@@ -165,32 +165,34 @@ def getCapab(myCapab) {
 def getState(myCapab, n) {
 	def result = null
 	def days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-	if     (myCapab == "Switch") result = input "state$n", "enum", title: "Switch state", options: ["on", "off"]
-	else if(myCapab == "Motion") result = input "state$n", "enum", title: "Motion state", options: ["active", "inactive"]
-	else if(myCapab == "Acceleration") result = input "state$n", "enum", title: "Acceleration state", options: ["active", "inactive"]
-	else if(myCapab == "Contact") result = input "state$n", "enum", title: "Contact state", options: ["open", "closed"]
-	else if(myCapab == "Presence") result = input "state$n", "enum", title: "Presence state", options: ["present", "not present"]
-	else if(myCapab == "Lock") result = input "state$n", "enum", title: "Lock state", options: ["locked", "unlocked"]
-	else if(myCapab == "Temperature") result = input "state$n", "number", title: "Temperature"
-	else if(myCapab == "Humidity") result = input "state$n", "number", title: "Humidity"
-	else if(myCapab == "Illuminance") result = input "state$n", "number", title: "Illuminance"
-	else if(myCapab == "Mode") result = input "modes", "mode", title: "When mode is", multiple: true, required: false
-	else if(myCapab == "Days of week") result = input "days", "enum", title: "On certain days of the week", multiple: true, required: false, options: days
+	if     (myCapab == "Switch") 		result = input "state$n", "enum", title: "Switch state", options: ["on", "off"]
+	else if(myCapab == "Motion") 		result = input "state$n", "enum", title: "Motion state", options: ["active", "inactive"], defaultValue: "active"
+	else if(myCapab == "Acceleration")	result = input "state$n", "enum", title: "Acceleration state", options: ["active", "inactive"]
+	else if(myCapab == "Contact") 		result = input "state$n", "enum", title: "Contact state", options: ["open", "closed"]
+	else if(myCapab == "Presence") 		result = input "state$n", "enum", title: "Presence state", options: ["present", "not present"], defaultValue: "present"
+	else if(myCapab == "Lock") 			result = input "state$n", "enum", title: "Lock state", options: ["locked", "unlocked"]
+	else if(myCapab == "Temperature") 	result = input "state$n", "number", title: "Temperature"
+	else if(myCapab == "Humidity") 		result = input "state$n", "number", title: "Humidity"
+	else if(myCapab == "Illuminance") 	result = input "state$n", "number", title: "Illuminance"
+	else if(myCapab == "Mode") 			result = input "modes", "mode", title: "When mode is", multiple: true, required: false
+	else if(myCapab == "Days of week") 	result = input "days", "enum", title: "On certain days of the week", multiple: true, required: false, options: days
 	else if(myCapab == "Time of day") {
 		def timeLabel = timeIntervalLabel()
 		href "certainTime", title: "During a certain time", description: timeLabel ?: "Tap to set", state: timeLabel ? "complete" : null
     } 
 }
 
-def inputLeft() {
+def inputLeft(sub) {
 	def conds = []
 	for (int i = 1; i <= howMany; i++) conds << conditionLabelN(i)
-	input "subCondL$state.n", "bool", title: "Enter sub rule for left?", submitOnChange: true
+	input "subCondL$state.n", "bool", title: "Enter subrule for left?", submitOnChange: true
 	if(settings["subCondL$state.n"]) {
 		state.str = state.str + "("
 		state.eval << "("
 		paragraph(state.str)
 		inputLeftAndRight(true)
+		input "moreConds$state.n", "bool", title: "More conditions?", submitOnChange: true
+		if(settings["moreConds$state.n"]) inputRight(sub)
 	} else {
 		input "condL$state.n", "enum", title: "Which condition?", options: conds, submitOnChange: true
 		if(settings["condL$state.n"]) {
@@ -203,7 +205,7 @@ def inputLeft() {
 	}
 }
 
-def inputRight() {
+def inputRight(sub) {
 	state.n = state.n + 1
 	input "operator$state.n", "enum", title: "Choose: AND,  OR,  Done", options: ["AND", "OR", "Done"], submitOnChange: true
 	if(settings["operator$state.n"]) if(settings["operator$state.n"] != "Done") {
@@ -212,12 +214,14 @@ def inputRight() {
 		paragraph(state.str)
 		def conds = []
 		for (int i = 1; i <= howMany; i++) conds << conditionLabelN(i)
-		input "subCondR$state.n", "bool", title: "Enter sub rule for right?", submitOnChange: true
+		input "subCondR$state.n", "bool", title: "Enter subrule for right?", submitOnChange: true
 		if(settings["subCondR$state.n"]) {
 			state.str = state.str + "("
 			state.eval << "("
 			paragraph(state.str)
 			inputLeftAndRight(true)
+			input "moreConds$state.n", "bool", title: "More conditions on right?", submitOnChange: true
+			if(settings["moreConds$state.n"]) inputRight(sub)
 		} else {
 			input "condR$state.n", "enum", title: "Which condition?", options: conds, submitOnChange: true
 			if(settings["condR$state.n"]) {
@@ -227,7 +231,16 @@ def inputRight() {
 				state.eval << myCond
 				paragraph(state.str)
 			}
-			input "moreConds$state.n", "bool", title: "More conditions?", submitOnChange: true
+            if(sub) {
+            	input "endOfSub$state.n", "bool", title: "End of subrule?", submitOnChange: true
+                if(settings["endOfSub$state.n"]) {
+					state.str = state.str + ")"
+					state.eval << ")"
+                    paragraph(state.str)
+                	return
+                }
+            }
+			input "moreConds$state.n", "bool", title: "More conditions on right?", submitOnChange: true
 			if(settings["moreConds$state.n"]) inputRight()
 		}
 	} 
@@ -235,25 +248,11 @@ def inputRight() {
 
 def inputLeftAndRight(sub) {
 	state.n = state.n + 1
-	inputLeft()
-	inputRight()
-	if(sub) {
-		state.str = state.str + ")"
-		state.eval << ")"
-	}
+	inputLeft(sub)
+	inputRight(sub)
 }
 
-def subscribeDevice(dev, cap) {
-	if     (cap == "Temperature") 	subscribe(dev, "temperature", allHandler)
-	else if(cap == "Humidity") 		subscribe(dev, "humidity", allHandler)
-	else if(cap == "Illuminance") 	subscribe(dev, "illuminance", allHandler)
-	else if(cap == "Switch") 		subscribe(dev, "switch", allHandler)
-	else if(cap == "Motion") 		subscribe(dev, "motion", allHandler)
-	else if(cap == "Acceleration") 	subscribe(dev, "acceleration", allHandler)
-	else if(cap == "Contact") 		subscribe(dev, "contact", allHandler)
-	else if(cap == "Presence") 		subscribe(dev, "presence", allHandler)
-	else if(cap == "Lock") 			subscribe(dev, "lock", allHandler)
-}
+// initialization code below
 
 def scheduleTimeOfDay() {
 	def start = null
@@ -268,7 +267,7 @@ def scheduleTimeOfDay() {
 	else if(ending) stop = timeToday(ending,location.timeZone).time
 	schedule(start, "startHandler")
 	schedule(stop, "stopHandler")
-	schedule("2015-01-09T00:00:20.000-0700", "scheduleTimeOfDay") // in case sunset/sunrise; change daily
+    schedule("2015-01-09T00:00:29.000-0700", "scheduleTimeOfDay") // in case sunset/sunrise; change daily
 }
 
 def installed() {
@@ -283,23 +282,17 @@ def updated() {
 
 def initialize() {
 	for (int i = 1; i <= howMany; i++) {
-		def thisCapab = "rCapab$i"
-		def myCapab = settings.find {it.key == thisCapab}
-		def xCapab = myCapab.value
-		if     (xCapab == "Mode") subscribe(location, allHandler)
-		else if(xCapab == "Time of day") scheduleTimeOfDay()
-		else if(xCapab == "Days of week") schedule("2015-01-09T00:00:10.000-0700", "runRule")
-		else {
-		def thisDev = "rDev$i"
-			def myDev = settings.find {it.key == thisDev}
-			def thisState = "state$i"
-			def myState = settings.find {it.key == thisState}
-			subscribeDevice(myDev.value, xCapab)
-		}
+		def capab = (settings.find {it.key == "rCapab$i"}).value
+		if     (capab == "Mode") subscribe(location, "mode", allHandler)
+		else if(capab == "Time of day") scheduleTimeOfDay()
+		else if(capab == "Days of week") schedule("2015-01-09T00:00:10.000-0700", "runRule")
+		else subscribe((settings.find{it.key == "rDev$i"}).value, capab.toLowerCase(), allHandler)
 	}
 	state.success = null
     runRule()
 }
+
+// Main rule evaluation code follows
 
 def compare(a, rel, b) {
 	def result = true
@@ -329,7 +322,7 @@ def checkCondAny(dev, state, cap, rel) {
 
 def checkCondAll(dev, state, cap, rel) {
 	def flip = ["on": "off",
-		"off": "on",
+				"off": "on",
                 "active": "inactive",
                 "inactive": "active",
                 "open": "closed",
@@ -353,27 +346,20 @@ def checkCondAll(dev, state, cap, rel) {
 }
 
 def getOperand(i) {
-//	log.debug "getOperand called i = $i"
 	def result = true
-	def thisCapab = "rCapab$i"
-	def myCapab = settings.find {it.key == thisCapab}
-	def xCapab = myCapab.value
-	if     (xCapab == "Mode") result = modeOk
-	else if(xCapab == "Time of day") result = timeOk
-	else if(xCapab == "Days of week") result = daysOk
+	def capab = (settings.find {it.key == "rCapab$i"}).value
+	if     (capab == "Mode") result = modeOk
+	else if(capab == "Time of day") result = timeOk
+	else if(capab == "Days of week") result = daysOk
 	else {
-		def thisDev = "rDev$i"
-		def myDev = settings.find {it.key == thisDev}
-		def thisState = "state$i"
-		def myState = settings.find {it.key == thisState}
-		def thisRel = "RelrDev$i"
-		def myRel = settings.find {it.key == thisRel}
-		def thisAll = "AllrDev$i"
-		def myAll = settings.find {it.key == thisAll}
+		def myDev = 	settings.find {it.key == "rDev$i"}
+		def myState = 	settings.find {it.key == "state$i"}
+		def myRel = 	settings.find {it.key == "RelrDev$i"}
+		def myAll = 	settings.find {it.key == "AllrDev$i"}
 		if(myAll) {
-			if(myAll.value) result = checkCondAll(myDev.value, myState.value, xCapab, myrel ? myRel.value : 0)
-			else result = checkCondAny(myDev.value, myState.value, xCapab, myrel ? myRel.value : 0)
-		} else result = checkCondAny(myDev.value, myState.value, xCapab, myrel ? myRel.value : 0)
+			if(myAll.value) result = checkCondAll(myDev.value, myState.value, capab, myrel ? myRel.value : 0)
+			else result = checkCondAny(myDev.value, myState.value, capab, myrel ? myRel.value : 0)
+		} else result = checkCondAny(myDev.value, myState.value, capab, myrel ? myRel.value : 0)
 	}
 	return result
 }
@@ -400,44 +386,38 @@ def disEval() {
 }
 
 def eval() {
-	def result = true
-	def operandL = false
+	def operand = true
 	while(true) {
-		if(state.token >= state.eval.size) return result
+		if(state.token >= state.eval.size) return operand
 		def thisTok = state.eval[state.token]
-//		log.debug "eval: $thisTok"
 		if(thisTok == "(") {
 			state.token = state.token + 1
-			operandL = eval()
-			result = operandL
+			operand = eval()
 		} else if(thisTok == ")") {
         	state.token = state.token + 1
-        	return result
+        	return operand
 		} else if(thisTok == "OR") {
 			state.token = state.token + 1
-			if(operandL) {
+			if(operand) {
             	disEval()
             	return true
-            } else result = eval() 
+            } else operand = eval() 
 		} else if(thisTok == "AND") { 
 			state.token = state.token + 1
-			if(!operandL) {
+			if(!operand) {
             	disEval()
             	return false
-			} else result = eval() 
-		} else {
-			operandL = getOperand(thisTok)
-			result = operandL
-        }
+			} else operand = eval() 
+		} else operand = getOperand(thisTok)
 		state.token = state.token + 1
-		if(state.token >= state.eval.size) return result
+		if(state.token >= state.eval.size) return operand
 	}
 }
 
 def runRule() {
 	state.token = 0
 	def success = eval()
-	if(state.success != success) {
+	if(success != state.success) {
 		if(success) {
         	if(myPhraseTrue) location.helloHome.execute(myPhraseTrue)
             if(switchTrue) switchTrue.on()
@@ -476,24 +456,31 @@ private conditionLabel() {
 
 private conditionLabelN(i) {
 	def result = ""
-        def thisCapab = settings.find {it.key == "rCapab$i"}
-        if(thisCapab.value == "Time of day") result = result + "Time between " + timeIntervalLabel()
-        else if(thisCapab.value == "Days of week") result = result + "Day i" + (days.size() > 1 ? "n " + days : "s " + days[0])
-        else if (thisCapab.value == "Mode") result = result + "Mode i" + (modes.size() > 1 ? "n " + modes : "s " + modes[0])
-        else {
+    def thisCapab = settings.find {it.key == "rCapab$i"}
+    if(thisCapab.value == "Time of day") result = "Time between " + timeIntervalLabel()
+    else if(thisCapab.value == "Days of week") result = "Day i" + (days.size() > 1 ? "n " + days : "s " + days[0])
+    else if (thisCapab.value == "Mode") result = "Mode i" + (modes.size() > 1 ? "n " + modes : "s " + modes[0])
+    else {
 		def thisDev = settings.find {it.key == "rDev$i"}
 		def thisAll = settings.find {it.key == "AllrDev$i"}
 		def myAny = thisAll ? "any " : ""
-		if(thisCapab.value == "Temperature") result = result + "Temperature of "
-		else if(thisCapab.value == "Humidity") result = result + "Humidity of "
-		else if(thisCapab.value == "Illuminance") result = result + "Illuminance of "
+		if(thisCapab.value == "Temperature") result = "Temperature of "
+		else if(thisCapab.value == "Humidity") result = "Humidity of "
+		else if(thisCapab.value == "Illuminance") result = "Illuminance of "
 		result = result + (myAny ? thisDev.value : thisDev.value[0]) + " " + ((thisAll ? thisAll.value : false) ? "all " : myAny)
 		def thisRel = settings.find {it.key == "RelrDev$i"}
 		if(thisCapab.value in ["Temperature", "Humidity", "Illuminance"]) result = result + " " + thisRel.value + " "
 		def thisState = settings.find {it.key == "state$i"}
 		result = result + thisState.value
-        }
+    }
 	return result
+}
+
+private hhmm(time, fmt = "h:mm a") {
+	def t = timeToday(time, location.timeZone)
+	def f = new java.text.SimpleDateFormat(fmt)
+	f.setTimeZone(location.timeZone ?: timeZone(time))
+	f.format(t)
 }
 
 private offset(value) {
