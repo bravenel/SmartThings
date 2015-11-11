@@ -34,8 +34,9 @@ def selectRule() {
 	dynamicPage(name: "selectRule", title: "Select Conditions, Rule and Results", uninstall: true, install: true) {
 		section() {     
 			label title: "Name the Rule", required: true
+			input "howMany", "number", title: "How many conditions?", required: true, range: "1..*"
 			def condLabel = conditionLabel()
-			href "selectConditions", title: "Select Conditions", description: condLabel ?: "Tap to set", required: true, state: condLabel ? "complete" : null
+			href "selectConditions", title: "Define Conditions", description: condLabel ?: "Tap to set", required: true, state: condLabel ? "complete" : null
 			href "defineRule", title: "Define the Rule", description: state.str ? state.str : "Tap to set", state: state.str ? "complete" : null
 			def phrases = location.helloHome?.getPhrases()*.label
 			input "myPhraseTrue", "enum", title: "Routine to run when true", required: false, options: phrases.sort()
@@ -48,7 +49,7 @@ def selectRule() {
 
 def selectConditions() {
 	dynamicPage(name: "selectConditions", title: "Select Conditions", uninstall: false) {
-		section("") {input "howMany", "number", title: "How many conditions?", required: true, range: "1..*", submitOnChange: true}
+//		section("") {input "howMany", "number", title: "How many conditions?", required: true, range: "1..*", submitOnChange: true}
 		if(howMany) {
 			for (int i = 1; i <= howMany; i++) {
 				def thisCapab = "rCapab$i"
