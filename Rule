@@ -357,9 +357,9 @@ def getOperand(i) {
 		def myRel = 	settings.find {it.key == "RelrDev$i"}
 		def myAll = 	settings.find {it.key == "AllrDev$i"}
 		if(myAll) {
-			if(myAll.value) result = checkCondAll(myDev.value, myState.value, capab, myrel ? myRel.value : 0)
-			else result = checkCondAny(myDev.value, myState.value, capab, myrel ? myRel.value : 0)
-		} else result = checkCondAny(myDev.value, myState.value, capab, myrel ? myRel.value : 0)
+			if(myAll.value) result = checkCondAll(myDev.value, myState.value, capab, myRel ? myRel.value : 0)
+			else result = checkCondAny(myDev.value, myState.value, capab, myRel ? myRel.value : 0)
+		} else result = checkCondAny(myDev.value, myState.value, capab, myRel ? myRel.value : 0)
 	}
 //    log.debug "operand is $result"
 	return result
