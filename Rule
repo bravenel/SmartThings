@@ -32,7 +32,6 @@ preferences {
 
 def selectRule() {
 	dynamicPage(name: "selectRule", title: "Select Conditions, Rule and Results", uninstall: true, install: true) {
-    	
 		section() {     
 			label title: "Name the Rule", required: true
 			def condLabel = conditionLabel()
@@ -267,7 +266,8 @@ def scheduleTimeOfDay() {
 	else if(ending) stop = timeToday(ending,location.timeZone).time
 	schedule(start, "startHandler")
 	schedule(stop, "stopHandler")
-    schedule("2015-01-09T00:00:29.000-0700", "scheduleTimeOfDay") // in case sunset/sunrise; change daily
+	if(startingX in ["Sunrise", "Sunset"] || endingX in ["Sunrise", "Sunset"])
+		schedule("2015-01-09T00:00:29.000-0700", "scheduleTimeOfDay") // in case sunset/sunrise; change daily
 }
 
 def installed() {
@@ -316,7 +316,7 @@ def checkCondAny(dev, state, cap, rel) {
 	else if(cap == "Contact") 		result = state in dev.currentContact
 	else if(cap == "Presence") 		result = state in dev.currentPresence
 	else if(cap == "Lock") 			result = state in dev.currentLock
-	log.debug "CheckAny $cap $result"
+//	log.debug "CheckAny $cap $result"
 	return result
 }
 
@@ -341,7 +341,7 @@ def checkCondAll(dev, state, cap, rel) {
 	else if(cap == "Contact") 		result = !(flip[state] in dev.currentContact)
 	else if(cap == "Presence") 		result = !(flip[state] in dev.currentPresence)
 	else if(cap == "Lock") 			result = !(flip[state] in dev.currentLock)
-	log.debug "CheckAll $cap $result"
+//	log.debug "CheckAll $cap $result"
 	return result
 }
 
@@ -361,19 +361,20 @@ def getOperand(i) {
 			else result = checkCondAny(myDev.value, myState.value, capab, myrel ? myRel.value : 0)
 		} else result = checkCondAny(myDev.value, myState.value, capab, myrel ? myRel.value : 0)
 	}
+//    log.debug "operand is $result"
 	return result
 }
 
 def findRParen() {
 	def noMatch = true
-    while(noMatch) {
-    	if(state.eval[state.token] == ")") {
-        	if(state.parenLev == 0) return
-            else state.parenLev = state.parenLev - 1
-        } else if(state.eval[state.token] == "(") state.parenLev = state.parenLev + 1
-        state.token = state.token + 1
-        if(state.token >= state.eval.size) return
-    }
+	while(noMatch) {
+		if(state.eval[state.token] == ")") {
+			if(state.parenLev == 0) return
+			else state.parenLev = state.parenLev - 1
+		} else if(state.eval[state.token] == "(") state.parenLev = state.parenLev + 1
+		state.token = state.token + 1
+		if(state.token >= state.eval.size) return
+	}
 }
 
 def disEval() {
@@ -385,32 +386,38 @@ def disEval() {
     state.token = state.token + 1
 }
 
-def eval() {
-	def operand = true
-	while(true) {
-		if(state.token >= state.eval.size) return operand
-		def thisTok = state.eval[state.token]
-		if(thisTok == "(") {
-			state.token = state.token + 1
-			operand = eval()
-		} else if(thisTok == ")") {
-        	state.token = state.token + 1
-        	return operand
-		} else if(thisTok == "OR") {
-			state.token = state.token + 1
-			if(operand) {
-            	disEval()
-            	return true
-            } else operand = eval() 
-		} else if(thisTok == "AND") { 
-			state.token = state.token + 1
-			if(!operand) {
-            	disEval()
-            	return false
-			} else operand = eval() 
-		} else operand = getOperand(thisTok)
+def evalTerm() {
+	def result = true
+	def thisTok = state.eval[state.token]
+//    log.debug "evalTerm tok is $thisTok"
+	if (thisTok == "(") {
 		state.token = state.token + 1
-		if(state.token >= state.eval.size) return operand
+		result = eval()
+	} else result = getOperand(thisTok)
+	state.token = state.token + 1
+//    log.debug "evalTerm is $result"
+	return result
+}
+
+def eval() {
+	def result = evalTerm()
+	while(true) {
+		if(state.token >= state.eval.size) return result
+		def thisTok = state.eval[state.token]
+//        log.debug "eval: $thisTok"
+		if (thisTok == "OR") {
+			if(result) {
+				disEval()
+				return true
+			} 
+		} else if (thisTok == "AND") {
+			if(!result) {
+				disEval()
+				return false
+			} 
+		} else if (thisTok == ")") return result
+		state.token = state.token + 1
+		result = evalTerm()
 	}
 }
 
@@ -419,13 +426,12 @@ def runRule() {
 	def success = eval()
 	if(success != state.success) {
 		if(success) {
-        	if(myPhraseTrue) location.helloHome.execute(myPhraseTrue)
-            if(switchTrue) switchTrue.on()
-        }
-		else {
-        	if(myPhraseFalse) location.helloHome.execute(myPhraseFalse)
-            if(switchFalse) switchFalse.off()
-        }
+			if(myPhraseTrue) location.helloHome.execute(myPhraseTrue)
+			if(switchTrue) switchTrue.on()
+		} else {
+			if(myPhraseFalse) location.helloHome.execute(myPhraseFalse)
+			if(switchFalse) switchFalse.off()
+		}
 		state.success = success
 		log.debug (success ? "Success" : "Failure")
 	}
