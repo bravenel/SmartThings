@@ -73,14 +73,32 @@ def selectConditions() {
 	}
 }
 
-def setActTrue(str) {
+def setActTrue(dev, str) {
+	if(dev) {
         if(state.actsTrue != "") state.actsTrue = state.actsTrue + "\n"
-        state.actsTrue = state.actsTrue + str
+        def i = str.indexOf(' ') + 1
+        def myStr = str
+        if(dev == true) state.actsTrue = state.actsTrue + str
+        else {
+        	def j = str.indexOf(']')
+        	myStr = str.substring(i + 1, j) + str.substring(j + 1)
+        	state.actsTrue = state.actsTrue + str.substring(0, i) + myStr
+        }
+    }
 }
 
 def setActFalse(str) {
+	if(dev) {
         if(state.actsFalse != "") state.actsFalse = state.actsFalse + "\n"
-        state.actsFalse = state.actsFalse + str
+        def i = str.indexOf(' ') + 1
+        def myStr = str
+        if(dev == true) state.actsFalse = state.actsFalse + str
+        else {
+        	def j = str.indexOf(']')
+        	myStr = str.substring(i + 1, j) + str.substring(j + 1)
+        	state.actsFalse = state.actsFalse + str.substring(0, i) + myStr
+        }
+    }
 }
 
 def selectActionsTrue() {
@@ -88,24 +106,24 @@ def selectActionsTrue() {
 		state.actsTrue = ""
 		section("") {
 			input "onSwitchTrue", "capability.switch", title: "Turn on these switches", multiple: true, required: false, submitOnChange: true
-			if(onSwitchTrue) setActTrue("On: $onSwitchTrue")
+			setActTrue(onSwitchTrue, "On: $onSwitchTrue")
 			input "offSwitchTrue", "capability.switch", title: "Turn off these switches", multiple: true, required: false, submitOnChange: true
-			if(offSwitchTrue) setActTrue("Off: $offSwitchTrue")
+			setActTrue(offSwitchTrue, "Off: $offSwitchTrue")
 			input "dimATrue", "capability.switchLevel", title: "Set these dimmers", multiple: true, submitOnChange: true, required: false
 			if(dimATrue) input "dimLATrue", "number", title: "To this level", range: "0..100", required: true, submitOnChange: true
-			if(dimLATrue) setActTrue("Dim: $dimATrue: $dimLATrue")
+			setActTrue(dimATrue, "Dim: $dimATrue: $dimLATrue")
 			input "dimBTrue", "capability.switchLevel", title: "Set these other dimmers", multiple: true, submitOnChange: true, required: false
 			if(dimBTrue) input "dimLBTrue", "number", title: "To this level", range: "0..100", required: true, submitOnChange: true
-			if(dimLBTrue) setActTrue("Dim: $dimBTrue: $dimLBTrue")
+			setActTrue(dimBTrue, "Dim: $dimBTrue: $dimLBTrue")
 			input "lockTrue", "capability.lock", title: "Lock these locks", multiple: true, required: false, submitOnChange: true
-			if(lockTrue) setActTrue("Lock: $lockTrue")
+			setActTrue(lockTrue, "Lock: $lockTrue")
 			input "unlockTrue", "capability.lock", title: "Unlock these locks", multiple: true, required: false, submitOnChange: true
-			if(unlockTrue) setActTrue("Unlock: $unlockTrue")
+			setActTrue(unlockTrue, "Unlock: $unlockTrue")
 			input "modeTrue", "mode", title: "Set the mode", multiple: false, required: false, submitOnChange: true
-			if(modeTrue) setActTrue("Mode: $modeTrue")
+			setActTrue(true, "Mode: $modeTrue")
 			def phrases = location.helloHome?.getPhrases()*.label
 			input "myPhraseTrue", "enum", title: "Routine to run", required: false, options: phrases.sort(), submitOnChange: true
-			if(myPhraseTrue) setActTrue("Routine: $myPhraseTrue")
+			setActTrue(true, "Routine: $myPhraseTrue")
 		}
 	}
 }
@@ -115,24 +133,24 @@ def selectActionsFalse() {
 		state.actsFalse = ""
 		section("") {
 			input "onSwitchFalse", "capability.switch", title: "Turn on these switches", multiple: true, required: false, submitOnChange: true
-			if(onSwitchFalse) setActFalse("On: $onSwitchFalse")
+			setActFalse(onSwitchFalse, "On: $onSwitchFalse")
 			input "offSwitchFalse", "capability.switch", title: "Turn off these switches", multiple: true, required: false, submitOnChange: true
-			if(offSwitchFalse) setActFalse("Off: $offSwitchFalse")
+			setActFalse(offSwitchFalse, "Off: $offSwitchFalse")
 			input "dimAFalse", "capability.switchLevel", title: "Set these dimmers", multiple: true, submitOnChange: true, required: false
 			if(dimAFalse) input "dimLAFalse", "number", title: "To this level", range: "0..100", required: true, submitOnChange: true
-			if(dimLAFalse) setActFalse("Dim: $dimAFalse: $dimLAFalse")
+			setActFalse(dimAFalse, "Dim: $dimAFalse: $dimLAFalse")
 			input "dimBFalse", "capability.switchLevel", title: "Set these other dimmers", multiple: true, submitOnChange: true, required: false
 			if(dimBFalse) input "dimLBFalse", "number", title: "To this level", range: "0..100", required: true, submitOnChange: true
-			if(dimLBFalse) setActFalse("Dim: $dimBFalse: $dimLBFalse")
+			setActFalse(dimBFalse, "Dim: $dimBFalse: $dimLBFalse")
 			input "lockFalse", "capability.lock", title: "Lock these locks", multiple: true, required: false, submitOnChange: true
-			if(lockFalse) setActFalse("Lock: $lockFalse")
+			setActFalse(lockFalse, "Lock: $lockFalse")
 			input "unlockFalse", "capability.lock", title: "Unlock these locks", multiple: true, required: false, submitOnChange: true
-			if(unlockFalse) setActFalse("Unlock: $unlockFalse")
+			setActFalse(unlockFalse, "Unlock: $unlockFalse")
 			input "modeFalse", "mode", title: "Set the mode", multiple: false, required: false, submitOnChange: true
-			if(modeFalse) setActFalse("Mode: $modeFalse")
+			setActFalse(true, "Mode: $modeFalse")
 			def phrases = location.helloHome?.getPhrases()*.label
 			input "myPhraseFalse", "enum", title: "Routine to run", required: false, options: phrases.sort(), submitOnChange: true
-			if(myPhraseFalse) setActFalse("Routine: $myPhraseFalse")
+			setActFalse(true, "Routine: $myPhraseFalse")
 		}
 	}
 }
