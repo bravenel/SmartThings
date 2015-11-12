@@ -85,56 +85,56 @@ def setActFalse(str) {
 
 def selectActionsTrue() {
 	dynamicPage(name: "selectActionsTrue", title: "Select Actions for True", uninstall: false) {
-                state.actsTrue = ""
-                section("") {
-                        input "onSwitchTrue", "capability.switch", title: "Turn on these switches", multiple: true, required: false
-                        if(onSwitchTrue) setActTrue("On: $onSwitchTrue")
-                        input "offSwitchTrue", "capability.switch", title: "Turn off these switches", multiple: true, required: false
-                        if(offSwitchTrue) setActTrue("Off: $offSwitchTrue")
-                        input "dimATrue", "capability.switchLevel", title: "Set these dimmers", multiple: true, submitOnChange: true, required: false
-                        if(dimATrue) input "dimLATrue", "number", title: "To this level", range: "0..100", required: true
-                        if(dimLATrue) setActTrue("Dim: $dimATrue: $dimLATrue")
-                        input "dimBTrue", "capability.switchLevel", title: "Set these other dimmers", multiple: true, submitOnChange: true, required: false
-                        if(dimBTrue) input "dimLBTrue", "number", title: "To this level", range: "0..100", required: true
-                        if(dimLBTrue) setActTrue("Dim: $dimBTrue: $dimLBTrue")
-                        input "lockTrue", "capability.lock", title: "Lock these locks", multiple: true, required: false
-                        if(lockTrue) setActTrue("Lock: $lockTrue")
-                        input "unlockTrue", "capability.lock", title: "Unlock these locks", multiple: true, required: false
-                        if(unlockTrue) setActTrue("Unlock: $unlockTrue")
-                        input "modeTrue", "mode", title: "Set the mode", multiple: false, required: false
-                        if(modeTrue) setActTrue("Mode: $modeTrue")
-                        def phrases = location.helloHome?.getPhrases()*.label
-                        input "myPhraseTrue", "enum", title: "Routine to run", required: false, options: phrases.sort()
-                        if(myPhraseTrue) setActTrue("Routine: $myPhraseTrue")
-                }
-        }
+		state.actsTrue = ""
+		section("") {
+			input "onSwitchTrue", "capability.switch", title: "Turn on these switches", multiple: true, required: false, submitOnChange: true
+			if(onSwitchTrue) setActTrue("On: $onSwitchTrue")
+			input "offSwitchTrue", "capability.switch", title: "Turn off these switches", multiple: true, required: false, submitOnChange: true
+			if(offSwitchTrue) setActTrue("Off: $offSwitchTrue")
+			input "dimATrue", "capability.switchLevel", title: "Set these dimmers", multiple: true, submitOnChange: true, required: false
+			if(dimATrue) input "dimLATrue", "number", title: "To this level", range: "0..100", required: true, submitOnChange: true
+			if(dimLATrue) setActTrue("Dim: $dimATrue: $dimLATrue")
+			input "dimBTrue", "capability.switchLevel", title: "Set these other dimmers", multiple: true, submitOnChange: true, required: false
+			if(dimBTrue) input "dimLBTrue", "number", title: "To this level", range: "0..100", required: true, submitOnChange: true
+			if(dimLBTrue) setActTrue("Dim: $dimBTrue: $dimLBTrue")
+			input "lockTrue", "capability.lock", title: "Lock these locks", multiple: true, required: false, submitOnChange: true
+			if(lockTrue) setActTrue("Lock: $lockTrue")
+			input "unlockTrue", "capability.lock", title: "Unlock these locks", multiple: true, required: false, submitOnChange: true
+			if(unlockTrue) setActTrue("Unlock: $unlockTrue")
+			input "modeTrue", "mode", title: "Set the mode", multiple: false, required: false, submitOnChange: true
+			if(modeTrue) setActTrue("Mode: $modeTrue")
+			def phrases = location.helloHome?.getPhrases()*.label
+			input "myPhraseTrue", "enum", title: "Routine to run", required: false, options: phrases.sort(), submitOnChange: true
+			if(myPhraseTrue) setActTrue("Routine: $myPhraseTrue")
+		}
+	}
 }
 
 def selectActionsFalse() {
-        dynamicPage(name: "selectActionsFalse", title: "Select Actions for False", uninstall: false) {
-                state.actsFalse = ""
-                section("") {
-                        input "onSwitchFalse", "capability.switch", title: "Turn on these switches", multiple: true, required: false
-                        if(onSwitchFalse) setActFalse("On: $onSwitchFalse")
-                        input "offSwitchFalse", "capability.switch", title: "Turn off these switches", multiple: true, required: false
-                        if(offSwitchFalse) setActFalse("Off: $offSwitchFalse")
-                        input "dimAFalse", "capability.switchLevel", title: "Set these dimmers", multiple: true, submitOnChange: true, required: false
-                        if(dimAFalse) input "dimLAFalse", "number", title: "To this level", range: "0..100", required: true
-                        if(dimLAFalse) setActFalse("Dim: $dimAFalse: $dimLAFalse")
-                        input "dimBFalse", "capability.switchLevel", title: "Set these other dimmers", multiple: true, submitOnChange: true, required: false
-                        if(dimBFalse) input "dimLBFalse", "number", title: "To this level", range: "0..100", required: true
-                        if(dimLBFalse) setActFalse("Dim: $dimBFalse: $dimLBFalse")
-                        input "lockFalse", "capability.lock", title: "Lock these locks", multiple: true, required: false
-                        if(lockFalse) setActFalse("Lock: $lockFalse")
-                        input "unlockFalse", "capability.lock", title: "Unlock these locks", multiple: true, required: false
-                        if(unlockFalse) setActFalse("Unlock: $unlockFalse")
-                        input "modeFalse", "mode", title: "Set the mode", multiple: false, required: false
-                        if(modeFalse) setActFalse("Mode: $modeFalse")
-                        def phrases = location.helloHome?.getPhrases()*.label
-                        input "myPhraseFalse", "enum", title: "Routine to run", required: false, options: phrases.sort()
-                        if(myPhraseFalse) setActFalse("Routine: $myPhraseFalse")
-                }
-        }
+	dynamicPage(name: "selectActionsFalse", title: "Select Actions for False", uninstall: false) {
+		state.actsFalse = ""
+		section("") {
+			input "onSwitchFalse", "capability.switch", title: "Turn on these switches", multiple: true, required: false, submitOnChange: true
+			if(onSwitchFalse) setActFalse("On: $onSwitchFalse")
+			input "offSwitchFalse", "capability.switch", title: "Turn off these switches", multiple: true, required: false, submitOnChange: true
+			if(offSwitchFalse) setActFalse("Off: $offSwitchFalse")
+			input "dimAFalse", "capability.switchLevel", title: "Set these dimmers", multiple: true, submitOnChange: true, required: false
+			if(dimAFalse) input "dimLAFalse", "number", title: "To this level", range: "0..100", required: true, submitOnChange: true
+			if(dimLAFalse) setActFalse("Dim: $dimAFalse: $dimLAFalse")
+			input "dimBFalse", "capability.switchLevel", title: "Set these other dimmers", multiple: true, submitOnChange: true, required: false
+			if(dimBFalse) input "dimLBFalse", "number", title: "To this level", range: "0..100", required: true, submitOnChange: true
+			if(dimLBFalse) setActFalse("Dim: $dimBFalse: $dimLBFalse")
+			input "lockFalse", "capability.lock", title: "Lock these locks", multiple: true, required: false, submitOnChange: true
+			if(lockFalse) setActFalse("Lock: $lockFalse")
+			input "unlockFalse", "capability.lock", title: "Unlock these locks", multiple: true, required: false, submitOnChange: true
+			if(unlockFalse) setActFalse("Unlock: $unlockFalse")
+			input "modeFalse", "mode", title: "Set the mode", multiple: false, required: false, submitOnChange: true
+			if(modeFalse) setActFalse("Mode: $modeFalse")
+			def phrases = location.helloHome?.getPhrases()*.label
+			input "myPhraseFalse", "enum", title: "Routine to run", required: false, options: phrases.sort(), submitOnChange: true
+			if(myPhraseFalse) setActFalse("Routine: $myPhraseFalse")
+		}
+	}
 }
 
 def defineRule() {
