@@ -120,10 +120,10 @@ def selectActionsTrue() {
 			input "unlockTrue", "capability.lock", title: "Unlock these locks", multiple: true, required: false, submitOnChange: true
 			setActTrue(unlockTrue, "Unlock: $unlockTrue")
 			input "modeTrue", "mode", title: "Set the mode", multiple: false, required: false, submitOnChange: true
-			setActTrue(true, "Mode: $modeTrue")
+			if(modeTrue) setActTrue(true, "Mode: $modeTrue")
 			def phrases = location.helloHome?.getPhrases()*.label
 			input "myPhraseTrue", "enum", title: "Routine to run", required: false, options: phrases.sort(), submitOnChange: true
-			setActTrue(true, "Routine: $myPhraseTrue")
+			if(myPhraseTrue) setActTrue(true, "Routine: $myPhraseTrue")
 		}
 	}
 }
@@ -147,10 +147,10 @@ def selectActionsFalse() {
 			input "unlockFalse", "capability.lock", title: "Unlock these locks", multiple: true, required: false, submitOnChange: true
 			setActFalse(unlockFalse, "Unlock: $unlockFalse")
 			input "modeFalse", "mode", title: "Set the mode", multiple: false, required: false, submitOnChange: true
-			setActFalse(true, "Mode: $modeFalse")
+			if(modeFalse) setActFalse(true, "Mode: $modeFalse")
 			def phrases = location.helloHome?.getPhrases()*.label
 			input "myPhraseFalse", "enum", title: "Routine to run", required: false, options: phrases.sort(), submitOnChange: true
-			setActFalse(true, "Routine: $myPhraseFalse")
+			if(myPhraseFalse) setActFalse(true, "Routine: $myPhraseFalse")
 		}
 	}
 }
