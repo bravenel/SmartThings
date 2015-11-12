@@ -536,7 +536,6 @@ def eval() {
 }
 
 def runRule() {
-	if(!allOk) return
 	state.token = 0
 	def success = eval()
 	if(success != state.success) {
