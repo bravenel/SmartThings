@@ -1,4 +1,4 @@
- /**
+/**
  *  Rule
  *
  *  Copyright 2015 Bruce Ravenel
@@ -29,6 +29,7 @@ preferences {
 	page(name: "selectConditions")
 	page(name: "defineRule")
 	page(name: "certainTime")
+	page(name: "certainTimeY")
         page(name: "selectActionsTrue")
         page(name: "selectActionsFalse")
 }
@@ -41,8 +42,15 @@ def selectRule() {
 			def condLabel = conditionLabel()
 			href "selectConditions", title: "Define Conditions", description: condLabel ?: "Tap to set", required: true, state: condLabel ? "complete" : null
 			href "defineRule", title: "Define the Rule", description: state.str ? state.str : "Tap to set", state: state.str ? "complete" : null
-                        href "selectActionsTrue", title: "Select the Actions for True", description: state.actsTrue ? state.actsTrue : "Tap to set", state: state.actsTrue ? "complete" : null
-                        href "selectActionsFalse", title: "Select the Actions for False", description: state.actsFalse ? state.actsFalse : "Tap to set", state: state.actsFalse ? "complete" : null
+			href "selectActionsTrue", title: "Select the Actions for True", description: state.actsTrue ? state.actsTrue : "Tap to set", state: state.actsTrue ? "complete" : null
+			href "selectActionsFalse", title: "Select the Actions for False", description: state.actsFalse ? state.actsFalse : "Tap to set", state: state.actsFalse ? "complete" : null
+        }
+		section(title: "More options", hidden: hideOptionsSection(), hideable: true) {
+			def timeLabel = timeIntervalLabelY()
+			href "certainTimeY", title: "Only during a certain time", description: timeLabel ?: "Tap to set", state: timeLabel ? "complete" : null
+			input "daysY", "enum", title: "Only on certain days of the week", multiple: true, required: false,
+				options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+			input "modesY", "mode", title: "Only when mode is", multiple: true, required: false
 		}
 	}
 }
@@ -183,6 +191,28 @@ def certainTime() {
 			else {
 				if(endingX == "Sunrise") input "endSunriseOffset", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
 				else if(endingX == "Sunset") input "endSunsetOffset", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
+			}
+		}
+	}
+}
+
+def certainTimeY() {
+	dynamicPage(name:"certainTimeY",title: "Only during a certain time", uninstall: false) {
+		section() {
+			input "startingXY", "enum", title: "Starting at", options: ["A specific time", "Sunrise", "Sunset"], defaultValue: "A specific time", submitOnChange: true
+			if(startingXY in [null, "A specific time"]) input "startingY", "time", title: "Start time", required: false
+			else {
+				if(startingXY == "Sunrise") input "startSunriseOffsetY", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
+				else if(startingXY == "Sunset") input "startSunsetOffsetY", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
+			}
+		}
+		
+		section() {
+			input "endingXY", "enum", title: "Ending at", options: ["A specific time", "Sunrise", "Sunset"], defaultValue: "A specific time", submitOnChange: true
+			if(endingXY in [null, "A specific time"]) input "endingY", "time", title: "End time", required: false
+			else {
+				if(endingXY == "Sunrise") input "endSunriseOffsetY", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
+				else if(endingXY == "Sunset") input "endSunsetOffsetY", "number", range: "*..*", title: "Offset in minutes (+/-)", required: false
 			}
 		}
 	}
@@ -505,6 +535,7 @@ def eval() {
 }
 
 def runRule() {
+	if(!allOk) return
 	state.token = 0
 	def success = eval()
 	if(success != state.success) {
@@ -641,4 +672,68 @@ private getTimeOk() {
 	}
 //	log.trace "getTimeOk = $result"
 	return result
+}
+
+// execution filter methods
+private getAllOk() {
+	modeOkY && daysOkY && timeOkY
+}
+
+private getModeOkY() {
+	def result = !modesY || modesY.contains(location.mode)
+//	log.trace "modeOk = $result"
+	return result
+}
+
+private getDaysOkY() {
+	def result = true
+	if (daysY) {
+		def df = new java.text.SimpleDateFormat("EEEE")
+		if (location.timeZone) df.setTimeZone(location.timeZone)
+		else df.setTimeZone(TimeZone.getTimeZone("America/New_York"))
+		def day = df.format(new Date())
+		result = daysY.contains(day)
+	}
+//	log.trace "daysOk = $result"
+	return result
+}
+
+private getTimeOkY() {
+	def result = true
+	if ((startingY && endingY) ||
+	(startingY && endingXY in ["Sunrise", "Sunset"]) ||
+	(startingXY in ["Sunrise", "Sunset"] && endingY) ||
+	(startingXY in ["Sunrise", "Sunset"] && endingXY in ["Sunrise", "Sunset"])) {
+		def currTime = now()
+		def start = null
+		def stop = null
+		def s = getSunriseAndSunset(zipCode: zipCode, sunriseOffset: startSunriseOffsetY, sunsetOffset: startSunsetOffsetY)
+		if(startingXY == "Sunrise") start = s.sunrise.time
+		else if(startingXY == "Sunset") start = s.sunset.time
+		else if(startingY) start = timeToday(startingY,location.timeZone).time
+		s = getSunriseAndSunset(zipCode: zipCode, sunriseOffset: endSunriseOffsetY, sunsetOffset: endSunsetOffsetY)
+		if(endingXY == "Sunrise") stop = s.sunrise.time
+		else if(endingXY == "Sunset") stop = s.sunset.time
+		else if(endingY) stop = timeToday(endingY,location.timeZone).time
+		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
+	}
+//	log.trace "getTimeOk = $result"
+	return result
+}
+
+private hideOptionsSection() {
+	(startingY || endingY || daysY || modesY || startingXY || endingXY) ? false : true
+}
+
+private timeIntervalLabelY() {
+	def result = ""
+	if (startingXY == "Sunrise" && endingXY == "Sunrise") result = "Sunrise" + offset(startSunriseOffsetY) + " to Sunrise" + offset(endSunriseOffsetY)
+	else if (startingXY == "Sunrise" && endingXY == "Sunset") result = "Sunrise" + offset(startSunriseOffsetY) + " to Sunset" + offset(endSunsetOffsetY)
+	else if (startingXY == "Sunset" && endingXY == "Sunrise") result = "Sunset" + offset(startSunsetOffsetY) + " to Sunrise" + offset(endSunriseOffsetY)
+	else if (startingXY == "Sunset" && endingXY == "Sunset") result = "Sunset" + offset(startSunsetOffsetY) + " to Sunset" + offset(endSunsetOffsetY)
+	else if (startingXY == "Sunrise" && endingY) result = "Sunrise" + offset(startSunriseOffsetY) + " to " + hhmm(endingY, "h:mm a z")
+	else if (startingXY == "Sunset" && endingY) result = "Sunset" + offset(startSunsetOffsetY) + " to " + hhmm(endingY, "h:mm a z")
+	else if (startingY && endingXY == "Sunrise") result = hhmm(startingY) + " to Sunrise" + offset(endSunriseOffsetY)
+	else if (startingY && endingXY == "Sunset") result = hhmm(startingY) + " to Sunset" + offset(endSunsetOffsetY)
+	else if (startingY && endingY) result = hhmm(startingY) + " to " + hhmm(endingY, "h:mm a z")
 }
