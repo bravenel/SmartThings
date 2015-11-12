@@ -45,7 +45,7 @@ def selectRule() {
 			href "selectActionsTrue", title: "Select the Actions for True", description: state.actsTrue ? state.actsTrue : "Tap to set", state: state.actsTrue ? "complete" : null
 			href "selectActionsFalse", title: "Select the Actions for False", description: state.actsFalse ? state.actsFalse : "Tap to set", state: state.actsFalse ? "complete" : null
         }
-		section(title: "More options", hidden: hideOptionsSection(), hideable: true) {
+		section(title: "Rule restriction options", hidden: hideOptionsSection(), hideable: true) {
 			def timeLabel = timeIntervalLabelY()
 			href "certainTimeY", title: "Only during a certain time", description: timeLabel ?: "Tap to set", state: timeLabel ? "complete" : null
 			input "daysY", "enum", title: "Only on certain days of the week", multiple: true, required: false,
