@@ -144,9 +144,11 @@ def selectActionsTrue() {
 			setActTrue(offSwitchTrue, "Off: $offSwitchTrue")
 			input "delayedOffTrue", "capability.switch", title: "Turn off these switches after a delay", multiple: true, required: false, submitOnChange: true
 			if(delayedOffTrue) input "delayMinutesTrue", "number", title: "Minutes of delay", required: true, range: "1..*", submitOnChange: true
-			def delayStr = "Delayed Off: $delayedOffTrue: $delayMinutesTrue minute"
-			if(delayMinutesTrue > 1) delayStr = "Delayed Off: $delayedOffTrue: $delayMinutesTrue minutes"
-			setActTrue(delayedOffTrue, delayStr)
+			if(delayMinutesTrue) {
+				def delayStr = "Delayed Off: $delayedOffTrue: $delayMinutesTrue minute"
+				if(delayMinutesTrue > 1) delayStr = "Delayed Off: $delayedOffTrue: $delayMinutesTrue minutes"
+				setActTrue(delayedOffTrue, delayStr)
+			}
 			input "dimATrue", "capability.switchLevel", title: "Set these dimmers", multiple: true, submitOnChange: true, required: false
 			if(dimATrue) input "dimLATrue", "number", title: "To this level", range: "0..100", required: true, submitOnChange: true
 			setActTrue(dimATrue, "Dim: $dimATrue: $dimLATrue")
@@ -181,9 +183,11 @@ def selectActionsFalse() {
 			setActFalse(offSwitchFalse, "Off: $offSwitchFalse")
 			input "delayedOffFalse", "capability.switch", title: "Turn off these switches after a delay", multiple: true, required: false, submitOnChange: true
 			if(delayedOffFalse) input "delayMinutesFalse", "number", title: "Minutes of delay", required: true, range: "1..*", submitOnChange: true
-			def delayStr = "Delayed Off: $delayedOffFalse: $delayMinutesFalse minute"
-			if(delayMinutesFalse > 1) delayStr = "Delayed Off: $delayedOffFalse: $delayMinutesFalse minutes"
-			setActFalse(delayedOffFalse, delayStr)
+			if(delayMinutesFalse) {
+				def delayStr = "Delayed Off: $delayedOffFalse: $delayMinutesFalse minute"
+				if(delayMinutesFalse > 1) delayStr = "Delayed Off: $delayedOffFalse: $delayMinutesFalse minutes"
+				setActFalse(delayedOffFalse, delayStr)
+			}
 			input "dimAFalse", "capability.switchLevel", title: "Set these dimmers", multiple: true, submitOnChange: true, required: false
 			if(dimAFalse) input "dimLAFalse", "number", title: "To this level", range: "0..100", required: true, submitOnChange: true
 			setActFalse(dimAFalse, "Dim: $dimAFalse: $dimLAFalse")
