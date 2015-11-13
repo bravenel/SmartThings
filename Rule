@@ -29,7 +29,6 @@ preferences {
 	page(name: "selectConditions")
 	page(name: "defineRule")
 	page(name: "certainTime")
-    page(name: "certainTimeY")
         page(name: "selectActionsTrue")
         page(name: "selectActionsFalse")
 }
