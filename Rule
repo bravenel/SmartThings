@@ -89,7 +89,7 @@ def setActTrue(dev, str) {
     }
 }
 
-def setActFalse(str) {
+def setActFalse(dev, str) {
 	if(dev) {
         if(state.actsFalse != "") state.actsFalse = state.actsFalse + "\n"
         def i = str.indexOf(' ') + 1
