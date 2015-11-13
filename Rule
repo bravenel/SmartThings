@@ -58,7 +58,7 @@ def selectConditions() {
 		if(howMany) {
 			for (int i = 1; i <= howMany; i++) {
 				def thisCapab = "rCapab$i"
-				section("Condtion #$i") {
+				section("Condition #$i") {
 					getCapab(thisCapab)
 					def myCapab = settings.find {it.key == thisCapab}
 					if(myCapab) {
@@ -162,9 +162,11 @@ def selectActionsTrue() {
 			def phrases = location.helloHome?.getPhrases()*.label
 			input "myPhraseTrue", "enum", title: "Routine to run", required: false, options: phrases.sort(), submitOnChange: true
 			if(myPhraseTrue) setActTrue(true, "Routine: $myPhraseTrue")
-            href "selectMsgTrue", title: "Send message", description: state.msgTrue ? state.msgTrue : "Tap to set", state: state.msgTrue ? "complete" : null
-            if(state.actsTrue != "") state.actsTrue = state.actsTrue + "\n"
-            state.actsTrue = state.actsTrue + state.msgTrue
+			href "selectMsgTrue", title: "Send message", description: state.msgTrue ? state.msgTrue : "Tap to set", state: state.msgTrue ? "complete" : null
+			if(state.msgTrue) {
+				if(state.actsTrue) state.actsTrue = state.actsTrue + "\n"
+				state.actsTrue = state.actsTrue + state.msgTrue
+			}
 		}
 	}
 }
@@ -197,9 +199,11 @@ def selectActionsFalse() {
 			def phrases = location.helloHome?.getPhrases()*.label
 			input "myPhraseFalse", "enum", title: "Routine to run", required: false, options: phrases.sort(), submitOnChange: true
 			if(myPhraseFalse) setActFalse(true, "Routine: $myPhraseFalse")
-            href "selectMsgFalse", title: "Send message", description: state.msgFalse ? state.msgFalse : "Tap to set", state: state.msgFalse ? "complete" : null
-            if(state.actsFalse != "") state.actsFalse = state.actsFalse + "\n"
-            state.actsFalse = state.actsFalse + state.msgFalse
+			href "selectMsgFalse", title: "Send message", description: state.msgFalse ? state.msgFalse : "Tap to set", state: state.msgFalse ? "complete" : null
+			if(state.msgFalse) {
+				if(state.actsFalse) state.actsFalse = state.actsFalse + "\n"
+				state.actsFalse = state.actsFalse + state.msgFalse
+			}
 		}
 	}
 }
