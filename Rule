@@ -31,10 +31,10 @@ preferences {
 	page(name: "selectConditions")
 	page(name: "defineRule")
 	page(name: "certainTime")
-    page(name: "selectActionsTrue")
-    page(name: "selectActionsFalse")
-    page(name: "selectMsgTrue")
-    page(name: "selectMsgFalse")
+	page(name: "selectActionsTrue")
+	page(name: "selectActionsFalse")
+	page(name: "selectMsgTrue")
+	page(name: "selectMsgFalse")
 }
 
 def selectRule() {
@@ -45,8 +45,8 @@ def selectRule() {
 			def condLabel = conditionLabel()
 			href "selectConditions", title: "Define Conditions", description: condLabel ?: "Tap to set", required: true, state: condLabel ? "complete" : null
 			href "defineRule", title: "Define the Rule", description: state.str ? state.str : "Tap to set", state: state.str ? "complete" : null
-            href "selectActionsTrue", title: "Select the Actions for True", description: state.actsTrue ? state.actsTrue : "Tap to set", state: state.actsTrue ? "complete" : null
-            href "selectActionsFalse", title: "Select the Actions for False", description: state.actsFalse ? state.actsFalse : "Tap to set", state: state.actsFalse ? "complete" : null
+			href "selectActionsTrue", title: "Select the Actions for True", description: state.actsTrue ? state.actsTrue : "Tap to set", state: state.actsTrue ? "complete" : null
+			href "selectActionsFalse", title: "Select the Actions for False", description: state.actsFalse ? state.actsFalse : "Tap to set", state: state.actsFalse ? "complete" : null
         }
         section() {mode(title: "Restrict to specific mode(s)")}
 	}
@@ -108,30 +108,30 @@ def setActFalse(dev, str) {
 
 def selectMsgTrue() {
 	dynamicPage(name: "selectMsgTrue", title: "Select Message and Destination", uninstall: false) {
-    	state.msgTrue = ""
-    	section("") {
+		state.msgTrue = ""
+		section("") {
 			input "pushTrue", "bool", title: "Send Push Notification?", required: false, submitOnChange: true
-            if(pushTrue) state.msgTrue = state.msgTrue + "Push"
-    		input "msgTrue", "text", title: "Custom message to send", required: false, submitOnChange: true
-            if(msgTrue) state.msgTrue = state.msgTrue + state.msgTrue ? state.msgTrue + " and Send '$msgTrue'" : "Send '$msgTrue'"
-            input "phoneTrue", "phone", title: "Phone number for SMS", required: false, submitOnChange: true
-            if(phoneTrue) state.msgTrue = state.msgTrue + " to $phoneTrue"
-        }
-    }
+			if(pushTrue) state.msgTrue = state.msgTrue + "Push"
+			input "msgTrue", "text", title: "Custom message to send", required: false, submitOnChange: true
+			if(msgTrue) state.msgTrue = state.msgTrue + state.msgTrue ? state.msgTrue + " and Send '$msgTrue'" : "Send '$msgTrue'"
+			input "phoneTrue", "phone", title: "Phone number for SMS", required: false, submitOnChange: true
+			if(phoneTrue) state.msgTrue = state.msgTrue + " to $phoneTrue"
+		}
+	}
 }
 
 def selectMsgFalse() {
 	dynamicPage(name: "selectMsgFalse", title: "Select Message and Destination", uninstall: false) {
-    	state.msgFalse = ""
-    	section("") {
+		state.msgFalse = ""
+		section("") {
 			input "pushFalse", "bool", title: "Send Push Notification?", required: false, submitOnChange: true
-            if(pushFalse) state.msgFalse = state.msgFalse + "Push"
-    		input "msgFalse", "text", title: "Custom message to send", required: false, submitOnChange: true
-            if(msgFalse) state.msgFalse = state.msgFalse + state.False ? state.False + " and Send '$msgFalse'" : "Send '$msgFalse'"
-            input "phoneFalse", "phone", title: "Phone number for SMS", required: false, submitOnChange: true
-            if(phoneFalse) state.msgFalse = state.msgFalse + " to $phoneFalse"
-        }
-    }
+			if(pushFalse) state.msgFalse = state.msgFalse + "Push"
+			input "msgFalse", "text", title: "Custom message to send", required: false, submitOnChange: true
+			if(msgFalse) state.msgFalse = state.msgFalse + state.False ? state.False + " and Send '$msgFalse'" : "Send '$msgFalse'"
+			input "phoneFalse", "phone", title: "Phone number for SMS", required: false, submitOnChange: true
+			if(phoneFalse) state.msgFalse = state.msgFalse + " to $phoneFalse"
+		}
+	}
 }
 
 def selectActionsTrue() {
@@ -142,11 +142,11 @@ def selectActionsTrue() {
 			setActTrue(onSwitchTrue, "On: $onSwitchTrue")
 			input "offSwitchTrue", "capability.switch", title: "Turn off these switches", multiple: true, required: false, submitOnChange: true
 			setActTrue(offSwitchTrue, "Off: $offSwitchTrue")
-            input "delayedOffTrue", "capability.switch", title: "Turn off these switches after a delay", multiple: true, required: false, submitOnChange: true
-            if(delayedOffTrue) input "delayMinutesTrue", "number", title: "Minutes of delay", required: true, range: "1..*", submitOnChange: true
-            def delayStr = "Delayed Off: $delayedOffTrue: $delayMinutesTrue minute"
-            if(delayMinutesTrue > 1) delayStr = "Delayed Off: $delayedOffTrue: $delayMinutesTrue minutes"
-            setActTrue(delayedOffTrue, delayStr)
+			input "delayedOffTrue", "capability.switch", title: "Turn off these switches after a delay", multiple: true, required: false, submitOnChange: true
+			if(delayedOffTrue) input "delayMinutesTrue", "number", title: "Minutes of delay", required: true, range: "1..*", submitOnChange: true
+			def delayStr = "Delayed Off: $delayedOffTrue: $delayMinutesTrue minute"
+			if(delayMinutesTrue > 1) delayStr = "Delayed Off: $delayedOffTrue: $delayMinutesTrue minutes"
+			setActTrue(delayedOffTrue, delayStr)
 			input "dimATrue", "capability.switchLevel", title: "Set these dimmers", multiple: true, submitOnChange: true, required: false
 			if(dimATrue) input "dimLATrue", "number", title: "To this level", range: "0..100", required: true, submitOnChange: true
 			setActTrue(dimATrue, "Dim: $dimATrue: $dimLATrue")
@@ -162,11 +162,11 @@ def selectActionsTrue() {
 			def phrases = location.helloHome?.getPhrases()*.label
 			input "myPhraseTrue", "enum", title: "Routine to run", required: false, options: phrases.sort(), submitOnChange: true
 			if(myPhraseTrue) setActTrue(true, "Routine: $myPhraseTrue")
-            href "selectMsgTrue", title: "Send message", description: state.msgTrue ? state.msgTrue : "Tap to set", state: state.msgTrue ? "complete" : null
-            if(state.msgTrue) {
-            	if(state.actsTrue) state.actsTrue = state.actsTrue + "\n"
-            	state.actsTrue = state.actsTrue + state.msgTrue
-            }
+			href "selectMsgTrue", title: "Send message", description: state.msgTrue ? state.msgTrue : "Tap to set", state: state.msgTrue ? "complete" : null
+			if(state.msgTrue) {
+				if(state.actsTrue) state.actsTrue = state.actsTrue + "\n"
+				state.actsTrue = state.actsTrue + state.msgTrue
+			}
 		}
 	}
 }
@@ -179,11 +179,11 @@ def selectActionsFalse() {
 			setActFalse(onSwitchFalse, "On: $onSwitchFalse")
 			input "offSwitchFalse", "capability.switch", title: "Turn off these switches", multiple: true, required: false, submitOnChange: true
 			setActFalse(offSwitchFalse, "Off: $offSwitchFalse")
-            input "delayedOffFalse", "capability.switch", title: "Turn off these switches after a delay", multiple: true, required: false, submitOnChange: true
-            if(delayedOffFalse) input "delayMinutesFalse", "number", title: "Minutes of delay", required: true, range: "1..*", submitOnChange: true
-            def delayStr = "Delayed Off: $delayedOffFalse: $delayMinutesFalse minute"
-            if(delayMinutesFalse > 1) delayStr = "Delayed Off: $delayedOffFalse: $delayMinutesFalse minutes"
-            setActFalse(delayedOffFalse, delayStr)
+			input "delayedOffFalse", "capability.switch", title: "Turn off these switches after a delay", multiple: true, required: false, submitOnChange: true
+			if(delayedOffFalse) input "delayMinutesFalse", "number", title: "Minutes of delay", required: true, range: "1..*", submitOnChange: true
+			def delayStr = "Delayed Off: $delayedOffFalse: $delayMinutesFalse minute"
+			if(delayMinutesFalse > 1) delayStr = "Delayed Off: $delayedOffFalse: $delayMinutesFalse minutes"
+			setActFalse(delayedOffFalse, delayStr)
 			input "dimAFalse", "capability.switchLevel", title: "Set these dimmers", multiple: true, submitOnChange: true, required: false
 			if(dimAFalse) input "dimLAFalse", "number", title: "To this level", range: "0..100", required: true, submitOnChange: true
 			setActFalse(dimAFalse, "Dim: $dimAFalse: $dimLAFalse")
@@ -199,11 +199,11 @@ def selectActionsFalse() {
 			def phrases = location.helloHome?.getPhrases()*.label
 			input "myPhraseFalse", "enum", title: "Routine to run", required: false, options: phrases.sort(), submitOnChange: true
 			if(myPhraseFalse) setActFalse(true, "Routine: $myPhraseFalse")
-            href "selectMsgFalse", title: "Send message", description: state.msgFalse ? state.msgFalse : "Tap to set", state: state.msgFalse ? "complete" : null
-            if(state.msgFalse) {
-            	if(state.actsFalse) state.actsFalse = state.actsFalse + "\n"
-            	state.actsFalse = state.actsFalse + state.msgFalse
-            }
+			href "selectMsgFalse", title: "Send message", description: state.msgFalse ? state.msgFalse : "Tap to set", state: state.msgFalse ? "complete" : null
+			if(state.msgFalse) {
+				if(state.actsFalse) state.actsFalse = state.actsFalse + "\n"
+				state.actsFalse = state.actsFalse + state.msgFalse
+			}
 		}
 	}
 }
@@ -570,19 +570,19 @@ def runRule() {
                         if(lockTrue) 		lockTrue.lock()
                         if(unlockTrue) 		unlockTrue.unlock()
                         if(modeTrue) 		setLocationMode(modeTrue)
-						if(myPhraseTrue)	location.helloHome.execute(myPhraseTrue)
+			if(myPhraseTrue)	location.helloHome.execute(myPhraseTrue)
                         if(pushTrue)		sendPush(msgTrue ?: "Rule $app.label True")
                         if(phoneTrue)		sendSms(phoneTrue, msgTrue ?: "Rule $app.label True")
 		} else {
                         if(onSwitchFalse) 	onSwitchFalse.on()
                         if(offSwitchFalse) 	offSwitchFalse.off()
-						if(delayedOffFalse)	runIn(delayMinutesFalse * 60, delayOffFalse)
-						if(dimAFalse) 		dimAFalse.setLevel(dimLAFalse)
+			if(delayedOffFalse)	runIn(delayMinutesFalse * 60, delayOffFalse)
+			if(dimAFalse) 		dimAFalse.setLevel(dimLAFalse)
                         if(dimBFalse) 		dimBFalse.setLevel(dimLBFalse)
                         if(lockFalse) 		lockFalse.lock()
                         if(unlockFalse) 	unlockFalse.unlock()
                         if(modeFalse) 		setLocationMode(modeFalse)
-						if(myPhraseFalse) 	location.helloHome.execute(myPhraseFalse)
+			if(myPhraseFalse) 	location.helloHome.execute(myPhraseFalse)
                         if(pushFalse)		sendPush(msgFalse ?: "Rule $app.label False")
                         if(phoneFalse)		sendSms(phoneFalse, msgFalse ?: "Rule $app.label False")
 		}
@@ -633,7 +633,7 @@ private conditionLabelN(i) {
         else if (thisCapab.value == "Mode") result = "Mode i" + (modes.size() > 1 ? "n " + modes : "s " + modes[0])
         else {
 			def thisDev = settings.find {it.key == "rDev$i"}
-            if(!thisDev) return result
+			if(!thisDev) return result
 			def thisAll = settings.find {it.key == "AllrDev$i"}
 			def myAny = thisAll ? "any " : ""
 			if(thisCapab.value == "Temperature") result = "Temperature of "
