@@ -77,30 +77,30 @@ def selectConditions() {
 
 def setActTrue(dev, str) {
 	if(dev) {
-        if(state.actsTrue != "") state.actsTrue = state.actsTrue + "\n"
-        def i = str.indexOf(' ') + 1
-        def myStr = str
-        if(dev == true) state.actsTrue = state.actsTrue + str
-        else {
-        	def j = str.indexOf(']')
-        	myStr = str.substring(i + 1, j) + str.substring(j + 1)
-        	state.actsTrue = state.actsTrue + str.substring(0, i) + myStr
-        }
-    }
+		if(state.actsTrue != "") state.actsTrue = state.actsTrue + "\n"
+		def i = str.indexOf(' ') + 1
+		def myStr = str
+		if(dev == true) state.actsTrue = state.actsTrue + str
+		else {
+			def j = str.indexOf(']')
+			myStr = str.substring(i + 1, j) + str.substring(j + 1)
+			state.actsTrue = state.actsTrue + str.substring(0, i) + myStr
+		}
+	}
 }
 
 def setActFalse(dev, str) {
 	if(dev) {
-        if(state.actsFalse != "") state.actsFalse = state.actsFalse + "\n"
-        def i = str.indexOf(' ') + 1
-        def myStr = str
-        if(dev == true) state.actsFalse = state.actsFalse + str
-        else {
-        	def j = str.indexOf(']')
-        	myStr = str.substring(i + 1, j) + str.substring(j + 1)
-        	state.actsFalse = state.actsFalse + str.substring(0, i) + myStr
-        }
-    }
+		if(state.actsFalse != "") state.actsFalse = state.actsFalse + "\n"
+		def i = str.indexOf(' ') + 1
+		def myStr = str
+		if(dev == true) state.actsFalse = state.actsFalse + str
+		else {
+			def j = str.indexOf(']')
+			myStr = str.substring(i + 1, j) + str.substring(j + 1)
+			state.actsFalse = state.actsFalse + str.substring(0, i) + myStr
+		}
+	}
 }
 
 def selectActionsTrue() {
