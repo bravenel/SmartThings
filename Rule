@@ -309,11 +309,11 @@ def getState(myCapab, n) {
 	else if(myCapab == "Acceleration")	result = input "state$n", "enum", title: "Acceleration state", options: ["active", "inactive"]
 	else if(myCapab == "Contact") 		result = input "state$n", "enum", title: "Contact state", options: ["open", "closed"]
 	else if(myCapab == "Presence") 		result = input "state$n", "enum", title: "Presence state", options: ["present", "not present"], defaultValue: "present"
-	else if(myCapab == "Lock") 			result = input "state$n", "enum", title: "Lock state", options: ["locked", "unlocked"]
+	else if(myCapab == "Lock") 		result = input "state$n", "enum", title: "Lock state", options: ["locked", "unlocked"]
 	else if(myCapab == "Temperature") 	result = input "state$n", "number", title: "Temperature"
 	else if(myCapab == "Humidity") 		result = input "state$n", "number", title: "Humidity"
 	else if(myCapab == "Illuminance") 	result = input "state$n", "number", title: "Illuminance"
-	else if(myCapab == "Mode") 			result = input "modes", "mode", title: "When mode is", multiple: true, required: false
+	else if(myCapab == "Mode") 		result = input "modes", "mode", title: "When mode is", multiple: true, required: false
 	else if(myCapab == "Days of week") 	result = input "days", "enum", title: "On certain days of the week", multiple: true, required: false, options: days
 	else if(myCapab == "Time of day") {
 		def timeLabel = timeIntervalLabel()
@@ -423,9 +423,9 @@ def updated() {
 def initialize() {
 	for (int i = 1; i <= howMany; i++) {
 		def capab = (settings.find {it.key == "rCapab$i"}).value
-		if     (capab == "Mode") subscribe(location, "mode", allHandler)
-		else if(capab == "Time of day") scheduleTimeOfDay()
-		else if(capab == "Days of week") schedule("2015-01-09T00:00:10.000-0700", "runRule")
+		if     (capab == "Mode") 		subscribe(location, "mode", allHandler)
+		else if(capab == "Time of day") 	scheduleTimeOfDay()
+		else if(capab == "Days of week") 	schedule("2015-01-09T00:00:10.000-0700", "runRule")
 		else subscribe((settings.find{it.key == "rDev$i"}).value, capab.toLowerCase(), allHandler)
 	}
 	state.success = null
@@ -447,12 +447,12 @@ def compare(a, rel, b) {
 
 def checkCondAny(dev, state, cap, rel) {
 	def result = false
-	if     (cap == "Temperature") 	dev.currentTemperature.each {result = result || compare(it, rel, state)}
+	if     (cap == "Temperature") 		dev.currentTemperature.each {result = result || compare(it, rel, state)}
 	else if(cap == "Humidity") 		dev.currentHumidity.each    {result = result || compare(it, rel, state)}
-	else if(cap == "Illuminance") 	dev.currentIlluminance.each {result = result || compare(it, rel, state)}
+	else if(cap == "Illuminance") 		dev.currentIlluminance.each {result = result || compare(it, rel, state)}
 	else if(cap == "Switch") 		result = state in dev.currentSwitch
 	else if(cap == "Motion") 		result = state in dev.currentMotion
-	else if(cap == "Acceleration") 	result = state in dev.currentAcceleration
+	else if(cap == "Acceleration") 		result = state in dev.currentAcceleration
 	else if(cap == "Contact") 		result = state in dev.currentContact
 	else if(cap == "Presence") 		result = state in dev.currentPresence
 	else if(cap == "Lock") 			result = state in dev.currentLock
@@ -462,7 +462,7 @@ def checkCondAny(dev, state, cap, rel) {
 
 def checkCondAll(dev, state, cap, rel) {
 	def flip = ["on": "off",
-				"off": "on",
+		"off": "on",
                 "active": "inactive",
                 "inactive": "active",
                 "open": "closed",
@@ -472,12 +472,12 @@ def checkCondAll(dev, state, cap, rel) {
                 "locked": "unlocked",
                 "unlocked": "locked"]
 	def result = true
-	if     (cap == "Temperature") 	dev.currentTemperature.each {result = result && compare(it, rel, state)}
+	if     (cap == "Temperature") 		dev.currentTemperature.each {result = result && compare(it, rel, state)}
 	else if(cap == "Humidity") 		dev.currentHumidity.each    {result = result && compare(it, rel, state)}
-	else if(cap == "Illuminance") 	dev.currentIlluminance.each {result = result && compare(it, rel, state)}
+	else if(cap == "Illuminance") 		dev.currentIlluminance.each {result = result && compare(it, rel, state)}
 	else if(cap == "Switch") 		result = !(flip[state] in dev.currentSwitch)
 	else if(cap == "Motion") 		result = !(flip[state] in dev.currentMotion)
-	else if(cap == "Acceleration") 	result = !(flip[state] in dev.currentAcceleration)
+	else if(cap == "Acceleration") 		result = !(flip[state] in dev.currentAcceleration)
 	else if(cap == "Contact") 		result = !(flip[state] in dev.currentContact)
 	else if(cap == "Presence") 		result = !(flip[state] in dev.currentPresence)
 	else if(cap == "Lock") 			result = !(flip[state] in dev.currentLock)
@@ -488,9 +488,9 @@ def checkCondAll(dev, state, cap, rel) {
 def getOperand(i) {
 	def result = true
 	def capab = (settings.find {it.key == "rCapab$i"}).value
-	if     (capab == "Mode") result = modeOk
-	else if(capab == "Time of day") result = timeOk
-	else if(capab == "Days of week") result = daysOk
+	if     (capab == "Mode") 		result = modeOk
+	else if(capab == "Time of day") 	result = timeOk
+	else if(capab == "Days of week") 	result = daysOk
 	else {
 		def myDev = 	settings.find {it.key == "rDev$i"}
 		def myState = 	settings.find {it.key == "state$i"}
@@ -591,7 +591,7 @@ def runRule() {
                         if(phoneFalse)		sendSms(phoneFalse, msgFalse ?: "Rule $app.label False")
 		}
 		state.success = success
-		log.debug (success ? "Rule proved True" : "Rule Proved False")
+		log.debug (success ? "Rule is True" : "Rule is False")
 	}
 }
 
@@ -617,6 +617,7 @@ def delayOffFalse() {
 }
 
 //  private execution filter methods below
+
 private conditionLabel() {
 	def result = ""
 	if(howMany) {
