@@ -371,7 +371,7 @@ def inputRight(sub) {
 				paragraph(state.str)
                         }
                         if(sub) {
-                                input "endOfSub$state.n", "bool", title: "End of subrule?", submitOnChange: true
+                                input "endOfSub$state.n", "bool", title: "End of sub-rule?", submitOnChange: true
                                 if(settings["endOfSub$state.n"]) {
                                         state.str = state.str + ")"
                                         state.eval << ")"
