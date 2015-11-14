@@ -43,8 +43,8 @@ def selectRule() {
 			label title: "Name the Rule", required: true
 			input "howMany", "number", title: "How many conditions?", required: true, range: "1..*" //temp fix for Android bug
 			def condLabel = conditionLabel()
-			href "selectConditions", title: "Define Conditions", description: condLabel ?: "Tap to set", required: true, state: condLabel ? "complete" : null
-			href "defineRule", title: "Define the Rule", description: state.str ? state.str : "Tap to set", state: state.str ? "complete" : null
+			href "selectConditions", title: "Define Conditions", description: condLabel ? (condLabel + "\n") : "Tap to set", required: true, state: condLabel ? "complete" : null
+			href "defineRule", title: "Define the Rule", description: state.str ? (state.str + "\n") : "Tap to set", state: state.str ? "complete" : null
 			href "selectActionsTrue", title: "Select the Actions for True", description: state.actsTrue ? state.actsTrue : "Tap to set", state: state.actsTrue ? "complete" : null
 			href "selectActionsFalse", title: "Select the Actions for False", description: state.actsFalse ? state.actsFalse : "Tap to set", state: state.actsFalse ? "complete" : null
         }
