@@ -591,12 +591,12 @@ def runRule() {
                         if(phoneFalse)		sendSms(phoneFalse, msgFalse ?: "Rule $app.label False")
 		}
 		state.success = success
-		log.debug (success ? "Rule is True" : "Rule is False")
+		log.info (success ? "$app.label is True" : "$app.label is False")
 	}
 }
 
 def allHandler(evt) {
-	log.debug "Handler: $evt.displayName $evt.name $evt.value"
+	log.info "$app.label: $evt.displayName $evt.name $evt.value"
 	runRule()
 }
 
