@@ -113,7 +113,7 @@ def selectMsgTrue() {
 			input "pushTrue", "bool", title: "Send Push Notification?", required: false, submitOnChange: true
 			if(pushTrue) state.msgTrue = state.msgTrue + "Push"
 			input "msgTrue", "text", title: "Custom message to send", required: false, submitOnChange: true
-			if(msgTrue) state.msgTrue = state.msgTrue + state.msgTrue ? state.msgTrue + " and Send '$msgTrue'" : "Send '$msgTrue'"
+			if(msgTrue) state.msgTrue = state.msgTrue + state.msgTrue ? state.msgTrue + " '$msgTrue'" : "Send '$msgTrue'"
 			input "phoneTrue", "phone", title: "Phone number for SMS", required: false, submitOnChange: true
 			if(phoneTrue) state.msgTrue = state.msgTrue + " to $phoneTrue"
 		}
@@ -127,7 +127,7 @@ def selectMsgFalse() {
 			input "pushFalse", "bool", title: "Send Push Notification?", required: false, submitOnChange: true
 			if(pushFalse) state.msgFalse = state.msgFalse + "Push"
 			input "msgFalse", "text", title: "Custom message to send", required: false, submitOnChange: true
-			if(msgFalse) state.msgFalse = state.msgFalse + state.False ? state.False + " and Send '$msgFalse'" : "Send '$msgFalse'"
+			if(msgFalse) state.msgFalse = state.msgFalse + state.msgFalse ? state.msgFalse + " '$msgFalse'" : "Send '$msgFalse'"
 			input "phoneFalse", "phone", title: "Phone number for SMS", required: false, submitOnChange: true
 			if(phoneFalse) state.msgFalse = state.msgFalse + " to $phoneFalse"
 		}
