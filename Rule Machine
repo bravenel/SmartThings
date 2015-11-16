@@ -3,7 +3,7 @@ definition(
     singleInstance: true,
     namespace: "bravenel",
     author: "Mike Maxwell",
-    description: "Rule Machne",
+    description: "Rule Machine",
     category: "My Apps",
   	iconUrl: "https://s3.amazonaws.com/smartapp-icons/ModeMagic/Cat-ModeMagic.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/ModeMagic/Cat-ModeMagic@2x.png",
