@@ -42,10 +42,15 @@ def selectRule() {
 	dynamicPage(name: "selectRule", title: "Select Conditions, Rule and Results", uninstall: true, install: true) {
 		section() {     
 			label title: "Name the Rule", required: true
-			input "howMany", "number", title: "How many conditions?", required: true, range: "1..*" //temp fix for Android bug
+			//maxwell removed
+			//input "howMany", "number", title: "How many conditions?", required: true, range: "1..*" //temp fix for Android bug
 			def condLabel = conditionLabel()
-			href "selectConditions", title: "Define Conditions", description: condLabel ? (condLabel + "\n") : "Tap to set", required: true, state: condLabel ? "complete" : null
-			href "defineRule", title: "Define the Rule", description: state.str ? (state.str + "\n") : "Tap to set", state: state.str ? "complete" : null
+            //maxwell removed annoying trailing lf
+            if (condLabel) condLabel = condLabel[0..-2]
+			href "selectConditions", title: "Define Conditions", description: condLabel ? (condLabel) : "Tap to set", required: true, state: condLabel ? "complete" : null
+			//maxwell removed annoying trailing lf
+            //href "defineRule", title: "Define the Rule", description: state.str ? (state.str + "\n") : "Tap to set", state: state.str ? "complete" : null
+            href "defineRule", title: "Define the Rule", description: state.str ? (state.str) : "Tap to set", state: state.str ? "complete" : null
             href "selectActionsTrue", title: "Select the Actions for True", description: state.actsTrue ? state.actsTrue : "Tap to set", state: state.actsTrue ? "complete" : null
             href "selectActionsFalse", title: "Select the Actions for False", description: state.actsFalse ? state.actsFalse : "Tap to set", state: state.actsFalse ? "complete" : null
         }
@@ -54,8 +59,12 @@ def selectRule() {
 }
 
 def selectConditions() {
+	//maxwell add count conditions for dynamic generation
+    def ct = settings.findAll{it.key.startsWith("rCapab")}
+    state.howMany = ct.size() + 1
+    def howMany = state.howMany
 	dynamicPage(name: "selectConditions", title: "Select Conditions", uninstall: false) {
-//		section("") {input "howMany", "number", title: "How many conditions?", required: true, range: "1..*", submitOnChange: true}
+
 		if(howMany) {
 			for (int i = 1; i <= howMany; i++) {
 				def thisCapab = "rCapab$i"
@@ -73,6 +82,7 @@ def selectConditions() {
 						}
 						getState(xCapab, i)
 					}
+
 				}
 			}
 		}
@@ -119,6 +129,8 @@ def selectMsgTrue() {
             if(phoneTrue) state.msgTrue = state.msgTrue + " to $phoneTrue"
         }
     }
+
+
 }
 
 def selectMsgFalse() {
@@ -133,6 +145,8 @@ def selectMsgFalse() {
             if(phoneFalse) state.msgFalse = state.msgFalse + " to $phoneFalse"
         }
     }
+
+
 }
 
 def selectActionsTrue() {
@@ -150,6 +164,7 @@ def selectActionsTrue() {
             	if(delayMinutesTrue > 1) delayStr = "Delayed Off: $delayedOffTrue: $delayMinutesTrue minutes"
             	setActTrue(delayedOffTrue, delayStr)
             }
+
 			input "dimATrue", "capability.switchLevel", title: "Set these dimmers", multiple: true, submitOnChange: true, required: false
 			if(dimATrue) input "dimLATrue", "number", title: "To this level", range: "0..100", required: true, submitOnChange: true
             if(dimLATrue) setActTrue(dimATrue, "Dim: $dimATrue: $dimLATrue")
@@ -160,6 +175,15 @@ def selectActionsTrue() {
 			setActTrue(lockTrue, "Lock: $lockTrue")
 			input "unlockTrue", "capability.lock", title: "Unlock these locks", multiple: true, required: false, submitOnChange: true
 			setActTrue(unlockTrue, "Unlock: $unlockTrue")
+
+
+
+
+
+
+
+
+
 			input "modeTrue", "mode", title: "Set the mode", multiple: false, required: false, submitOnChange: true
 			if(modeTrue) setActTrue(true, "Mode: $modeTrue")
 			def phrases = location.helloHome?.getPhrases()*.label
@@ -167,9 +191,11 @@ def selectActionsTrue() {
 			if(myPhraseTrue) setActTrue(true, "Routine: $myPhraseTrue")
             href "selectMsgTrue", title: "Send message", description: state.msgTrue ? state.msgTrue : "Tap to set", state: state.msgTrue ? "complete" : null
             if(selectMsgTrue) {
+
             	if(state.actsTrue) state.actsTrue = state.actsTrue + "\n"
             	state.actsTrue = state.actsTrue + state.msgTrue
             }
+
 		}
 	}
 }
@@ -189,6 +215,7 @@ def selectActionsFalse() {
             	if(delayMinutesFalse > 1) delayStr = "Delayed Off: $delayedOffFalse: $delayMinutesFalse minutes"
             	setActFalse(delayedOffFalse, delayStr)
             }
+
 			input "dimAFalse", "capability.switchLevel", title: "Set these dimmers", multiple: true, submitOnChange: true, required: false
 			if(dimAFalse) input "dimLAFalse", "number", title: "To this level", range: "0..100", required: true, submitOnChange: true
 			if(dimLAFalse) setActFalse(dimAFalse, "Dim: $dimAFalse: $dimLAFalse")
@@ -199,6 +226,14 @@ def selectActionsFalse() {
 			setActFalse(lockFalse, "Lock: $lockFalse")
 			input "unlockFalse", "capability.lock", title: "Unlock these locks", multiple: true, required: false, submitOnChange: true
 			setActFalse(unlockFalse, "Unlock: $unlockFalse")
+
+
+
+
+
+
+
+
 			input "modeFalse", "mode", title: "Set the mode", multiple: false, required: false, submitOnChange: true
 			if(modeFalse) setActFalse(true, "Mode: $modeFalse")
 			def phrases = location.helloHome?.getPhrases()*.label
@@ -206,9 +241,11 @@ def selectActionsFalse() {
 			if(myPhraseFalse) setActFalse(true, "Routine: $myPhraseFalse")
             href "selectMsgFalse", title: "Send message", description: state.msgFalse ? state.msgFalse : "Tap to set", state: state.msgFalse ? "complete" : null
             if(selectMsgFalse) {
+
             	if(state.actsFalse) state.actsFalse = state.actsFalse + "\n"
             	state.actsFalse = state.actsFalse + state.msgFalse
             }
+
 		}
 	}
 }
@@ -315,8 +352,11 @@ def getRelational(myDev) {
 }
 
 def getCapab(myCapab) {  // add , "Certain Time" to the list below to enable "Certain Time" -- rest of the code is implemented
+
 	def myOptions = ["Switch", "Motion", "Acceleration", "Contact", "Presence", "Lock", "Temperature", "Humidity", "Illuminance", "Time of day", "Days of week", "Mode", "Dimmer level"]
-	def result = input myCapab, "enum", title: "Select capability", required: true, options: myOptions.sort(), submitOnChange: true
+	//maxwell change to suport dynamic condition genertion
+    //def result = input myCapab, "enum", title: "Select capability", required: true, options: myOptions.sort(), submitOnChange: true
+	def result = input myCapab, "enum", title: "Select capability", required: false, options: myOptions.sort(), submitOnChange: true
 }
 
 def getState(myCapab, n) {
@@ -344,9 +384,12 @@ def getState(myCapab, n) {
     	def atTimeLabel = atTimeLabel()
         href "atCertainTime", title: "At a certain time", description: atTimeLabel ?: "Tap to set", state: atTimeLabel ? "complete" : null
     }
+
 }
 
 def inputLeft(sub) {
+	//maxwell add for dynamic condition generation
+	def howMany = state.howMany - 1
 	def conds = []
 	for (int i = 1; i <= howMany; i++) conds << conditionLabelN(i)
 	input "subCondL$state.n", "bool", title: "Enter subrule for left?", submitOnChange: true
@@ -370,6 +413,8 @@ def inputLeft(sub) {
 }
 
 def inputRight(sub) {
+	//maxwell add for dynamic condition generation
+	def howMany = state.howMany - 1
 	state.n = state.n + 1
 	input "operator$state.n", "enum", title: "Choose: AND,  OR,  Done", options: ["AND", "OR", "Done"], submitOnChange: true
 	if(settings["operator$state.n"]) if(settings["operator$state.n"] != "Done") {
@@ -395,6 +440,7 @@ def inputRight(sub) {
 				state.eval << myCond
 				paragraph(state.str)
 			}
+
 			if(sub) {
 				input "endOfSub$state.n", "bool", title: "End of sub-rule?", submitOnChange: true
 				if(settings["endOfSub$state.n"]) {
@@ -404,6 +450,8 @@ def inputRight(sub) {
 					return
 				}
 			}
+
+
 			input "moreConds$state.n", "bool", title: "More conditions on right?", submitOnChange: true
 			if(settings["moreConds$state.n"]) inputRight()
 		}
@@ -456,6 +504,8 @@ def updated() {
 }
 
 def initialize() {
+	//maxwell add for dynamic condition generation
+	def howMany = state.howMany - 1
 	for (int i = 1; i <= howMany; i++) {
 		def capab = (settings.find {it.key == "rCapab$i"}).value
 		if     (capab == "Mode") subscribe(location, "mode", allHandler)
@@ -617,6 +667,17 @@ def runRule() {
 			if(myPhraseTrue)	location.helloHome.execute(myPhraseTrue)
 			if(pushTrue)		sendPush(msgTrue ?: "Rule $app.label True")
 			if(phoneTrue)		sendSms(phoneTrue, msgTrue ?: "Rule $app.label True")
+
+
+
+
+
+
+
+
+
+
+
 		} else {
 			if(onSwitchFalse) 	onSwitchFalse.on()
 			if(offSwitchFalse) 	offSwitchFalse.off()
@@ -630,6 +691,19 @@ def runRule() {
 			if(pushFalse)		sendPush(msgFalse ?: "Rule $app.label False")
 			if(phoneFalse)		sendSms(phoneFalse, msgFalse ?: "Rule $app.label False")
 		}
+
+
+
+
+
+
+
+
+
+
+
+
+
 		state.success = success
 		log.info (success ? "$app.label is True" : "$app.label is False")
 	}
@@ -661,7 +735,10 @@ def delayOffFalse() {
 }
 
 //  private execution filter methods below
+
 private conditionLabel() {
+	//maxwell add for dynamic condition generation
+	def howMany = state.howMany
 	def result = ""
 	if(howMany) {
 		for (int i = 1; i <= howMany; i++) {
