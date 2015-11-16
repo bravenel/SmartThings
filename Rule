@@ -566,6 +566,7 @@ def runRule() {
 	def success = eval()
 	if(success != state.success) {
 		if(success) {
+			if(delayedOffFalse)	unschedule("delayOffFalse")
                         if(onSwitchTrue) 	onSwitchTrue.on()
                         if(offSwitchTrue) 	offSwitchTrue.off()
                         if(delayedOffTrue)	runIn(delayMinutesTrue * 60, delayOffTrue)
@@ -578,6 +579,7 @@ def runRule() {
                         if(pushTrue)		sendPush(msgTrue ?: "Rule $app.label True")
                         if(phoneTrue)		sendSms(phoneTrue, msgTrue ?: "Rule $app.label True")
 		} else {
+			if(delayedOffTrue)	unschedule("delayOffTrue")
                         if(onSwitchFalse) 	onSwitchFalse.on()
                         if(offSwitchFalse) 	offSwitchFalse.off()
 			if(delayedOffFalse)	runIn(delayMinutesFalse * 60, delayOffFalse)
