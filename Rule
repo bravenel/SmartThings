@@ -3,7 +3,7 @@
  *
  *  Copyright 2015 Bruce Ravenel
  *
- *  Version 1.105  16 Nov 2015
+ *  Version 1.106  16 Nov 2015
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -168,7 +168,7 @@ def selectActionsFalse() {
 			if(pendMinutesFalse) {
 				def pendStr = "Pending Off: $pendedOffFalse: $pendMinutesFalse minute"
 				if(pendMinutesFalse > 1) pendStr = pendStr + "s"
-				setActTrue(pendedOffFalse, pendStr)
+				setActFalse(pendedOffFalse, pendStr)
 			}
 			input "dimAFalse", "capability.switchLevel", title: "Set these dimmers", multiple: true, submitOnChange: true, required: false
 			if(dimAFalse) input "dimLAFalse", "number", title: "To this level", range: "0..100", required: true, submitOnChange: true
