@@ -584,7 +584,7 @@ def checkCondAny(dev, state, cap, rel) {
 	else if(cap == "Contact") 	result = state in dev.currentContact
 	else if(cap == "Presence") 	result = state in dev.currentPresence
 	else if(cap == "Lock") 		result = state in dev.currentLock
-	else if(cap == "Valve") 	resule = state.in dev.currentValve			
+	else if(cap == "Valve") 	result = state.in dev.currentValve			
 //	log.debug "CheckAny $cap $result"
 	return result
 }
