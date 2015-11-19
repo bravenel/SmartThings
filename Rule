@@ -148,10 +148,11 @@ def selectActionsTrue() {
 			if(thermoTrue) {
 				input "thermoModeTrue", "enum", title: "Select thermostate mode", multiple: false, required: true, options: ["heat", "cool", "off"], submitOnChange: true
 				if(thermoModeTrue) {
-					if     (thermoModeTrue == "heat") input "thermoSetTrue", "number", title: "Set heating point", multiple: false, required: true, submitOnChange: true
-					else if(thermoModeTrue == "cool") input "thermoSetTrue", "number", title: "Set cooling point", multiple: false, required: true, submitOnChange: true 
+					if     (thermoModeTrue == "heat") input "thermoSetTrue", "number", title: "Set heating point (optional)", multiple: false, required: false, submitOnChange: true
+					else if(thermoModeTrue == "cool") input "thermoSetTrue", "number", title: "Set cooling point (optional)", multiple: false, required: false, submitOnChange: true 
 					if(thermoModeTrue == "off") setActTrue(thermoTrue, "Thermostat $thermoTrue: off")
-					else setActTrue(thermoTrue, "Thermostat $thermoTrue: $thermoModeTrue to $thermoSetTrue")
+					else if(thermoSetTrue) setActTrue(thermoTrue, "Thermostat $thermoTrue: $thermoModeTrue to $thermoSetTrue")
+					else setActTrue(thermoTrue, "Thermostat $thermoTrue: $thermoModeTrue")
 				}
 			}
 			input "modeTrue", "mode", title: "Set the mode", multiple: false, required: false, submitOnChange: true
@@ -212,10 +213,11 @@ def selectActionsFalse() {
 			if(thermoFalse) {
 				input "thermoModeFalse", "enum", title: "Select thermostate mode", multiple: false, required: true, options: ["heat", "cool", "off"], submitOnChange: true
 				if(thermoModeFalse) {
-					if     (thermoModeFalse == "heat") input "thermoSetFalse", "number", title: "Set heating point", multiple: false, required: true, submitOnChange: true
-					else if(thermoModeFalse == "cool") input "thermoSetFalse", "number", title: "Set cooling point", multiple: false, required: true, submitOnChange: true 
+					if     (thermoModeFalse == "heat") input "thermoSetFalse", "number", title: "Set heating point (optional)", multiple: false, required: false, submitOnChange: true
+					else if(thermoModeFalse == "cool") input "thermoSetFalse", "number", title: "Set cooling point (optional)", multiple: false, required: false, submitOnChange: true 
 					if(thermoModeFalse == "off") setActFalse(thermoFalse, "Thermostat $thermoFalse: off")
-					else setActFalse(thermoFalse, "Thermostat $thermoFalse: $thermoModeFalse to $thermoSetFalse")
+					else if(thermoSetFalse) setActFalse(thermoFalse, "Thermostat $thermoFalse: $thermoModeFalse to $thermoSetFalse")
+					else setActFalse(thermoFalse, "Thermostat $thermoFalse: $thermoModeFalse")
 				}
 			}
 			input "modeFalse", "mode", title: "Set the mode", multiple: false, required: false, submitOnChange: true
@@ -726,8 +728,8 @@ def runRule(delay) {
 			if(openValveTrue)	openValveTrue.open()
 			if(closeValveTrue)	closeValveTrue.close()
 			if(thermoTrue)		{	thermoTrue.setThermostatMode(thermoModeTrue)
-							if(thermoModeTrue == "heat") thermoTrue.setHeatingSetpoint(thermoSetTrue)
-							else if(thermoModeTrue == "cool") thermoTrue.setCoolingSetpoint(thermoSetTrue) 	}
+							if(thermoModeTrue == "heat" && thermoSetTrue) thermoTrue.setHeatingSetpoint(thermoSetTrue)
+							else if(thermoModeTrue == "cool" && thermoSetTrue) thermoTrue.setCoolingSetpoint(thermoSetTrue) 	}
 			if(modeTrue) 		setLocationMode(modeTrue)
 			if(myPhraseTrue)	location.helloHome.execute(myPhraseTrue)
 			if(pushTrue)		sendPush(msgTrue ?: "Rule $app.label True")
@@ -745,8 +747,8 @@ def runRule(delay) {
 			if(openValveFalse)	openValveFalse.open()
 			if(closeValveFalse)	closeValveFalse.close()
 			if(thermoFalse)		{	thermoFalse.setThermostatMode(thermoModeFalse)
-							if(thermoModeFalse == "heat") thermoFalse.setHeatingSetpoint(thermoSetFalse)
-							else if(thermoModeFalse == "cool") thermoFalse.setCoolingSetpoint(thermoSetFalse) 	}
+							if(thermoModeFalse == "heat" && thermoSetFalse) thermoFalse.setHeatingSetpoint(thermoSetFalse)
+							else if(thermoModeFalse == "cool" && thermoSetFalse) thermoFalse.setCoolingSetpoint(thermoSetFalse) 	}
 			if(modeFalse) 		setLocationMode(modeFalse)
 			if(myPhraseFalse) 	location.helloHome.execute(myPhraseFalse)
 			if(pushFalse)		sendPush(msgFalse ?: "Rule $app.label False")
