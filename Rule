@@ -409,7 +409,7 @@ def getState(myCapab, n) {
 	else if(myCapab == "Humidity") 		result = input "state$n", "number", title: "Humidity", range: "0..100"
 	else if(myCapab == "Illuminance") 	result = input "state$n", "number", title: "Illuminance"
 	else if(myCapab == "Energy meter") 	result = input "state$n", "number", title: "Energy level"
-	else if(myCapab == "Power meter") 	result = input "state$n", "number", title: "Power level"
+	else if(myCapab == "Power meter") 	result = input "state$n", "number", title: "Power level", range: "*..*"
 	else if(myCapab == "Battery") 		result = input "state$n", "number", title: "Battery level"
 	else if(myCapab == "Days of week") 	result = input "days", "enum", title: "On certain days of the week", multiple: true, required: false, options: days
 	else if(myCapab == "Mode") {
