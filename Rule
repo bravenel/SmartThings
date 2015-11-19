@@ -805,7 +805,6 @@ private conditionLabelN(i) {
 		else if(thisCapab.value == "Energy meter")	result = "Energy level of " 
 		else if(thisCapab.value == "Power meter")	result = "Power level of " 
 		else if(thisCapab.value == "Battery")		result = "Battery level of "
-		else if(thisCapab.value == "Water sensor")	result = "Water sensor is "
 		result = result + (myAny ? thisDev.value : thisDev.value[0]) + " " + ((thisAll ? thisAll.value : false) ? "all " : myAny)
 		def thisRel = settings.find {it.key == "RelrDev$i"}
 		if(thisCapab.value in ["Temperature", "Humidity", "Illuminance", "Dimmer level", "Energy meter", "Power meter", "Battery"]) result = result + " " + thisRel.value + " "
