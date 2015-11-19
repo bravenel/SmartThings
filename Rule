@@ -49,6 +49,11 @@ def selectRule() {
 			href "selectActionsTrue", title: "Select the Actions for True", description: state.actsTrue ? state.actsTrue : "Tap to set", state: state.actsTrue ? "complete" : null
 			href "selectActionsFalse", title: "Select the Actions for False", description: state.actsFalse ? state.actsFalse : "Tap to set", state: state.actsFalse ? "complete" : null
 		}
+                section ("Overrides") {
+                       paragraph "Manual ON disables rule evaluation. Manual OFF re-enables rule evaluation."
+                       input "physicalOverride", "bool", title: "Physical override?", required: true, defaultValue: false
+                       paragraph ""
+                }
 		section() {mode(title: "Restrict to specific mode(s)")}
 	}
 }
@@ -502,7 +507,12 @@ def initialize() {
 		else if(capab == "Power meter") subscribe((settings.find{it.key == "rDev$i"}).value, "power", allHandler)
 		else subscribe((settings.find{it.key == "rDev$i"}).value, capab.toLowerCase(), allHandler)
 	}
+        if (physicalOverride) {
+                subscribe(onSwitchTrue, "switch.on", switchHandler)
+                subscribe(onSwitchTrue, "switch.off", switchHandler)
+        }
 	state.success = null
+        state.override = false
 	runRule(false)
 }
 
@@ -653,6 +663,8 @@ def doDelay(time, success) {
 }
 
 def runRule(delay) {
+    if(!state.override) {
+        log.info ("$app.label is rule processing NORMALLY")
 	state.token = 0
 	def success = eval()
 	if((success != state.success) || delay) {
@@ -690,7 +702,24 @@ def runRule(delay) {
 		}
 		state.success = success
 		log.info (success ? "$app.label is True" : "$app.label is False")
-	}
+	} 
+     } else {
+        log.info ("$app.label is Overridden - no rule processing...")
+    }
+}
+
+def switchHandler(evt) {
+    if (evt.isPhysical()) {
+        if (evt.value == "on") {
+          log.debug "switchHandler(isPhysical()): $evt.name: $evt.value"
+          state.override = true
+          unschedule()
+        } else if (evt.value == "off") {
+          state.override = false
+          log.debug "switchHandler(isPhysical()): $evt.name: $evt.value"
+        }
+        runRule()
+    }
 }
 
 def allHandler(evt) {
