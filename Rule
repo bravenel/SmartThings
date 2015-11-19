@@ -3,7 +3,7 @@
  *
  *  Copyright 2015 Bruce Ravenel
  *
- *  Version 1.109  19 Nov 2015
+ *  Version 1.1.10  19 Nov 2015
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -346,6 +346,10 @@ def getDevs(myCapab, dev) {
 			thisName = "Water sensors"
 			thisCapab = "waterSensor"
 			break
+		case "Valve":
+			thisName = "Valves"
+			thisCapab = "valve"
+			break
 		case "Battery":
 			thisName = "Batteries"
 			thisCapab = "battery"
@@ -363,7 +367,7 @@ def getRelational(myDev) {
 
 def getCapab(myCapab) {  
 	def myOptions = ["Switch", "Motion", "Acceleration", "Contact", "Presence", "Lock", "Temperature", "Humidity", "Illuminance", "Time of day", "Certain Time", 
-    	"Days of week", "Mode", "Dimmer level", "Energy meter", "Power meter", "Water sensor", "Battery"]
+    	"Days of week", "Mode", "Dimmer level", "Energy meter", "Power meter", "Water sensor", "Valve", "Battery"]
 	def result = input myCapab, "enum", title: "Select capability", required: false, options: myOptions.sort(), submitOnChange: true
 }
 
@@ -377,6 +381,7 @@ def getState(myCapab, n) {
 	else if(myCapab == "Presence") 		result = input "state$n", "enum", title: "Presence state", options: ["present", "not present"], defaultValue: "present"
 	else if(myCapab == "Lock") 		result = input "state$n", "enum", title: "Lock state", options: ["locked", "unlocked"]
 	else if(myCapab == "Water sensor")	result = input "state$n", "enum", title: "Water state", options: ["dry", "wet"]
+	else if(myCapab == "Valve") 		result = input "state$n", "enum", title: "Valve state", options: ["open", "closed"]
 	else if(myCapab == "Dimmer level")	result = input "state$n", "number", title: "Dimmer level", range: "0..100"
 	else if(myCapab == "Temperature") 	result = input "state$n", "number", title: "Temperature"
 	else if(myCapab == "Humidity") 		result = input "state$n", "number", title: "Humidity", range: "0..100"
@@ -557,6 +562,7 @@ def checkCondAny(dev, state, cap, rel) {
 	else if(cap == "Contact") 	result = state in dev.currentContact
 	else if(cap == "Presence") 	result = state in dev.currentPresence
 	else if(cap == "Lock") 		result = state in dev.currentLock
+	else if(cap == "Valve") 	resule = state.in dev.currentValve			
 //	log.debug "CheckAny $cap $result"
 	return result
 }
@@ -587,6 +593,7 @@ def checkCondAll(dev, state, cap, rel) {
 	else if(cap == "Contact") 		result = !(flip[state] in dev.currentContact)
 	else if(cap == "Presence") 		result = !(flip[state] in dev.currentPresence)
 	else if(cap == "Lock") 			result = !(flip[state] in dev.currentLock)
+	else if(cap == "Valve")			result = !(flip[state] in dev.currentValve)
 //	log.debug "CheckAll $cap $result"
 	return result
 }
