@@ -51,7 +51,7 @@ def selectRule() {
 		}
 		section(title: "More options", hidden: hideOptionsSection(), hideable: true) {
 			input "modesZ", "mode", title: "Evaluate only when mode is", multiple: true, required: false
-			paragraph "With Physical Overide, Manual ON disables rule evaluation. Manual OFF re-enables rule evaluation."
+			paragraph "With Physical Overide, Manual ON disables rule evaluation. Manual OFF re-enables rule evaluation.  Use any of Switches for True for override."
 			input "physicalOverride", "bool", title: "Physical override?", required: false, defaultValue: false
    		}    
 	}
