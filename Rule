@@ -721,7 +721,7 @@ def switchHandler(evt) {
         state.override = false
         log.debug "switchHandler(isPhysical()): $evt.name: $evt.value"
     }
-   runRule()
+   runRule(false)
 }
 
 def allHandler(evt) {
