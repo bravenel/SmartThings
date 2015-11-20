@@ -3,7 +3,7 @@
  *
  *  Copyright 2015 Bruce Ravenel
  *
- *  Version 1.1.11  19 Nov 2015
+ *  Version 1.1.12  19 Nov 2015
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -100,12 +100,20 @@ def addToActTrue(str) {
 	state.actsTrue = state.actsTrue + str + "\n"
 }
 
+def buildActTrue(str, brackets) {
+	state.actsTrue = state.actsTrue + (brackets ? stripBrackets("$str") : str)
+}
+
 def setActFalse(dev, str) {
 	if(dev) state.actsFalse = state.actsFalse + stripBrackets("$str") + "\n"
 }
 
 def addToActFalse(str) {
 	state.actsFalse = state.actsFalse + str + "\n"
+}
+
+def buildActFalse(str, brackets) {
+	state.actsFalse = state.actsFalse + (brackets ? stripBrackets("$str") : str)
 }
 
 def selectActionsTrue() {
@@ -146,13 +154,14 @@ def selectActionsTrue() {
 			setActTrue(closeValveTrue, "Close: $closeValveTrue")
 			input "thermoTrue", "capability.thermostat", title: "Set these thermostats", multiple: true, required: false, submitOnChange: true
 			if(thermoTrue) {
-				input "thermoModeTrue", "enum", title: "Select thermostate mode", multiple: false, required: true, options: ["heat", "cool", "off"], submitOnChange: true
-				if(thermoModeTrue) {
-					if     (thermoModeTrue == "heat") input "thermoSetTrue", "number", title: "Set heating point", multiple: false, required: true, submitOnChange: true
-					else if(thermoModeTrue == "cool") input "thermoSetTrue", "number", title: "Set cooling point", multiple: false, required: true, submitOnChange: true 
-					if(thermoModeTrue == "off") setActTrue(thermoTrue, "Thermostat $thermoTrue: off")
-					else setActTrue(thermoTrue, "Thermostat $thermoTrue: $thermoModeTrue to $thermoSetTrue")
-				}
+				input "thermoModeTrue", "enum", title: "Select thermostate mode", multiple: false, required: false, options: ["auto", "heat", "cool", "off"], submitOnChange: true
+				input "thermoSetHeatTrue", "number", title: "Set heating point", multiple: false, required: false, submitOnChange: true
+				input "thermoSetCoolTrue", "number", title: "Set cooling point", multiple: false, required: false, submitOnChange: true 
+				buildActTrue("$thermoTrue: ", true)
+				if(thermoModeTrue) buildActTrue("Mode: " + thermoModeTrue + " ", false)
+				if(thermoSetHeatTrue) buildActTrue("Heat to $thermoSetHeatTrue ", false)
+				if(thermoSetCoolTrue) buildActTrue("Cool to $thermoSetCoolTrue", false)
+				addToActTrue("")
 			}
 			input "modeTrue", "mode", title: "Set the mode", multiple: false, required: false, submitOnChange: true
 			if(modeTrue) addToActTrue("Mode: $modeTrue")
@@ -210,13 +219,14 @@ def selectActionsFalse() {
 			setActTrue(closeValveFalse, "Close: $closeValveFalse")
 			input "thermoFalse", "capability.thermostat", title: "Set mode for these thermostats", multiple: true, required: false, submitOnChange: true
 			if(thermoFalse) {
-				input "thermoModeFalse", "enum", title: "Select thermostate mode", multiple: false, required: true, options: ["heat", "cool", "off"], submitOnChange: true
-				if(thermoModeFalse) {
-					if     (thermoModeFalse == "heat") input "thermoSetFalse", "number", title: "Set heating point", multiple: false, required: true, submitOnChange: true
-					else if(thermoModeFalse == "cool") input "thermoSetFalse", "number", title: "Set cooling point", multiple: false, required: true, submitOnChange: true 
-					if(thermoModeFalse == "off") setActFalse(thermoFalse, "Thermostat $thermoFalse: off")
-					else setActFalse(thermoFalse, "Thermostat $thermoFalse: $thermoModeFalse to $thermoSetFalse")
-				}
+				input "thermoModeFalse", "enum", title: "Select thermostate mode", multiple: false, required: false, options: ["auto", "heat", "cool", "off"], submitOnChange: true
+				input "thermoSetHeatFalse", "number", title: "Set heating point", multiple: false, required: false, submitOnChange: true
+				input "thermoSetCoolFalse", "number", title: "Set cooling point", multiple: false, required: false, submitOnChange: true 
+				buildActFalse("$thermoTrue: ", true)
+				if(thermoModeFalse) buildActFalse("Mode: " + thermoModeFalse + " ", false)
+				if(thermoSetHeatFalse) buildActFalse("Heat to $thermoSetHeatFalse ", false)
+				if(thermoSetCoolFalse) buildActFalse("Cool to $thermoSetCoolFalse", false)
+				addToActFalse("")
 			}
 			input "modeFalse", "mode", title: "Set the mode", multiple: false, required: false, submitOnChange: true
 			if(modeFalse) addToActFalse("Mode: $modeFalse")
@@ -403,11 +413,11 @@ def getState(myCapab, n) {
 	else if(myCapab == "Water sensor")	result = input "state$n", "enum", title: "Water state", options: ["dry", "wet"]
 	else if(myCapab == "Valve") 		result = input "state$n", "enum", title: "Valve state", options: ["open", "closed"]
 	else if(myCapab == "Dimmer level")	result = input "state$n", "number", title: "Dimmer level", range: "0..100"
-	else if(myCapab == "Temperature") 	result = input "state$n", "number", title: "Temperature"
+	else if(myCapab == "Temperature") 	result = input "state$n", "number", title: "Temperature", range: "*..*"
 	else if(myCapab == "Humidity") 		result = input "state$n", "number", title: "Humidity", range: "0..100"
 	else if(myCapab == "Illuminance") 	result = input "state$n", "number", title: "Illuminance"
 	else if(myCapab == "Energy meter") 	result = input "state$n", "number", title: "Energy level"
-	else if(myCapab == "Power meter") 	result = input "state$n", "number", title: "Power level"
+	else if(myCapab == "Power meter") 	result = input "state$n", "number", title: "Power level", range: "*..*"
 	else if(myCapab == "Battery") 		result = input "state$n", "number", title: "Battery level"
 	else if(myCapab == "Days of week") 	result = input "days", "enum", title: "On certain days of the week", multiple: true, required: false, options: days
 	else if(myCapab == "Mode") {
@@ -582,7 +592,7 @@ def checkCondAny(dev, state, cap, rel) {
 	else if(cap == "Contact") 	result = state in dev.currentContact
 	else if(cap == "Presence") 	result = state in dev.currentPresence
 	else if(cap == "Lock") 		result = state in dev.currentLock
-	else if(cap == "Valve") 	resule = state.in dev.currentValve			
+	else if(cap == "Valve") 	result = state.in dev.currentValve			
 //	log.debug "CheckAny $cap $result"
 	return result
 }
@@ -725,9 +735,9 @@ def runRule(delay) {
 			if(unlockTrue) 		unlockTrue.unlock()
 			if(openValveTrue)	openValveTrue.open()
 			if(closeValveTrue)	closeValveTrue.close()
-			if(thermoTrue)		{	thermoTrue.setThermostatMode(thermoModeTrue)
-							if(thermoModeTrue == "heat") thermoTrue.setHeatingSetpoint(thermoSetTrue)
-							else if(thermoModeTrue == "cool") thermoTrue.setCoolingSetpoint(thermoSetTrue) 	}
+			if(thermoTrue)		{	if(thermoModeTrue) thermoTrue.setThermostatMode(thermoModeTrue)
+							if(thermoSetHeatTrue) thermoTrue.setHeatingSetpoint(thermoSetHeatTrue)
+							if(thermoSetCoolTrue) thermoTrue.setCoolingSetpoint(thermoSetCoolTrue) 	}
 			if(modeTrue) 		setLocationMode(modeTrue)
 			if(myPhraseTrue)	location.helloHome.execute(myPhraseTrue)
 			if(pushTrue)		sendPush(msgTrue ?: "Rule $app.label True")
@@ -744,9 +754,9 @@ def runRule(delay) {
 			if(unlockFalse) 	unlockFalse.unlock()
 			if(openValveFalse)	openValveFalse.open()
 			if(closeValveFalse)	closeValveFalse.close()
-			if(thermoFalse)		{	thermoFalse.setThermostatMode(thermoModeFalse)
-							if(thermoModeFalse == "heat") thermoFalse.setHeatingSetpoint(thermoSetFalse)
-							else if(thermoModeFalse == "cool") thermoFalse.setCoolingSetpoint(thermoSetFalse) 	}
+			if(thermoFalse)		{	if(thermoModeFalse) thermoFalse.setThermostatMode(thermoModeFalse)
+							if(thermoSetHeatFalse) thermoFalse.setHeatingSetpoint(thermoSetHeatFalse)
+							if(thermoSetCoolFalse) thermoFalse.setCoolingSetpoint(thermoSetCoolFalse) 	}
 			if(modeFalse) 		setLocationMode(modeFalse)
 			if(myPhraseFalse) 	location.helloHome.execute(myPhraseFalse)
 			if(pushFalse)		sendPush(msgFalse ?: "Rule $app.label False")
