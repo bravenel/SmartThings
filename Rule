@@ -222,7 +222,7 @@ def selectActionsFalse() {
 				input "thermoModeFalse", "enum", title: "Select thermostate mode", multiple: false, required: false, options: ["auto", "heat", "cool", "off"], submitOnChange: true
 				input "thermoSetHeatFalse", "number", title: "Set heating point", multiple: false, required: false, submitOnChange: true
 				input "thermoSetCoolFalse", "number", title: "Set cooling point", multiple: false, required: false, submitOnChange: true 
-				buildActFalse("$thermoTrue: ", true)
+				buildActFalse("$thermoFalse: ", true)
 				if(thermoModeFalse) buildActFalse("Mode: " + thermoModeFalse + " ", false)
 				if(thermoSetHeatFalse) buildActFalse("Heat to $thermoSetHeatFalse ", false)
 				if(thermoSetCoolFalse) buildActFalse("Cool to $thermoSetCoolFalse", false)
