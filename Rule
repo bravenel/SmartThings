@@ -556,7 +556,6 @@ def initialize() {
 		else if(capab == "Energy meter") subscribe((settings.find{it.key == "rDev$i"}).value, "energy", allHandler)
 		else if(capab == "Power meter") subscribe((settings.find{it.key == "rDev$i"}).value, "power", allHandler)
 		else if(capab == "Water sensor") subscribe((settings.find{it.key == "rDev$i"}).value, "water", allHandler)
-		else if(capab == "Valve") subscribe((settings.find{it.key == "rDev$i"}).value, "valve", allHandler)
 		else subscribe((settings.find{it.key == "rDev$i"}).value, capab.toLowerCase(), allHandler)
 	}
 	if (physicalOverride) subscribe(onSwitchTrue, "switch", switchHandler)
