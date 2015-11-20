@@ -217,7 +217,7 @@ def selectActionsFalse() {
 			setActTrue(openValveFalse, "Open: $openValveFalse")
 			input "closeValveFalse", "capability.valve", title: "Close these valves", multiple: true, required: false, submitOnChange: true
 			setActTrue(closeValveFalse, "Close: $closeValveFalse")
-			input "thermoFalse", "capability.thermostat", title: "Set mode for these thermostats", multiple: true, required: false, submitOnChange: true
+			input "thermoFalse", "capability.thermostat", title: "Set these thermostats", multiple: true, required: false, submitOnChange: true
 			if(thermoFalse) {
 				input "thermoModeFalse", "enum", title: "Select thermostate mode", multiple: false, required: false, options: ["auto", "heat", "cool", "off"], submitOnChange: true
 				input "thermoSetHeatFalse", "number", title: "Set heating point", multiple: false, required: false, submitOnChange: true
