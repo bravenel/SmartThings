@@ -734,8 +734,8 @@ def runRule(delay) {
 	def success = eval()
 	if((success != state.success) || delay) {
 		unschedule(delayRule)
-		if     (delayTrue && !delay)	doDelay(delayTrue, success)
-		else if(delayFalse && !delay)	doDelay(delayFalse, success)
+		if     (delayTrue > 0 && !delay)	doDelay(delayTrue, success)
+		else if(delayFalse > 0 && !delay)	doDelay(delayFalse, success)
 		else {
 			if(success) {
 				if(onSwitchTrue) 	onSwitchTrue.on()
