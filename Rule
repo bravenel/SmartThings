@@ -723,7 +723,7 @@ def eval() {
 def doDelay(time, success) {
 	runIn(time * 60, delayRule)
 	def delayStr = "minute"
-	if(time > 1) delayStr = delayStr + 1
+	if(time > 1) delayStr = delayStr + "s"
 	log.info (success ? "$app.label is True, but delayed by $time $delayStr" : "$app.label is False, but delayed by $time $delayStr")
 	state.success = success
 }
