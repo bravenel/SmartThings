@@ -734,51 +734,54 @@ def runRule(delay) {
 	def success = eval()
 	if((success != state.success) || delay) {
 		unschedule(delayRule)
-		if(delayTrue && !delay)		doDelay(delayTrue, success)
+		if     (delayTrue && !delay)	doDelay(delayTrue, success)
 		else if(delayFalse && !delay)	doDelay(delayFalse, success)
-		else if(success) {
-			if(onSwitchTrue) 	onSwitchTrue.on()
-			if(offSwitchTrue) 	offSwitchTrue.off()
-			if(delayedOffTrue)	runIn(delayMinutesTrue * 60, delayOffTrue)
-			if(pendedOffTrue)	runIn(pendMinutesTrue * 60, pendingOffTrue)
-			if(pendedOffFalse)	unschedule(pendingOffFalse)
-			if(dimATrue) 		dimATrue.setLevel(dimLATrue)
-			if(dimBTrue) 		dimBTrue.setLevel(dimLBTrue)
-			if(lockTrue) 		lockTrue.lock()
-			if(unlockTrue) 		unlockTrue.unlock()
-			if(openValveTrue)	openValveTrue.open()
-			if(closeValveTrue)	closeValveTrue.close()
-			if(thermoTrue)		{	if(thermoModeTrue) thermoTrue.setThermostatMode(thermoModeTrue)
-							if(thermoSetHeatTrue) thermoTrue.setHeatingSetpoint(thermoSetHeatTrue)
-							if(thermoSetCoolTrue) thermoTrue.setCoolingSetpoint(thermoSetCoolTrue) 	}
-			if(modeTrue) 		setLocationMode(modeTrue)
-			if(myPhraseTrue)	location.helloHome.execute(myPhraseTrue)
-			if(pushTrue)		sendPush(msgTrue ?: "Rule $app.label True")
-			if(phoneTrue)		sendSms(phoneTrue, msgTrue ?: "Rule $app.label True")
-		} else {
-			if(onSwitchFalse) 	onSwitchFalse.on()
-			if(offSwitchFalse) 	offSwitchFalse.off()
-			if(delayedOffFalse)	runIn(delayMinutesFalse * 60, delayOffFalse)
-			if(pendedOffFalse)	runIn(pendMinutesFalse * 60, pendingOffFalse)
-			if(pendedOffTrue)	unschedule(pendingOffTrue)
-			if(dimAFalse) 		dimAFalse.setLevel(dimLAFalse)
-			if(dimBFalse) 		dimBFalse.setLevel(dimLBFalse)
-			if(lockFalse) 		lockFalse.lock()
-			if(unlockFalse) 	unlockFalse.unlock()
-			if(openValveFalse)	openValveFalse.open()
-			if(closeValveFalse)	closeValveFalse.close()
-			if(thermoFalse)		{	if(thermoModeFalse) thermoFalse.setThermostatMode(thermoModeFalse)
-							if(thermoSetHeatFalse) thermoFalse.setHeatingSetpoint(thermoSetHeatFalse)
-							if(thermoSetCoolFalse) thermoFalse.setCoolingSetpoint(thermoSetCoolFalse) 	}
-			if(modeFalse) 		setLocationMode(modeFalse)
-			if(myPhraseFalse) 	location.helloHome.execute(myPhraseFalse)
-			if(pushFalse)		sendPush(msgFalse ?: "Rule $app.label False")
-			if(phoneFalse)		sendSms(phoneFalse, msgFalse ?: "Rule $app.label False")
-		}
+		else {
+			if(success) {
+				if(onSwitchTrue) 	onSwitchTrue.on()
+				if(offSwitchTrue) 	offSwitchTrue.off()
+				if(delayedOffTrue)	runIn(delayMinutesTrue * 60, delayOffTrue)
+				if(pendedOffTrue)	runIn(pendMinutesTrue * 60, pendingOffTrue)
+				if(pendedOffFalse)	unschedule(pendingOffFalse)
+				if(dimATrue) 		dimATrue.setLevel(dimLATrue)
+				if(dimBTrue) 		dimBTrue.setLevel(dimLBTrue)
+				if(lockTrue) 		lockTrue.lock()
+				if(unlockTrue) 		unlockTrue.unlock()
+				if(openValveTrue)	openValveTrue.open()
+				if(closeValveTrue)	closeValveTrue.close()
+				if(thermoTrue)		{	if(thermoModeTrue) thermoTrue.setThermostatMode(thermoModeTrue)
+								if(thermoSetHeatTrue) thermoTrue.setHeatingSetpoint(thermoSetHeatTrue)
+								if(thermoSetCoolTrue) thermoTrue.setCoolingSetpoint(thermoSetCoolTrue) 	}
+				if(modeTrue) 		setLocationMode(modeTrue)
+				if(myPhraseTrue)	location.helloHome.execute(myPhraseTrue)
+				if(pushTrue)		sendPush(msgTrue ?: "Rule $app.label True")
+				if(phoneTrue)		sendSms(phoneTrue, msgTrue ?: "Rule $app.label True")
+			} else {
+				if(onSwitchFalse) 	onSwitchFalse.on()
+				if(offSwitchFalse) 	offSwitchFalse.off()
+				if(delayedOffFalse)	runIn(delayMinutesFalse * 60, delayOffFalse)
+				if(pendedOffFalse)	runIn(pendMinutesFalse * 60, pendingOffFalse)
+				if(pendedOffTrue)	unschedule(pendingOffTrue)
+				if(dimAFalse) 		dimAFalse.setLevel(dimLAFalse)
+				if(dimBFalse) 		dimBFalse.setLevel(dimLBFalse)
+				if(lockFalse) 		lockFalse.lock()
+				if(unlockFalse) 	unlockFalse.unlock()
+				if(openValveFalse)	openValveFalse.open()
+				if(closeValveFalse)	closeValveFalse.close()
+				if(thermoFalse)		{	if(thermoModeFalse) thermoFalse.setThermostatMode(thermoModeFalse)
+								if(thermoSetHeatFalse) thermoFalse.setHeatingSetpoint(thermoSetHeatFalse)
+								if(thermoSetCoolFalse) thermoFalse.setCoolingSetpoint(thermoSetCoolFalse) 	}
+				if(modeFalse) 		setLocationMode(modeFalse)
+				if(myPhraseFalse) 	location.helloHome.execute(myPhraseFalse)
+				if(pushFalse)		sendPush(msgFalse ?: "Rule $app.label False")
+				if(phoneFalse)		sendSms(phoneFalse, msgFalse ?: "Rule $app.label False")
+			}
 		state.success = success
 		log.info (success ? "$app.label is True" : "$app.label is False")
+		}
 	}
 }
+
 
 def allHandler(evt) {
 	log.info "$app.label: $evt.displayName $evt.name $evt.value"
