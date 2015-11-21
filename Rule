@@ -332,6 +332,7 @@ def buildActFalse(str, brackets) {
 def selectActionsTrue() {
 	dynamicPage(name: "selectActionsTrue", title: "Select Actions for True", uninstall: false) {
 		state.actsTrue = ""
+//        state.msgTrue = ""
 		section("") {
 			input "onSwitchTrue", "capability.switch", title: "Turn on these switches", multiple: true, required: false, submitOnChange: true
 			setActTrue(onSwitchTrue, "On: $onSwitchTrue")
@@ -403,6 +404,7 @@ def selectActionsTrue() {
 def selectActionsFalse() {
 	dynamicPage(name: "selectActionsFalse", title: "Select Actions for False", uninstall: false) {
 		state.actsFalse = ""
+//        state.msgFalse = ""
 		section("") {
 			input "onSwitchFalse", "capability.switch", title: "Turn on these switches", multiple: true, required: false, submitOnChange: true
 			setActFalse(onSwitchFalse, "On: $onSwitchFalse")
@@ -473,29 +475,23 @@ def selectActionsFalse() {
 
 def selectMsgTrue() {
 	dynamicPage(name: "selectMsgTrue", title: "Select Message and Destination", uninstall: false) {
-		state.msgTrue = ""
 		section("") {
 			input "pushTrue", "bool", title: "Send Push Notification?", required: false, submitOnChange: true
-			if(pushTrue) state.msgTrue = state.msgTrue + "Push"
 			input "msgTrue", "text", title: "Custom message to send", required: false, submitOnChange: true
-			if(msgTrue) state.msgTrue = state.msgTrue + (state.msgTrue ? (state.msgTrue + " '$msgTrue'") : "Send '$msgTrue'")
 			input "phoneTrue", "phone", title: "Phone number for SMS", required: false, submitOnChange: true
-			if(phoneTrue) state.msgTrue = state.msgTrue + " to $phoneTrue"
 		}
+        state.msgTrue = (pushTrue ? "Push" : "") + (msgTrue ? " '$msgTrue'" : "") + (phoneTrue ? " to $phoneTrue" : "")
 	}
 }
 
 def selectMsgFalse() {
 	dynamicPage(name: "selectMsgFalse", title: "Select Message and Destination", uninstall: false) {
-		state.msgFalse = ""
 		section("") {
 			input "pushFalse", "bool", title: "Send Push Notification?", required: false, submitOnChange: true
-			if(pushFalse) state.msgFalse = state.msgFalse + "Push"
 			input "msgFalse", "text", title: "Custom message to send", required: false, submitOnChange: true
-			if(msgFalse) state.msgFalse = state.msgFalse + state.msgFalse ? state.msgFalse + " '$msgFalse'" : "Send '$msgFalse'"
 			input "phoneFalse", "phone", title: "Phone number for SMS", required: false, submitOnChange: true
-			if(phoneFalse) state.msgFalse = state.msgFalse + " to $phoneFalse"
 		}
+        state.msgFalse = (pushFalse ? "Push" : "") + (msgFalse ? " '$msgFalse'" : "") + (phoneFalse ? " to $phoneFalse" : "")
 	}
 }
 
