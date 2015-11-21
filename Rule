@@ -285,7 +285,7 @@ def inputRight(sub) {
 					return
 				}
 			}
-            inputRight(sub)
+			inputRight(sub)
 		}
 	} 
 }
