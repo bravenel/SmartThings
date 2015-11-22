@@ -3,7 +3,7 @@
  *
  *  Copyright 2015 Bruce Ravenel
  *
- *  Version 1.1.14a  22 Nov 2015
+ *  Version 1.2.0  22 Nov 2015
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -53,8 +53,6 @@ def selectRule() {
 			input "modesZ", "mode", title: "Evaluate only when mode is", multiple: true, required: false
 			paragraph "Advanced Rule Input allows for parenthesized sub-rules."
 			input "advanced", "bool", title: "Advanced Rule Input", required: false
-			paragraph "With Physical Overide, Physical ON disables rule evaluation.  OFF re-enables rule evaluation.  Use any of Switches On for True for override."
-			input "physicalOverride", "bool", title: "Physical override?", required: false, defaultValue: false
    		}    
 	}
 }
@@ -215,6 +213,50 @@ def certainTime() {
 	}
 }
 
+def conditionLabel() {
+	def howMany = state.howMany
+	def result = ""
+	if(howMany) {
+		for (int i = 1; i <= howMany; i++) {
+			result = result + conditionLabelN(i)
+			if((i + 1) <= howMany) result = result + "\n"
+		}
+        if(howMany == 2) {
+        	state.str = result[0..-2]
+        	state.eval = [1]
+        }
+    }
+	return result
+}
+
+def conditionLabelN(i) {
+	def result = ""
+        def thisCapab = settings.find {it.key == "rCapab$i"}
+        if(!thisCapab) return result
+        if(thisCapab.value == "Time of day") result = "Time between " + timeIntervalLabel()
+        else if(thisCapab.value == "Days of week") result = "Day i" + (days.size() > 1 ? "n " + days : "s " + days[0])
+        else if(thisCapab.value == "Mode") result = "Mode i" + (modes.size() > 1 ? "n " + modes : "s " + modes[0])
+        else {
+		def thisDev = settings.find {it.key == "rDev$i"}
+		if(!thisDev) return result
+		def thisAll = settings.find {it.key == "AllrDev$i"}
+		def myAny = thisAll ? "any " : ""
+		if     (thisCapab.value == "Temperature") 	result = "Temperature of "
+		else if(thisCapab.value == "Humidity") 		result = "Humidity of "
+		else if(thisCapab.value == "Illuminance")	result = "Illuminance of "
+		else if(thisCapab.value == "Dimmer level")	result = "Dimmer level of " 
+		else if(thisCapab.value == "Energy meter")	result = "Energy level of " 
+		else if(thisCapab.value == "Power meter")	result = "Power level of " 
+		else if(thisCapab.value == "Battery")		result = "Battery level of "
+		result = result + (myAny ? thisDev.value : thisDev.value[0]) + " " + ((thisAll ? thisAll.value : false) ? "all " : myAny)
+		def thisRel = settings.find {it.key == "RelrDev$i"}
+		if(thisCapab.value in ["Temperature", "Humidity", "Illuminance", "Dimmer level", "Energy meter", "Power meter", "Battery"]) result = result + " " + thisRel.value + " "
+		def thisState = settings.find {it.key == "state$i"}
+		result = result + thisState.value
+        }
+	return result
+}
+
 // Rule definition code follows
 
 def defineRule() {
@@ -332,7 +374,6 @@ def buildActFalse(str, brackets) {
 def selectActionsTrue() {
 	dynamicPage(name: "selectActionsTrue", title: "Select Actions for True", uninstall: false) {
 		state.actsTrue = ""
-//        state.msgTrue = ""
 		section("") {
 			input "onSwitchTrue", "capability.switch", title: "Turn on these switches", multiple: true, required: false, submitOnChange: true
 			setActTrue(onSwitchTrue, "On: $onSwitchTrue")
@@ -364,6 +405,15 @@ def selectActionsTrue() {
 			input "dimBTrue", "capability.switchLevel", title: "Set these other dimmers", multiple: true, submitOnChange: true, required: false
 			if(dimBTrue) input "dimLBTrue", "number", title: "To this level", range: "0..100", required: true, submitOnChange: true
 			if(dimLBTrue) setActTrue(dimBTrue, "Dim: $dimBTrue: $dimLBTrue")
+			input "bulbsTrue", "capability.colorControl", title: "Set color for these bulbs", multiple: true, required: false, submitOnChange: true
+			if(bulbsTrue) {
+				input "colorTrue", "enum", title: "Bulb color?", required: true, multiple: false, submitOnChange: true,
+					options: ["Soft White", "White", "Daylight", "Warm White", "Red", "Green", "Blue", "Yellow", "Orange", "Purple", "Pink"]
+				input "colorLevelTrue", "number", title: "Bulb level?", required: false, submitOnChange: true, range: "0..100"
+				buildActTrue("Color: $bulbsTrue ", true)
+				if(colorTrue) buildActTrue("$colorTrue ", false)
+				if(colorLevelTrue) addToActTrue("Level: $colorLevelTrue")
+			}            
 			input "lockTrue", "capability.lock", title: "Lock these locks", multiple: true, required: false, submitOnChange: true
 			setActTrue(lockTrue, "Lock: $lockTrue")
 			input "unlockTrue", "capability.lock", title: "Unlock these locks", multiple: true, required: false, submitOnChange: true
@@ -404,7 +454,6 @@ def selectActionsTrue() {
 def selectActionsFalse() {
 	dynamicPage(name: "selectActionsFalse", title: "Select Actions for False", uninstall: false) {
 		state.actsFalse = ""
-//        state.msgFalse = ""
 		section("") {
 			input "onSwitchFalse", "capability.switch", title: "Turn on these switches", multiple: true, required: false, submitOnChange: true
 			setActFalse(onSwitchFalse, "On: $onSwitchFalse")
@@ -436,6 +485,15 @@ def selectActionsFalse() {
 			input "dimBFalse", "capability.switchLevel", title: "Set these other dimmers", multiple: true, submitOnChange: true, required: false
 			if(dimBFalse) input "dimLBFalse", "number", title: "To this level", range: "0..100", required: true, submitOnChange: true
 			if(dimLBFalse) setActFalse(dimBFalse, "Dim: $dimBFalse: $dimLBFalse")
+			input "bulbsFalse", "capability.colorControl", title: "Set color for these bulbs", multiple: true, required: false, submitOnChange: true
+			if(bulbsFalse) {
+				input "colorFalse", "enum", title: "Bulb color?", required: true, multiple: false, submitOnChange: true,
+					options: ["Soft White", "White", "Daylight", "Warm White", "Red", "Green", "Blue", "Yellow", "Orange", "Purple", "Pink"]
+				input "colorLevelFalse", "number", title: "Bulb level?", required: false, submitOnChange: true, range: "0..100"
+				buildActFalse("Color: $bulbsFalse ", true)
+				if(colorFalse) buildActFalse("$colorFalse ", false)
+				if(colorLevelFalse) addToActFalse("Level: $colorLevelFalse")
+			}            
 			input "lockFalse", "capability.lock", title: "Lock these locks", multiple: true, required: false, submitOnChange: true
 			setActFalse(lockFalse, "Lock: $lockFalse")
 			input "unlockFalse", "capability.lock", title: "Unlock these locks", multiple: true, required: false, submitOnChange: true
@@ -537,9 +595,7 @@ def initialize() {
 		else if(capab == "Water sensor") subscribe((settings.find{it.key == "rDev$i"}).value, "water", allHandler)
 		else subscribe((settings.find{it.key == "rDev$i"}).value, capab.toLowerCase(), allHandler)
 	}
-	if (physicalOverride) subscribe(onSwitchTrue, "switch", switchHandler)
 	state.success = null
-	state.override = false
 	runRule(false)
 }
 
@@ -705,7 +761,7 @@ def runRule(delay) {
 	def success = eval()
 	if((success != state.success) || delay) {
 		unschedule(delayRuleTrue)
-		unschedule(delayRuleFalse)
+        unschedule(delayRuleFalse)
 		if     (delayTrue > 0 && !delay && success)		doDelayTrue(delayTrue)
 		else if(delayFalse > 0 && !delay && !success)	doDelayFalse(delayFalse)
 		else {
@@ -717,13 +773,14 @@ def runRule(delay) {
 				if(pendedOffFalse)	unschedule(pendingOffFalse)
 				if(dimATrue) 		dimATrue.setLevel(dimLATrue)
 				if(dimBTrue) 		dimBTrue.setLevel(dimLBTrue)
+				if(bulbsTrue)		setColor(true)
 				if(lockTrue) 		lockTrue.lock()
 				if(unlockTrue) 		unlockTrue.unlock()
 				if(openValveTrue)	openValveTrue.open()
 				if(closeValveTrue)	closeValveTrue.close()
 				if(thermoTrue)		{	if(thermoModeTrue) thermoTrue.setThermostatMode(thermoModeTrue)
-										if(thermoSetHeatTrue) thermoTrue.setHeatingSetpoint(thermoSetHeatTrue)
-										if(thermoSetCoolTrue) thermoTrue.setCoolingSetpoint(thermoSetCoolTrue) 	}
+								if(thermoSetHeatTrue) thermoTrue.setHeatingSetpoint(thermoSetHeatTrue)
+								if(thermoSetCoolTrue) thermoTrue.setCoolingSetpoint(thermoSetCoolTrue) 	}
 				if(modeTrue) 		setLocationMode(modeTrue)
 				if(myPhraseTrue)	location.helloHome.execute(myPhraseTrue)
 				if(pushTrue)		sendPush(msgTrue ?: "Rule $app.label True")
@@ -736,13 +793,14 @@ def runRule(delay) {
 				if(pendedOffTrue)	unschedule(pendingOffTrue)
 				if(dimAFalse) 		dimAFalse.setLevel(dimLAFalse)
 				if(dimBFalse) 		dimBFalse.setLevel(dimLBFalse)
+				if(bulbsFalse)		setColor(false)
 				if(lockFalse) 		lockFalse.lock()
 				if(unlockFalse) 	unlockFalse.unlock()
 				if(openValveFalse)	openValveFalse.open()
 				if(closeValveFalse)	closeValveFalse.close()
 				if(thermoFalse)		{	if(thermoModeFalse) thermoFalse.setThermostatMode(thermoModeFalse)
-										if(thermoSetHeatFalse) thermoFalse.setHeatingSetpoint(thermoSetHeatFalse)
-										if(thermoSetCoolFalse) thermoFalse.setCoolingSetpoint(thermoSetCoolFalse) 	}
+								if(thermoSetHeatFalse) thermoFalse.setHeatingSetpoint(thermoSetHeatFalse)
+								if(thermoSetCoolFalse) thermoFalse.setCoolingSetpoint(thermoSetCoolFalse) 	}
 				if(modeFalse) 		setLocationMode(modeFalse)
 				if(myPhraseFalse) 	location.helloHome.execute(myPhraseFalse)
 				if(pushFalse)		sendPush(msgFalse ?: "Rule $app.label False")
@@ -795,60 +853,13 @@ def delayRuleFalse() {
 	runRule(true)
 }
 
-def switchHandler(evt) {
-	state.override = evt.isPhysical() && evt.value == "on"
-	if (state.override) unschedule()
-	else runRule(false)
-}
-
 //  private execution filter methods follow
 
-private conditionLabel() {
-	def howMany = state.howMany
-	def result = ""
-	if(howMany) {
-		for (int i = 1; i <= howMany; i++) {
-			result = result + conditionLabelN(i)
-			if((i + 1) <= howMany) result = result + "\n"
-		}
-        if(howMany == 2) {
-        	state.str = result[0..-2]
-        	state.eval = [1]
-        }
-    }
-	return result
-}
-
-private conditionLabelN(i) {
-	def result = ""
-        def thisCapab = settings.find {it.key == "rCapab$i"}
-        if(!thisCapab) return result
-        if(thisCapab.value == "Time of day") result = "Time between " + timeIntervalLabel()
-        else if(thisCapab.value == "Days of week") result = "Day i" + (days.size() > 1 ? "n " + days : "s " + days[0])
-        else if(thisCapab.value == "Mode") result = "Mode i" + (modes.size() > 1 ? "n " + modes : "s " + modes[0])
-        else {
-		def thisDev = settings.find {it.key == "rDev$i"}
-		if(!thisDev) return result
-		def thisAll = settings.find {it.key == "AllrDev$i"}
-		def myAny = thisAll ? "any " : ""
-		if     (thisCapab.value == "Temperature") 	result = "Temperature of "
-		else if(thisCapab.value == "Humidity") 		result = "Humidity of "
-		else if(thisCapab.value == "Illuminance")	result = "Illuminance of "
-		else if(thisCapab.value == "Dimmer level")	result = "Dimmer level of " 
-		else if(thisCapab.value == "Energy meter")	result = "Energy level of " 
-		else if(thisCapab.value == "Power meter")	result = "Power level of " 
-		else if(thisCapab.value == "Battery")		result = "Battery level of "
-		result = result + (myAny ? thisDev.value : thisDev.value[0]) + " " + ((thisAll ? thisAll.value : false) ? "all " : myAny)
-		def thisRel = settings.find {it.key == "RelrDev$i"}
-		if(thisCapab.value in ["Temperature", "Humidity", "Illuminance", "Dimmer level", "Energy meter", "Power meter", "Battery"]) result = result + " " + thisRel.value + " "
-		def thisState = settings.find {it.key == "state$i"}
-		result = result + thisState.value
-        }
-	return result
-}
-
-private msgLabel() {
-	def result = state.msgTrue
+private atTimeLabel() {
+	def result = ''
+	if     (timeX == "Sunrise") result = "Sunrise" + offset(atSunriseOffset)
+	else if(timeX == "Sunset")  result = "Sunset" + offset(atSunsetOffset)
+	else if(atTime) result = hhmm(atTime)
 }
 
 private hhmm(time, fmt = "h:mm a") {
@@ -876,7 +887,7 @@ private timeIntervalLabel() {
 }
 
 private getAllOk() {
-	modeZOk && overOk //&& daysOk && timeOk
+	modeZOk  //&& daysOk && timeOk
 }
 
 private hideOptionsSection() {
@@ -886,12 +897,6 @@ private hideOptionsSection() {
 private getModeZOk() {
 	def result = !modesZ || modesZ.contains(location.mode)
 //	log.trace "modeZOk = $result"
-	return result
-}
-
-private getOverOk() {
-	def result = !state.override
-//	log.trace "overOk = $result"
 	return result
 }
 
@@ -935,4 +940,51 @@ private getTimeOk() {
 	}
 //	log.trace "getTimeOk = $result"
 	return result
+}
+
+private setColor(trufal) {
+	def hueColor = 0
+	def saturation = 100
+	switch(trufal ? colorTrue : colorFalse) {
+		case "White":
+			hueColor = 52
+			saturation = 19
+			break;
+		case "Daylight":
+			hueColor = 53
+			saturation = 91
+			break;
+		case "Soft White":
+			hueColor = 23
+			saturation = 56
+			break;
+		case "Warm White":
+			hueColor = 20
+			saturation = 80 //83
+			break;
+		case "Blue":
+			hueColor = 70
+			break;
+		case "Green":
+			hueColor = 39
+			break;
+		case "Yellow":
+			hueColor = 25
+			break;
+		case "Orange":
+			hueColor = 10
+			break;
+		case "Purple":
+			hueColor = 75
+			break;
+		case "Pink":
+			hueColor = 83
+			break;
+		case "Red":
+			hueColor = 100
+			break;
+	}
+	def lightLevel = trufal ? colorLevelTrue : colorLevelFalse
+	def newValue = [hue: hueColor, saturation: saturation, level: lightLevel as Integer ?: 100]
+	if(trufal) bulbsTrue.setColor(newValue) else bulbsFalse.setColor(newValue)
 }
