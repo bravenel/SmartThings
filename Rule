@@ -704,7 +704,8 @@ def runRule(delay) {
 	state.token = 0
 	def success = eval()
 	if((success != state.success) || delay) {
-		unschedule(delayRule)
+		unschedule(delayRuleTrue)
+		unschedule(delayRuleFalse)
 		if     (delayTrue > 0 && !delay && success)		doDelayTrue(delayTrue)
 		else if(delayFalse > 0 && !delay && !success)	doDelayFalse(delayFalse)
 		else {
