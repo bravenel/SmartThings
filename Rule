@@ -432,7 +432,7 @@ def selectActionsTrue() {
 				if(thermoModeTrue) buildActTrue("Mode: " + thermoModeTrue + " ", false)
 				if(thermoSetHeatTrue) buildActTrue("Heat to $thermoSetHeatTrue ", false)
 				if(thermoSetCoolTrue) buildActTrue("Cool to $thermoSetCoolTrue ", false)
-				if(thermoSetFanTrue) buildActTrue("Fan setting $thermoSetTrue", false)
+				if(thermoFanTrue) buildActTrue("Fan setting $thermoSetTrue", false)
 				addToActTrue("")
 			}
 			input "modeTrue", "mode", title: "Set the mode", multiple: false, required: false, submitOnChange: true
@@ -514,7 +514,7 @@ def selectActionsFalse() {
 				if(thermoModeFalse) buildActFalse("Mode: " + thermoModeFalse + " ", false)
 				if(thermoSetHeatFalse) buildActFalse("Heat to $thermoSetHeatFalse ", false)
 				if(thermoSetCoolFalse) buildActFalse("Cool to $thermoSetCoolFalse ", false)
-				if(thermoSetFanFalse) buildActFalse("Fan setting $thermoSetFalse", false)
+				if(thermoFanFalse) buildActFalse("Fan setting $thermoSetFalse", false)
 				addToActFalse("")
 			}
 			input "modeFalse", "mode", title: "Set the mode", multiple: false, required: false, submitOnChange: true
