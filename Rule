@@ -3,7 +3,7 @@
  *
  *  Copyright 2015 Bruce Ravenel
  *
- *  Version 1.2.0  22 Nov 2015
+ *  Version 1.2.1  23 Nov 2015
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -175,7 +175,7 @@ def getState(myCapab, n) {
 	else if(myCapab == "Lock")			result = input "state$n", "enum", title: "Lock state", options: ["locked", "unlocked"]
 	else if(myCapab == "Water sensor")	result = input "state$n", "enum", title: "Water state", options: ["dry", "wet"]
 	else if(myCapab == "Dimmer level")	result = input "state$n", "number", title: "Dimmer level", range: "0..100"
-	else if(myCapab == "Temperature") 	result = input "state$n", "number", title: "Temperature", range: "*..*"
+	else if(myCapab == "Temperature") 	result = input "state$n", "decimal", title: "Temperature", range: "*..*"
 	else if(myCapab == "Humidity") 		result = input "state$n", "number", title: "Humidity", range: "0..100"
 	else if(myCapab == "Illuminance") 	result = input "state$n", "number", title: "Illuminance"
 	else if(myCapab == "Energy meter") 	result = input "state$n", "number", title: "Energy level"
@@ -427,10 +427,12 @@ def selectActionsTrue() {
 				input "thermoModeTrue", "enum", title: "Select thermostate mode", multiple: false, required: false, options: ["auto", "heat", "cool", "off"], submitOnChange: true
 				input "thermoSetHeatTrue", "number", title: "Set heating point", multiple: false, required: false, submitOnChange: true
 				input "thermoSetCoolTrue", "number", title: "Set cooling point", multiple: false, required: false, submitOnChange: true 
+				input "thermoFanTrue", "enum", title: "Fan setting", multiple: false, required: false, submitOnChange: true, options: ["fanOn", "fanAuto"]
 				buildActTrue("$thermoTrue: ", true)
 				if(thermoModeTrue) buildActTrue("Mode: " + thermoModeTrue + " ", false)
 				if(thermoSetHeatTrue) buildActTrue("Heat to $thermoSetHeatTrue ", false)
-				if(thermoSetCoolTrue) buildActTrue("Cool to $thermoSetCoolTrue", false)
+				if(thermoSetCoolTrue) buildActTrue("Cool to $thermoSetCoolTrue ", false)
+				if(thermoSetFanTrue) buildActTrue("Fan setting $thermoSetTrue", false)
 				addToActTrue("")
 			}
 			input "modeTrue", "mode", title: "Set the mode", multiple: false, required: false, submitOnChange: true
@@ -507,10 +509,12 @@ def selectActionsFalse() {
 				input "thermoModeFalse", "enum", title: "Select thermostate mode", multiple: false, required: false, options: ["auto", "heat", "cool", "off"], submitOnChange: true
 				input "thermoSetHeatFalse", "number", title: "Set heating point", multiple: false, required: false, submitOnChange: true
 				input "thermoSetCoolFalse", "number", title: "Set cooling point", multiple: false, required: false, submitOnChange: true 
+				input "thermoFanFalse", "enum", title: "Fan setting", multiple: false, required: false, submitOnChange: true, options: ["fanOn", "fanAuto"]
 				buildActFalse("$thermoFalse: ", true)
 				if(thermoModeFalse) buildActFalse("Mode: " + thermoModeFalse + " ", false)
 				if(thermoSetHeatFalse) buildActFalse("Heat to $thermoSetHeatFalse ", false)
-				if(thermoSetCoolFalse) buildActFalse("Cool to $thermoSetCoolFalse", false)
+				if(thermoSetCoolFalse) buildActFalse("Cool to $thermoSetCoolFalse ", false)
+				if(thermoSetFanFalse) buildActFalse("Fan setting $thermoSetFalse", false)
 				addToActFalse("")
 			}
 			input "modeFalse", "mode", title: "Set the mode", multiple: false, required: false, submitOnChange: true
@@ -780,7 +784,8 @@ def runRule(delay) {
 				if(closeValveTrue)	closeValveTrue.close()
 				if(thermoTrue)		{	if(thermoModeTrue) thermoTrue.setThermostatMode(thermoModeTrue)
 								if(thermoSetHeatTrue) thermoTrue.setHeatingSetpoint(thermoSetHeatTrue)
-								if(thermoSetCoolTrue) thermoTrue.setCoolingSetpoint(thermoSetCoolTrue) 	}
+								if(thermoSetCoolTrue) thermoTrue.setCoolingSetpoint(thermoSetCoolTrue) 	
+                                if(thermoFanTrue)	  thermoTrue.setThermostatFanMode(thermoFanTrue)   }
 				if(modeTrue) 		setLocationMode(modeTrue)
 				if(myPhraseTrue)	location.helloHome.execute(myPhraseTrue)
 				if(pushTrue)		sendPush(msgTrue ?: "Rule $app.label True")
@@ -800,7 +805,8 @@ def runRule(delay) {
 				if(closeValveFalse)	closeValveFalse.close()
 				if(thermoFalse)		{	if(thermoModeFalse) thermoFalse.setThermostatMode(thermoModeFalse)
 								if(thermoSetHeatFalse) thermoFalse.setHeatingSetpoint(thermoSetHeatFalse)
-								if(thermoSetCoolFalse) thermoFalse.setCoolingSetpoint(thermoSetCoolFalse) 	}
+								if(thermoSetCoolFalse) thermoFalse.setCoolingSetpoint(thermoSetCoolFalse) 	
+                                if(thermoFanFalse)	  thermoFalse.setThermostatFanMode(thermoFanFalse)   }
 				if(modeFalse) 		setLocationMode(modeFalse)
 				if(myPhraseFalse) 	location.helloHome.execute(myPhraseFalse)
 				if(pushFalse)		sendPush(msgFalse ?: "Rule $app.label False")
