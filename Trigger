@@ -627,7 +627,7 @@ def doTrigger(delay) {
 		if(fanAdjustTrue)		adjustFan(fanAdjustTrue)
 		if(openValveTrue)		openValveTrue.open()
 		if(closeValveTrue)		closeValveTrue.close()
-		if(thermoTrue)			{	if(thermoModeTrue	thermoTrue.setThermostatMode(thermoModeTrue)
+		if(thermoTrue)			{	if(thermoModeTrue)	thermoTrue.setThermostatMode(thermoModeTrue)
 							if(thermoSetHeatTrue) 	thermoTrue.setHeatingSetpoint(thermoSetHeatTrue)
 							if(thermoSetCoolTrue) 	thermoTrue.setCoolingSetpoint(thermoSetCoolTrue)
 							if(thermoFanTrue)	thermoTrue.setThermostatFanMode(thermoFanTrue)   }
