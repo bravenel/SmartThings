@@ -50,7 +50,7 @@ def selectTriggerActs() {
 			input "days", "enum", title: "Only on certain days of the week", multiple: true, required: false,
 				options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 			input "modes", "mode", title: "Only when mode is", multiple: true, required: false            
-			input "disabled", "capability.switch", title: "Switch to disable trigger", required: false, multiple: false
+			input "disabled", "capability.switch", title: "Switch to disable trigger when ON", required: false, multiple: false
    		}    
 	}
 }
