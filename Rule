@@ -991,7 +991,9 @@ private setColor(trufal) {
 			break;
 	}
 	def lightLevel = trufal ? colorLevelTrue : colorLevelFalse
-	def newValue = [hue: hueColor, saturation: saturation, level: lightLevel as Integer ?: 100]
+	def newValue = [:]
+	if(lightlevel == 0 || lightlevel == null) newValue = [hue: hueColor, saturation: saturation]
+	else newValue = [hue: hueColor, saturation: saturation, level: lightLevel]
 	if(trufal) bulbsTrue.setColor(newValue) else bulbsFalse.setColor(newValue)
 	if(lightLevel == 0) {if(trufal) bulbsTrue.off() else bulbsFalse.off()}
 }
