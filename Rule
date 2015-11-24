@@ -3,7 +3,7 @@
  *
  *  Copyright 2015 Bruce Ravenel
  *
- *  Version 1.2.1d  23 Nov 2015
+ *  Version 1.2.2  24 Nov 2015
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -53,6 +53,7 @@ def selectRule() {
 			input "modesZ", "mode", title: "Evaluate only when mode is", multiple: true, required: false
 			paragraph "Advanced Rule Input allows for parenthesized sub-rules."
 			input "advanced", "bool", title: "Advanced Rule Input", required: false
+            input "disabled", "capability.switch", title: "Switch to disable rule", required: false, multiple: false
    		}    
 	}
 }
@@ -409,7 +410,7 @@ def selectActionsTrue() {
 			if(bulbsTrue) {
 				input "colorTrue", "enum", title: "Bulb color?", required: true, multiple: false, submitOnChange: true,
 					options: ["Soft White", "White", "Daylight", "Warm White", "Red", "Green", "Blue", "Yellow", "Orange", "Purple", "Pink"]
-				input "colorLevelTrue", "number", title: "Bulb level?", required: false, submitOnChange: true, range: "0..255"
+				input "colorLevelTrue", "number", title: "Bulb level?", required: false, submitOnChange: true, range: "0..100"
 				buildActTrue("Color: $bulbsTrue ", true)
 				if(colorTrue) buildActTrue("$colorTrue ", false)
 				if(colorLevelTrue) addToActTrue("Level: $colorLevelTrue")
@@ -491,7 +492,7 @@ def selectActionsFalse() {
 			if(bulbsFalse) {
 				input "colorFalse", "enum", title: "Bulb color?", required: true, multiple: false, submitOnChange: true,
 					options: ["Soft White", "White", "Daylight", "Warm White", "Red", "Green", "Blue", "Yellow", "Orange", "Purple", "Pink"]
-				input "colorLevelFalse", "number", title: "Bulb level?", required: false, submitOnChange: true, range: "0..255"
+				input "colorLevelFalse", "number", title: "Bulb level?", required: false, submitOnChange: true, range: "0..100"
 				buildActFalse("Color: $bulbsFalse ", true)
 				if(colorFalse) buildActFalse("$colorFalse ", false)
 				if(colorLevelFalse) addToActFalse("Level: $colorLevelFalse")
@@ -600,6 +601,9 @@ def initialize() {
 		else subscribe((settings.find{it.key == "rDev$i"}).value, capab.toLowerCase(), allHandler)
 	}
 	state.success = null
+	subscribe(disabled, "switch", disabledHandler)
+	if(disabled) state.disabled = disabled.currentSwitch == "on"
+	else state.disabled = false
 	runRule(false)
 }
 
@@ -859,6 +863,10 @@ def delayRuleFalse() {
 	runRule(true)
 }
 
+def disabledHandler() {
+	state.disabled = evt.value == "on"
+}
+
 //  private execution filter methods follow
 
 private atTimeLabel() {
@@ -893,7 +901,7 @@ private timeIntervalLabel() {
 }
 
 private getAllOk() {
-	modeZOk  //&& daysOk && timeOk
+	modeZOk && !state.disabled  //&& daysOk && timeOk
 }
 
 private hideOptionsSection() {
