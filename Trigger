@@ -684,7 +684,7 @@ def testEvt(evt) {
 	for(int i = 1; i < state.howMany; i++) {
 		def myDev = (settings.find {it.key == "rDev$i"}).value
 		myDev.each {if(evt.displayName == it.displayName) {
-			if(evt.name == "button") getButton(myDev, evt, i)
+			if(evt.name == "button") result = getButton(myDev, evt, i)
 			else result = getOperand(i)}
 		}
 	}
