@@ -287,6 +287,7 @@ def conditionLabelN(i) {
 		result = result + (myAny ? thisDev.value : thisDev.value[0]) + " " + ((thisAll ? thisAll.value : false) ? "all " : myAny)
 		def thisRel = settings.find {it.key == "RelrDev$i"}
 		if(thisCapab.value in ["Temperature", "Humidity", "Illuminance", "Dimmer level", "Energy meter", "Power meter", "Battery"]) result = result + " " + thisRel.value + " "
+		if(thisCapab.value == "Physical Switch") result = result + "physical "
 		def thisState = settings.find {it.key == "state$i"}
 		result = result + thisState.value
         }
