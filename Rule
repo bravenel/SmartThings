@@ -53,7 +53,7 @@ def selectRule() {
 			input "modesZ", "mode", title: "Evaluate only when mode is", multiple: true, required: false
 			paragraph "Advanced Rule Input allows for parenthesized sub-rules."
 			input "advanced", "bool", title: "Advanced Rule Input", required: false
-            input "disabled", "capability.switch", title: "Switch to disable rule", required: false, multiple: false
+            input "disabled", "capability.switch", title: "Switch to disable rule when ON", required: false, multiple: false
    		}    
 	}
 }
