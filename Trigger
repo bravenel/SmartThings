@@ -28,7 +28,7 @@ definition(
 
 preferences {
 	page(name: "selectTriggerActs")
-    page(name: "selectConditions")
+	page(name: "selectConditions")
 	page(name: "certainTime")
 	page(name: "atCertainTime")
 	page(name: "selectActionsTrue")
@@ -41,7 +41,7 @@ def selectTriggerActs() {
 			label title: "Name the Trigger", required: true
 			def condLabel = conditionLabel()
 			if (condLabel) condLabel = condLabel[0..-1]
-            href "selectConditions", title: "Define Triggers", description: condLabel ? (condLabel) : "Tap to set", required: true, state: condLabel ? "complete" : null, submitOnChange: true
+			href "selectConditions", title: "Define Triggers", description: condLabel ? (condLabel) : "Tap to set", required: true, state: condLabel ? "complete" : null, submitOnChange: true
 			href "selectActionsTrue", title: "Select the Actions", description: state.actsTrue ? state.actsTrue : "Tap to set", state: state.actsTrue ? "complete" : null
 		}
 		section(title: "More options", hidden: hideOptionsSection(), hideable: true) {
@@ -90,9 +90,9 @@ def selectConditions() {
 							if(myDev) if(myDev.value.size() > 1) getAnyAll(thisDev)
 							if(xCapab in ["Temperature", "Humidity", "Illuminance", "Dimmer level", "Energy meter", "Power meter", "Battery"]) getRelational(thisDev)
 						} else if(xCapab == "Button") {
-                        	def thisDev = "rDev$i"
-                            getButton(thisDev)
-                        }
+							def thisDev = "rDev$i"
+							getButton(thisDev)
+						}
 						getState(xCapab, i)
 					}
 				}
@@ -174,7 +174,7 @@ def getDevs(myCapab, dev) {
 
 def getButton(dev) {
 	def result = input "$dev", "capability.button", title: "Button Device", required: true, multiple: false, submitOnChange: true
-    if(dev) input "Button$dev", "enum", title: "Button number", required: true, multiple: false, submitOnChange: true, options: ["one", "two", "three", "four"]
+	if(dev) input "Button$dev", "enum", title: "Button number", required: true, multiple: false, submitOnChange: true, options: ["one", "two", "three", "four"]
 }
 
 def getAnyAll(myDev) {
@@ -193,16 +193,15 @@ def getCapab(myCapab) {
 
 def getState(myCapab, n) {
 	def result = null
-//	def days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 	if     (myCapab == "Switch") 			result = input "state$n", "enum", title: "Switch turns ", options: ["on", "off"]
-    else if(myCapab == "Physical Switch")	result = input "state$n", "enum", title: "Switch turns ", options: ["on", "off"]
+	else if(myCapab == "Physical Switch")	result = input "state$n", "enum", title: "Switch turns ", options: ["on", "off"]
 	else if(myCapab == "Motion") 			result = input "state$n", "enum", title: "Motion becomes ", options: ["active", "inactive"], defaultValue: "active"
 	else if(myCapab == "Acceleration")		result = input "state$n", "enum", title: "Acceleration becomes ", options: ["active", "inactive"]
 	else if(myCapab == "Contact") 			result = input "state$n", "enum", title: "Contact ", options: ["open", "closed"]
 	else if(myCapab == "Presence") 			result = input "state$n", "enum", title: "Presence ", options: ["arrives", "leaves"], defaultValue: "arrive"
 	else if(myCapab == "Lock")				result = input "state$n", "enum", title: "Lock is ", options: ["locked", "unlocked"]
 	else if(myCapab == "Water sensor")		result = input "state$n", "enum", title: "Water becomes ", options: ["dry", "wet"]
-    else if(myCapab == "Button")			result = input "state$n", "enum", title: "Button pushed or held ", options: ["pushed", "held"]
+	else if(myCapab == "Button")			result = input "state$n", "enum", title: "Button pushed or held ", options: ["pushed", "held"]
 //	else if(myCapab == "Dimmer level")		result = input "state$n", "number", title: "Dimmer level", range: "0..100"
 	else if(myCapab == "Temperature") 		result = input "state$n", "decimal", title: "Temperature becomes ", range: "*..*"
 	else if(myCapab == "Humidity") 			result = input "state$n", "number", title: "Humidity becomes", range: "0..100"
@@ -264,32 +263,32 @@ def conditionLabelN(i) {
         else if(thisCapab.value == "Certain Time")  result = "When time is " + atTimeLabel()
         else if(thisCapab.value == "Routine") {
         	result = "Routine "
-			def thisState = settings.find {it.key == "state$i"}
-			result = result + "'" + thisState.value + "' runs"        
+		def thisState = settings.find {it.key == "state$i"}
+		result = result + "'" + thisState.value + "' runs"        
         } else {
-			def thisDev = settings.find {it.key == "rDev$i"}
-			if(!thisDev) return result
-			def thisAll = settings.find {it.key == "AllrDev$i"}
-			def myAny = thisAll ? "any " : ""
-            def myButton = settings.find {it.key == "ButtonrDev$i"}
-			if     (thisCapab.value == "Temperature") 	result = "Temperature becomes "
-			else if(thisCapab.value == "Humidity") 		result = "Humidity becomes "
-			else if(thisCapab.value == "Illuminance")	result = "Illuminance becomes "
-//			else if(thisCapab.value == "Dimmer level")	result = "Dimmer level becomes " 
-			else if(thisCapab.value == "Energy meter")	result = "Energy level becomes " 
-			else if(thisCapab.value == "Power meter")	result = "Power level becomes " 
-			else if(thisCapab.value == "Battery")		result = "Battery level becomes "
+		def thisDev = settings.find {it.key == "rDev$i"}
+		if(!thisDev) return result
+		def thisAll = settings.find {it.key == "AllrDev$i"}
+		def myAny = thisAll ? "any " : ""
+		def myButton = settings.find {it.key == "ButtonrDev$i"}
+		if     (thisCapab.value == "Temperature") 	result = "Temperature becomes "
+		else if(thisCapab.value == "Humidity") 		result = "Humidity becomes "
+		else if(thisCapab.value == "Illuminance")	result = "Illuminance becomes "
+//		else if(thisCapab.value == "Dimmer level")	result = "Dimmer level becomes " 
+		else if(thisCapab.value == "Energy meter")	result = "Energy level becomes " 
+		else if(thisCapab.value == "Power meter")	result = "Power level becomes " 
+		else if(thisCapab.value == "Battery")		result = "Battery level becomes "
         	else if(thisCapab.value == "Button") {
-            	result = "$thisDev.value button $myButton.value "                
-				def thisState = settings.find {it.key == "state$i"}
-				result = result + thisState.value
-                return result
-            }
-			result = result + (myAny ? thisDev.value : thisDev.value[0]) + " " + ((thisAll ? thisAll.value : false) ? "all " : myAny)
-			def thisRel = settings.find {it.key == "RelrDev$i"}
-			if(thisCapab.value in ["Temperature", "Humidity", "Illuminance", "Dimmer level", "Energy meter", "Power meter", "Battery"]) result = result + " " + thisRel.value + " "
+            		result = "$thisDev.value button $myButton.value "                
 			def thisState = settings.find {it.key == "state$i"}
 			result = result + thisState.value
+                	return result
+		}
+		result = result + (myAny ? thisDev.value : thisDev.value[0]) + " " + ((thisAll ? thisAll.value : false) ? "all " : myAny)
+		def thisRel = settings.find {it.key == "RelrDev$i"}
+		if(thisCapab.value in ["Temperature", "Humidity", "Illuminance", "Dimmer level", "Energy meter", "Power meter", "Battery"]) result = result + " " + thisRel.value + " "
+		def thisState = settings.find {it.key == "state$i"}
+		result = result + thisState.value
         }
 	return result
 }
@@ -324,7 +323,7 @@ def selectActionsTrue() {
 			setActTrue(onSwitchTrue, "On: $onSwitchTrue")
 			input "offSwitchTrue", "capability.switch", title: "Turn off these switches", multiple: true, required: false, submitOnChange: true
 			setActTrue(offSwitchTrue, "Off: $offSwitchTrue")
-            input "toggleSwitchTrue", "capability.switch", title: "Toggle these switches", multiple: true, required: false, submitOnChange: true
+			input "toggleSwitchTrue", "capability.switch", title: "Toggle these switches", multiple: true, required: false, submitOnChange: true
 			setActTrue(toggleSwitchTrue, "Toggle: $toggleSwitchTrue")
 			input "delayedOffTrue", "capability.switch", title: "Turn on/off these switches after a delay (default is OFF)", multiple: true, required: false, submitOnChange: true
 			if(delayedOffTrue) {
@@ -336,25 +335,15 @@ def selectActionsTrue() {
 					setActTrue(delayedOffTrue, delayStrTrue)
 				}
 			}
-//			input "pendedOffTrue", "capability.switch", title: "Turn on/off these switches after a delay, pending cancellation (default is OFF)", multiple: true, required: false, submitOnChange: true
-//			if(pendedOffTrue) {
-//				input "pendOnOffTrue", "bool", title: "Turn ON after the delay?", multiple: false, required: false, defaultValue: false, submitOnChange: true
-//				input "pendMinutesTrue", "number", title: "Minutes of delay", required: true, range: "1..*", submitOnChange: true
-//				if(pendMinutesTrue) {
-//					def pendStrTrue = "Pending "+ (pendOnOffTrue ? "On:" : "Off:") + " $pendedOffTrue: $pendMinutesTrue minute"
-//					if(pendMinutesTrue > 1) pendStrTrue = pendStrTrue + "s"
-//					setActTrue(pendedOffTrue, pendStrTrue)
-//				}
-//			}
 			input "dimATrue", "capability.switchLevel", title: "Set these dimmers", multiple: true, submitOnChange: true, required: false
 			if(dimATrue) input "dimLATrue", "number", title: "To this level", range: "0..100", required: true, submitOnChange: true
 			if(dimLATrue) setActTrue(dimATrue, "Dim: $dimATrue: $dimLATrue")
 			input "dimBTrue", "capability.switchLevel", title: "Set these other dimmers", multiple: true, submitOnChange: true, required: false
 			if(dimBTrue) input "dimLBTrue", "number", title: "To this level", range: "0..100", required: true, submitOnChange: true
 			if(dimLBTrue) setActTrue(dimBTrue, "Dim: $dimBTrue: $dimLBTrue")
-            input "toggleDimmerTrue", "capability.switchLevel", title: "Toggle these dimmers", multiple: true, required: false, submitOnChange: true
-            if(toggleDimmerTrue) input "dimTogTrue", "number", title: "To this level", range: "0..100", required: true, submitOnChange: true
-            if(dimTogTrue) setActTrue(toggleDimmerTrue, "Toggle: $toggleDimmerTrue: $dimTogTrue")
+			input "toggleDimmerTrue", "capability.switchLevel", title: "Toggle these dimmers", multiple: true, required: false, submitOnChange: true
+			if(toggleDimmerTrue) input "dimTogTrue", "number", title: "To this level", range: "0..100", required: true, submitOnChange: true
+			if(dimTogTrue) setActTrue(toggleDimmerTrue, "Toggle: $toggleDimmerTrue: $dimTogTrue")
 			input "bulbsTrue", "capability.colorControl", title: "Set color for these bulbs", multiple: true, required: false, submitOnChange: true
 			if(bulbsTrue) {
 				input "colorTrue", "enum", title: "Bulb color?", required: true, multiple: false, submitOnChange: true,
@@ -368,7 +357,7 @@ def selectActionsTrue() {
 			setActTrue(lockTrue, "Lock: $lockTrue")
 			input "unlockTrue", "capability.lock", title: "Unlock these locks", multiple: true, required: false, submitOnChange: true
 			setActTrue(unlockTrue, "Unlock: $unlockTrue")
-            input "fanAdjustTrue", "capability.switchLevel", title: "Adjust these fans - Low, Medium, High, Off", multiple: false, required: false, submitOnChange: true
+			input "fanAdjustTrue", "capability.switchLevel", title: "Adjust these fans - Low, Medium, High, Off", multiple: false, required: false, submitOnChange: true
 			if(fanAdjustTrue) addToActTrue("Adjust Fan: $fanAdjustTrue")
 			input "openValveTrue", "capability.valve", title: "Open these valves", multiple: true, required: false, submitOnChange: true
 			setActTrue(openValveTrue, "Open: $openValveTrue")
@@ -442,55 +431,55 @@ def initialize() {
 	def howMany = state.howMany - 1
 	for (int i = 1; i <= howMany; i++) {
 		def capab =   (settings.find {it.key == "rCapab$i"}).value
-        def myState = (settings.find {it.key == "state$i"})
-        if(myState) myState = myState.value
-        switch(capab) {
-        	case "Mode": 
-            	subscribe(location, "mode", allHandler)
-            	break
-            case "Certain Time":
-            	scheduleAtTime()
-                break
-            case "Energy meter":
-            	subscribe((settings.find{it.key == "rDev$i"}).value, "energy", allHandler)
-                break
-            case "Power meter":
-            	subscribe((settings.find{it.key == "rDev$i"}).value, "power", allHandler)
-                break
-            case "Temperature":
-            	subscribe((settings.find{it.key == "rDev$i"}).value, "temperature", allHandler)
-                break
-            case "Humidity":
-            	subscribe((settings.find{it.key == "rDev$i"}).value, "humidity", allHandler)
-                break
-            case "Battery":
-            	subscribe((settings.find{it.key == "rDev$i"}).value, "battery", allHandler)
-                break
-            case "Illuminance":
-            	subscribe((settings.find{it.key == "rDev$i"}).value, "illuminance", allHandler)
-                break
+		def myState = (settings.find {it.key == "state$i"})
+		if(myState) myState = myState.value
+		switch(capab) {
+			case "Mode": 
+				subscribe(location, "mode", allHandler)
+				break
+			case "Certain Time":
+				scheduleAtTime()
+				break
+			case "Energy meter":
+				subscribe((settings.find{it.key == "rDev$i"}).value, "energy", allHandler)
+				break
+			case "Power meter":
+				subscribe((settings.find{it.key == "rDev$i"}).value, "power", allHandler)
+				break
+			case "Temperature":
+				subscribe((settings.find{it.key == "rDev$i"}).value, "temperature", allHandler)
+				break
+			case "Humidity":
+				subscribe((settings.find{it.key == "rDev$i"}).value, "humidity", allHandler)
+				break
+			case "Battery":
+				subscribe((settings.find{it.key == "rDev$i"}).value, "battery", allHandler)
+				break
+			case "Illuminance":
+				subscribe((settings.find{it.key == "rDev$i"}).value, "illuminance", allHandler)
+				break
 			case "Water sensor":
 				subscribe((settings.find{it.key == "rDev$i"}).value, "water.$myState", allHandler)
-                break
-            case ["arrives", "leaves"]:
-            	subscribe((settings.find{it.key == "rDev$i"}).value, "presence", allHandler)
-                break
-            case "Button":
-            	subscribe((settings.find{it.key == "rDev$i"}).value, "button", allHandler)
-                break
-            case "Physical Switch":
-            	subscribe((settings.find{it.key == "rDev$i"}).value, "switch.$myState", physicalHandler)
-                break
-            case "Routine":
-            	subscribe(location, "routineExecuted", allHandler)
-                break
+				break
+			case ["arrives", "leaves"]:
+				subscribe((settings.find{it.key == "rDev$i"}).value, "presence", allHandler)
+				break
+			case "Button":
+				subscribe((settings.find{it.key == "rDev$i"}).value, "button", allHandler)
+				break
+			case "Physical Switch":
+				subscribe((settings.find{it.key == "rDev$i"}).value, "switch.$myState", physicalHandler)
+				break
+			case "Routine":
+				subscribe(location, "routineExecuted", allHandler)
+				break
 			default:
-            	subscribe((settings.find{it.key == "rDev$i"}).value, (capab.toLowerCase() + ".$myState"), allHandler)
-        }
+				subscribe((settings.find{it.key == "rDev$i"}).value, (capab.toLowerCase() + ".$myState"), allHandler)
+		}
 	}
-    subscribe(disabled, "switch", disabledHandler)
-    if(disabled) state.disabled = disabled.currentSwitch == "on"
-    else state.disabled = false
+	subscribe(disabled, "switch", disabledHandler)
+	if(disabled) state.disabled = disabled.currentSwitch == "on"
+	else state.disabled = false
 }
 
 // Trigger evaluation code follows
@@ -577,9 +566,7 @@ def getOperand(i) {
 
 def adjustFan(device) {
 //	log.debug "adjust: $device = ${device.currentLevel}"
-    
 	def currentLevel = device.currentLevel
-
 	if(device.currentSwitch == 'off') device.setLevel(15)
 	else if (currentLevel < 34) device.setLevel(50)
   	else if (currentLevel < 67) device.setLevel(90)
@@ -588,7 +575,6 @@ def adjustFan(device) {
 
 def adjustShade(device) {
 //	log.debug "shades: $device = ${device.currentMotor} state.lastUP = $state.lastshadesUp"
-
 	if(device.currentMotor in ["up","down"]) {
     	state.lastshadesUp = device.currentMotor == "up"
     	device.stop()
@@ -602,27 +588,16 @@ def adjustShade(device) {
 
 def toggle(devices) {
 //	log.debug "toggle: $devices = ${devices*.currentValue('switch')}"
-
 	if (devices*.currentValue('switch').contains('on')) {
 		devices.off()
 	}
 	else if (devices*.currentValue('switch').contains('off')) {
 		devices.on()
 	}
-	else if (devices*.currentValue('lock').contains('locked')) {
-		devices.unlock()
-	}
-	else if (devices*.currentValue('alarm').contains('off')) {
-        devices.siren()
-    }
-	else {
-		devices.on()
-	}
 }
 
 def dimToggle(devices, dimLevel) {
 //	log.debug "dimToggle: $devices = ${devices*.currentValue('switch')}"
-
 	if (devices*.currentValue('switch').contains('on')) devices.off()
 	else devices.setLevel(dimLevel)
 }
@@ -641,21 +616,21 @@ def doTrigger(delay) {
 	else {
 		if(onSwitchTrue) 		onSwitchTrue.on()
 		if(offSwitchTrue) 		offSwitchTrue.off()
-        if(toggleSwitchTrue)	toggle(toggleSwitchTrue)
+		if(toggleSwitchTrue)		toggle(toggleSwitchTrue)
 		if(delayedOffTrue)		runIn(delayMinutesTrue * 60, delayOffTrue)
 		if(dimATrue) 			dimATrue.setLevel(dimLATrue)
 		if(dimBTrue) 			dimBTrue.setLevel(dimLBTrue)
-        if(toggleDimmerTrue)	dimToggle(toggleDimmerTrue, dimTogTrue)
+		if(toggleDimmerTrue)		dimToggle(toggleDimmerTrue, dimTogTrue)
 		if(bulbsTrue)			setColor(true)
 		if(lockTrue) 			lockTrue.lock()
 		if(unlockTrue) 			unlockTrue.unlock()
-        if(fanAdjustTrue)		adjustFan(fanAdjustTrue)
+		if(fanAdjustTrue)		adjustFan(fanAdjustTrue)
 		if(openValveTrue)		openValveTrue.open()
 		if(closeValveTrue)		closeValveTrue.close()
-		if(thermoTrue)			{	if(thermoModeTrue) 	  thermoTrue.setThermostatMode(thermoModeTrue)
-									if(thermoSetHeatTrue) thermoTrue.setHeatingSetpoint(thermoSetHeatTrue)
-									if(thermoSetCoolTrue) thermoTrue.setCoolingSetpoint(thermoSetCoolTrue)
-                                	if(thermoFanTrue)	  thermoTrue.setThermostatFanMode(thermoFanTrue)   }
+		if(thermoTrue)			{	if(thermoModeTrue	thermoTrue.setThermostatMode(thermoModeTrue)
+							if(thermoSetHeatTrue) 	thermoTrue.setHeatingSetpoint(thermoSetHeatTrue)
+							if(thermoSetCoolTrue) 	thermoTrue.setCoolingSetpoint(thermoSetCoolTrue)
+							if(thermoFanTrue)	thermoTrue.setThermostatFanMode(thermoFanTrue)   }
 		if(modeTrue) 			setLocationMode(modeTrue)
 		if(myPhraseTrue)		location.helloHome.execute(myPhraseTrue)
 		if(pushTrue)			sendPush(msgTrue ?: "Rule $app.label True")
@@ -664,63 +639,62 @@ def doTrigger(delay) {
 }
 
 def getButton(dev, evt, i) {
-				def buttonNumber = evt.data // why doesn't jsonData work? always returning [:]
-				def value = evt.value
-//				log.debug "buttonEvent: $evt.name = $evt.value ($evt.data)"
-//				log.debug "button: $buttonNumber, value: $value"
-
-				def recentEvents = dev.eventsSince(new Date(now() - 3000)).findAll{it.value == evt.value && it.data == evt.data}
-//				log.debug "Found ${recentEvents.size()?:0} events in past 3 seconds"
-				def thisButton = 0
-				if(recentEvents.size <= 1){
-					switch(buttonNumber) {
-						case ~/.*1.*/:
-							thisButton = "one"
-							break
-						case ~/.*2.*/:
-							thisButton = "two"
-							break
-						case ~/.*3.*/:
-							thisButton = "three"
-							break
-						case ~/.*4.*/:
-							thisButton = "four"
-							break
-					}
-//				} else {
-//					log.debug "Found recent button press events for $buttonNumber with value $value"
-				}
-                def myState = settings.find {it.key == "state$i"}
-                def myButton = settings.find {it.key == "ButtonrDev$i"}
-                def result = (evt.value == myState.value) && (thisButton == myButton.value)
+	def buttonNumber = evt.data // why doesn't jsonData work? always returning [:]
+	def value = evt.value
+//	log.debug "buttonEvent: $evt.name = $evt.value ($evt.data)"
+//	log.debug "button: $buttonNumber, value: $value"
+	def recentEvents = dev.eventsSince(new Date(now() - 3000)).findAll{it.value == evt.value && it.data == evt.data}
+//	log.debug "Found ${recentEvents.size()?:0} events in past 3 seconds"
+	def thisButton = 0
+	if(recentEvents.size <= 1){
+		switch(buttonNumber) {
+			case ~/.*1.*/:
+				thisButton = "one"
+				break
+			case ~/.*2.*/:
+				thisButton = "two"
+				break
+			case ~/.*3.*/:
+				thisButton = "three"
+				break
+			case ~/.*4.*/:
+				thisButton = "four"
+				break
+		}
+//	} else {
+//		log.debug "Found recent button press events for $buttonNumber with value $value"
+	}
+	def myState = settings.find {it.key == "state$i"}
+	def myButton = settings.find {it.key == "ButtonrDev$i"}
+	def result = (evt.value == myState.value) && (thisButton == myButton.value)
 }
 
 def testEvt(evt) {
 	def result = false
-    if(evt.name == "mode") return modeXOk
-    if(evt.name == "routineExecuted") {
-        for(int i = 1; i < state.howMany; i++) {
-        	def myCapab = (settings.find {it.key == "rCapab$i"}).value
-            def state = settings.find {it.key == "state$i"}
-            if(myCapab == "Routine") result = result || evt.displayName == state.value
-        }
-        return result
-    }
-    for(int i = 1; i < state.howMany; i++) {
-    	def myDev = (settings.find {it.key == "rDev$i"}).value
-        myDev.each {if(evt.displayName == it.displayName) {
-        	if(evt.name == "button") getButton(myDev, evt, i)
-        	else result = getOperand(i)}
-        }
-    }
-    log.debug "testEvt result: $result"
-    return result
+	if(evt.name == "mode") return modeXOk
+	if(evt.name == "routineExecuted") {
+		for(int i = 1; i < state.howMany; i++) {
+			def myCapab = (settings.find {it.key == "rCapab$i"}).value
+			def state = settings.find {it.key == "state$i"}
+			if(myCapab == "Routine") result = result || evt.displayName == state.value
+		}
+		return result
+	}
+	for(int i = 1; i < state.howMany; i++) {
+		def myDev = (settings.find {it.key == "rDev$i"}).value
+		myDev.each {if(evt.displayName == it.displayName) {
+			if(evt.name == "button") getButton(myDev, evt, i)
+			else result = getOperand(i)}
+		}
+	}
+//	log.debug "testEvt result: $result"
+	return result
 }
 
 def allHandler(evt) {
 	log.info "$app.label: $evt.displayName $evt.name $evt.value"
-    def doit = true
-    if(evt.name in ["temperature", "humidity", "power", "energy", "battery", "illuminance", "mode", "presence", "button", "routineExecuted"]) doit = testEvt(evt)
+	def doit = true
+	if(evt.name in ["temperature", "humidity", "power", "energy", "battery", "illuminance", "mode", "presence", "button", "routineExecuted"]) doit = testEvt(evt)
 	if (doit) doTrigger(false)
 }
 
