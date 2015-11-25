@@ -709,7 +709,7 @@ def physicalHandler(evt) {
 }
 
 def delayOffTrue() {
-	if(delayOnOffTrue) delayedOffTrue.on() else delayedOffTrue.off()
+	if(delayOnOffTrue && allOk) delayedOffTrue.on() else delayedOffTrue.off()
 }
 
 def delayRuleTrue() {
