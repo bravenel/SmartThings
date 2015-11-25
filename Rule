@@ -840,19 +840,19 @@ def timeHandler() {
 }
 
 def delayOffTrue() {
-	if(delayOnOffTrue) delayedOffTrue.on() else delayedOffTrue.off()
+	if(delayOnOffTrue && allOk delayedOffTrue.on() else delayedOffTrue.off()
 }
 
 def pendingOffTrue() {
-	if(pendOnOffTrue) pendedOffTrue.on() else pendedOffTrue.off()
+	if(pendOnOffTrue && allOk) pendedOffTrue.on() else pendedOffTrue.off()
 }
 
 def delayOffFalse() {
-	if(delayOnOffFalse) delayedOffFalse.on() else delayedOffFalse.off()
+	if(delayOnOffFalse && allOk) delayedOffFalse.on() else delayedOffFalse.off()
 }
 
 def pendingOffFalse() {
-	if(pendOnOffFalse) pendedOffFalse.on() else pendedOffFalse.off()
+	if(pendOnOffFalse && allOk) pendedOffFalse.on() else pendedOffFalse.off()
 }
 
 def delayRuleTrue() {
