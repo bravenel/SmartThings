@@ -1,7 +1,7 @@
 /**
  *  Trigger
  *
- *	Version 1.0.0     24 Nov 2015
+ *	Version 1.0.1     25 Nov 2015
  *
  *  Copyright 2015 Bruce Ravenel
  *
@@ -716,7 +716,7 @@ def delayRuleTrue() {
 	doTrigger(true)
 }
 
-def disabledHandler() {
+def disabledHandler(evt) {
 	state.disabled = evt.value == "on"
 }
 
