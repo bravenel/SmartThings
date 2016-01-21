@@ -6,7 +6,7 @@
  */
 definition(
     name: "Scene Controller",
-    namespace: "",
+    namespace: "bravenl",
     author: "SmartThings, Bruce Ravenel",
     description: "Set Scenes with the Aeon Labs Minimote",
     category: "My Apps",
