@@ -818,7 +818,7 @@ def runRule(delay) {
 			}
 		state.success = success
 		log.info (success ? "$app.label is True" : "$app.label is False")
-        }
+              }
 	}
 }
 
