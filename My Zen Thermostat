@@ -181,7 +181,7 @@ def parseDescriptionAsMap(description) {
 
 def getModeMap() { [
 	"00":"off",
-    "01":"auto",
+    	"01":"auto",
 	"03":"cool",
 	"04":"heat"
 ]}
@@ -425,16 +425,9 @@ def heat() {
 
 def auto() {
 	def coolingSetpoint = device.currentValue("coolingSetpoint")
-    def heatingSetpoint = device.currentValue("heatingSetpoint")
-    sendEvent("name":"thermostatMode", "value":"auto")
-//    sendEvent("name":"thermostatSetpoint","value":coolingSetpoint)
-//    [
-      "st wattr 0x${device.deviceNetworkId} 1 0x201 0x1C 0x30 {01}"
-//    ]
-//    sendEvent("name":"thermostatSetpoint","value":heatingSetpoint)
-//    [
-//      "st wattr 0x${device.deviceNetworkId} 1 0x201 0x1C 0x30 {04}"
-//    ]
+	def heatingSetpoint = device.currentValue("heatingSetpoint")
+	sendEvent("name":"thermostatMode", "value":"auto")
+	"st wattr 0x${device.deviceNetworkId} 1 0x201 0x1C 0x30 {01}"
 }
 
 // =============== Fan Mode ===============
