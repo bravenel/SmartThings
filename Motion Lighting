@@ -1,9 +1,9 @@
 /**
  *  Motion Lighting
  *
- *  Copyright 2015 Bruce Ravenel
+ *  Copyright 2015, 2016 Bruce Ravenel
  *
- *	10-09-2015 1.1
+ *	3-28-2016 1.2
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -20,8 +20,9 @@ definition(
     name: "Motion Lighting",
     namespace: "bravenel",
     author: "Bruce Ravenel",
-    description: "Set Dimmer Levels by mode, with Motion on/off/disabled, button on, and Master on/off",
+    description: "Set Dimmer Levels by mode, with Motion on/off/disabled, button on, and Main on/off",
     category: "Convenience",
+	parent: "bravenel:Rule Machine",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/MyApps/Cat-MyApps.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/MyApps/Cat-MyApps@2x.png"
 )
@@ -36,23 +37,23 @@ preferences {
 def selectDimmers() {
 	dynamicPage(name: "selectDimmers", title: "Dimmers, modes and levels", nextPage: "motionSettings", uninstall: true) {
 
-		section("When this master dimmer") { 
-			input "master", "capability.switchLevel", multiple: false, title: "Is turned on", required: true, submitOnChange: true
+		section("When this main dimmer") { 
+			input "main", "capability.switchLevel", multiple: false, title: "Is turned on", required: true, submitOnChange: true
 		}
 
-		section("These other dimmers (optional)") {
-			input "slaves", "capability.switchLevel", multiple: true, title: "Will also be turned on", required: false
+		section("These extra dimmers (optional)") {
+			input "extras", "capability.switchLevel", multiple: true, title: "Will also be turned on", required: false
 		}
 
-		section("Set to a dimmer level selected for each mode") {
+		section("Set to a dimmer level for each mode") {
 			def m = location.mode
 			def myModes = []
 			location.modes.each {myModes << "$it"}
 			input "modesX", "enum", multiple: true, title: "Select mode(s)", submitOnChange: true, options: myModes.sort(), defaultValue: [m]
-			def sortModes = modesX
+            def sortModes = modesX
 			if(!sortModes) setModeLevel(m, "level$m")
-			else sortModes = sortModes.sort()
-			sortModes.each {setModeLevel(it, "level$it")}
+            else sortModes = sortModes.sort()
+            sortModes.each {setModeLevel(it, "level$it")}
 		}
 	}
 }
@@ -91,18 +92,58 @@ def motionSettings() {
 def otherSettings() {
 	dynamicPage(name:"otherSettings", uninstall: true, install: true) {
 
-		section("Turn master and slaves on with this") {
-			input "button", "capability.momentary", title: "Button", multiple: false, required: false
-		}
-
-		section("When the master is turned off") {
-			input "offSwitches", "capability.switch", title: "Turn these other switches off", multiple: true, required: false
+		section("Turn main and extras on/off with this") {
+			input "buttonSw", "capability.switch", title: "Switch", multiple: false, required: false
 		}
         
+        section("Turn main and extras on with this") {
+        	input "buttonDev", "capability.button", title: "Button Device", required: false, multiple: false, submitOnChange: true
+			if(buttonDev) {
+				input "buttonNbr", "enum", title: "Button number", required: true, multiple: false, submitOnChange: true, options: ["one", "two", "three", "four"], defaultValue: "one"
+        		input "buttonState", "enum", title: "Button pushed or held ", options: ["pushed", "held"], defaultValue: "pushed"
+			}
+        }
+
+        section("Turn main and extras off with this") {
+        	input "buttonOffDev", "capability.button", title: "Button Device", required: false, multiple: false, submitOnChange: true
+			if(buttonOffDev) {
+				input "buttonOffNbr", "enum", title: "Button number", required: true, multiple: false, submitOnChange: true, options: ["one", "two", "three", "four"], defaultValue: "one"
+        		input "buttonOffState", "enum", title: "Button pushed or held ", options: ["pushed", "held"], defaultValue: "pushed"
+			}
+        }
+
+		section("When the main is turned off") {
+			input "offSwitches", "capability.switch", title: "These extra switches will be turned off", multiple: true, required: false
+		}
+        
+		section("When the main is turned on") {
+			input "onSwitches", "capability.switch", title: "These extra switches will be turned on", multiple: true, required: false
+		}
+
 		section {
 			label title: "Assign a name:", required: false
 		}
    	}
+}
+
+def getButton() {
+//	def numNames = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+//    	"eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty"]
+ 	def result = input "buttonDev", "capability.button", title: "Button Device", required: false, multiple: false, submitOnChange: true
+	if(buttonDev) {
+//		input "numButtons$dev", "number", title: "Number of buttons? (Default 4)", range: "1..20", required: false, submitOnChange: true, description: "4"
+//		def numButtons = settings.find{it.key == "numButtons$dev"}
+//		numButtons = numButtons ? numButtons.value : 4
+		def numButtons = 4
+//		def butOpts = ["one"]
+		def butOpts = ["one", "two", "three", "four"]
+//		if(numButtons > 1) {
+//        	for (int i = 1; i < numButtons; i++) butOpts[i] = numNames[i]
+            log.debug "getButton: $buttonDev, $numButtons"
+			input "buttonNbr", "enum", title: "Button number", required: true, multiple: false, submitOnChange: true, options: butOpts, defaultValue: "one"
+//        }
+        input buttonState, "enum", title: "Button pushed or held ", options: ["pushed", "held"], defaultValue: "pushed"
+	}
 }
 
 def certainTime() {
@@ -138,15 +179,18 @@ def updated() {
 
 
 def initialize() {
-	subscribe(master, "switch.on", switchOnHandler)
-	subscribe(button, "switch.on", switchOnHandler)
-	subscribe(master, "switch.off", switchOffHandler)
-	subscribe(master, "level", levelHandler)
-	subscribe(slaves, "level", levelHandler)
+	subscribe(main, "switch.on", switchOnHandler)
+	subscribe(buttonSw, "switch.on", switchOnHandler)
+	subscribe(main, "switch.off", switchOffHandler)
+    subscribe(buttonSw, "switch.off", allSwitchOffHandler)
+	subscribe(main, "level", levelHandler)
+	subscribe(extras, "level", levelHandler)
 	subscribe(motions, "motion.active", motionOnHandler)
 	subscribe(disabled, "switch", disableHandler)
 	if(turnOff) subscribe(motions, "motion.inactive", motionOffHandler)
 	subscribe(location, modeChangeHandler)
+    subscribe(buttonDev, "button", buttonHandler)
+    subscribe(buttonOffDev, "button", buttonOffHandler)
     
 	state.modeLevels = [:]
 	for(m in modesX) {
@@ -158,23 +202,26 @@ def initialize() {
 	state.dimLevel = state.modeLevels[state.currentMode]
 	state.motionOffDismissed = true
 	state.motionDisabled = (disable) ? disable.currentSwitch == "on" : false
-	state.masterOff = master.currentSwitch == "off"
+	state.mainOff = main.currentSwitch == "off"
+    state.needsReset = false
 }
 
 def switchesOn() {
 	state.motionOffDismissed = true    		// use this variable instead of unschedule() to kill pending off()
-	state.masterOff = false
-	master.setLevel(state.dimLevel)
-	slaves?.setLevel(state.dimLevel)
+	state.mainOff = false
+	main.setLevel(state.dimLevel)
+	extras?.setLevel(state.dimLevel)
+    state.needsReset = false
+    onSwitches?.on()
 }
 
 def switchOnHandler(evt) {
-	if(state.masterOff) switchesOn() 
+	if(state.mainOff) switchesOn() 
 }
 
 def motionOnHandler(evt) {
 	if(state.motionDisabled) return
-	if(allOk && state.masterOff) switchesOn() else state.motionOffDismissed = true
+	if(allOk && state.mainOff) switchesOn() else state.motionOffDismissed = true
 }
 
 def disableHandler(evt) {
@@ -187,20 +234,66 @@ def levelHandler(evt) {      				// allows a dimmer to change the current dimLev
 	switchesOn()
 }
 
+def buttonHandler(evt) {
+	def numNames = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+    	"eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty"]
+	def buttonNumber = evt.jsonData.buttonNumber.toInteger() 
+    def value = evt.value
+	def recentEvents = buttonDev.eventsSince(new Date(now() - 3000)).findAll{it.value == evt.value && it.data == evt.data}
+	def thisButton = 0
+	def firstEventId = 0
+	if (recentEvents.size() != 0) firstEventId = recentEvents[0].id
+	if(firstEventId == evt.id) thisButton = numNames[buttonNumber]
+//	def myState = settings.find {it.key == (state.isTrig ? "state$i" : "tstate$i")}
+//	def myButton = settings.find {it.key == (state.isTrig ? "ButtonrDev$i" : "ButtontDev$i")}
+    def result = true
+    if(value in ["pushed", "held"]) result = (value == buttonState) && (thisButton == buttonNbr)
+//    else if(value.startsWith("button")) result = thisButton == myButton.value // ZWN-SC7
+	if(result && state.mainOff) switchesOn()
+}
+
+def buttonOffHandler(evt) {
+	def numNames = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+    	"eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty"]
+	def buttonNumber = evt.jsonData.buttonNumber.toInteger() 
+    def value = evt.value
+	def recentEvents = buttonOffDev.eventsSince(new Date(now() - 3000)).findAll{it.value == evt.value && it.data == evt.data}
+	def thisButton = 0
+	def firstEventId = 0
+	if (recentEvents.size() != 0) firstEventId = recentEvents[0].id
+	if(firstEventId == evt.id) thisButton = numNames[buttonNumber]
+//	def myState = settings.find {it.key == (state.isTrig ? "state$i" : "tstate$i")}
+//	def myButton = settings.find {it.key == (state.isTrig ? "ButtonrDev$i" : "ButtontDev$i")}
+    def result = true
+    if(value in ["pushed", "held"]) result = (value == buttonOffState) && (thisButton == buttonOffNbr)
+//    else if(value.startsWith("button")) result = thisButton == myButton.value // ZWN-SC7
+	if(result) switchesOffNow(true)
+}
+
 def switchOffHandler(evt) {
-	switchesOffNow()
+	switchesOffNow(false)
+}
+
+def allSwitchOffHandler(evt) {
+	switchesOffNow(true)
 }
 
 def switchesOffLater() {                    		
 	if(state.motionOffDismissed || state.motionDisabled) return  
-	if(allOk) switchesOffNow()
+	if(allOk) switchesOffNow(true)
 }
 
-def switchesOffNow() {
+def switchesOffNow(m) {
 	state.dimLevel = state.modeLevels[state.currentMode]
-	state.masterOff = true
-	master.off()
-	slaves?.off()
+	state.mainOff = true
+    if(state.needsReset) {
+    	if(m) main.resetLevel(state.dimLevel)
+		extras?.resetLevel(state.dimLevel)
+        state.needsReset = false
+    } else {
+    	if(m) main.off()
+    	extras?.off()
+    }
 	offSwitches?.off()
 }
 
@@ -209,7 +302,7 @@ def motionOffHandler(evt) {  				// called when motion goes inactive, check all 
 	if(allOk) {
 		def someMotion = "active" in motions.currentMotion
 		state.motionOffDismissed = someMotion
-		if(!someMotion) {if(minutes) runIn(minutes*60, switchesOffLater) else switchesOffNow()}
+		if(!someMotion) {if(minutes) runIn(minutes*60, switchesOffLater) else switchesOffNow(true)}
 	}
 }
 
@@ -218,8 +311,14 @@ def modeChangeHandler(evt) {
 	state.currentMode = evt.value			   
 	state.dimLevel = state.modeLevels[evt.value]
 // the next two lines brighten any lights on when new mode is brighter than previous
-	if(master.currentSwitch == "on" && master.currentLevel < state.dimLevel) master.setLevel(state.dimLevel)
-	slaves.each {if(it.currentSwitch == "on" && it.currentLevel < state.dimLevel) it.setLevel(state.dimLevel)}
+	if(main.currentSwitch == "on" && main.currentLevel < state.dimLevel) main.setLevel(state.dimLevel)
+	extras.each {if(it.currentSwitch == "on" && it.currentLevel < state.dimLevel) it.setLevel(state.dimLevel)}
+// the next five lines reset the dimLevel on any dimmer that is off at mode change for non-motion rooms
+    if(!motions) {
+    	if(state.mainOff) main.resetLevel(state.dimLevel)
+    	else state.needsReset = true
+    	extras.each {if(it.currentSwitch == "off") it.resetLevel(state.dimLevel)}
+    }
 }
 
 // execution filter methods
@@ -286,7 +385,7 @@ private offset(value) {
 
 private timeIntervalLabel() {
 	def result = ""
-	if (startingX == "Sunrise" && endingX == "Sunrise") result = "Sunrise" + offset(startSunriseOffset) + " to Sunrise" + offset(endSunriseOffset)
+	if      (startingX == "Sunrise" && endingX == "Sunrise") result = "Sunrise" + offset(startSunriseOffset) + " to Sunrise" + offset(endSunriseOffset)
 	else if (startingX == "Sunrise" && endingX == "Sunset") result = "Sunrise" + offset(startSunriseOffset) + " to Sunset" + offset(endSunsetOffset)
 	else if (startingX == "Sunset" && endingX == "Sunrise") result = "Sunset" + offset(startSunsetOffset) + " to Sunrise" + offset(endSunriseOffset)
 	else if (startingX == "Sunset" && endingX == "Sunset") result = "Sunset" + offset(startSunsetOffset) + " to Sunset" + offset(endSunsetOffset)
