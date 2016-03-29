@@ -67,8 +67,7 @@ def mainPage() {
     	dynamicPage(name: "mainPage", title: "Installed Rules, Triggers and Actions " + (nApps > 0 ? "[$nApps]" : ""), install: true, uninstall: false) {
         	section {
             	app(name: "childRules", appName: "Rule", namespace: "bravenel", title: "Create New Rule...", multiple: true)
-            	app(name: "childRules", appName: "Motion Lighting", namespace: "bravenel", title: "Create New Motion Lighting...", multiple: true)
-//            	app(name: "childRules", appName: "Button Controller+", namespace: "bravenel", title: "Create New Button Controller+...", multiple: true)
+            	app(name: "childRules2", appName: "Motion Lighting", namespace: "bravenel", title: "Create New Motion Lighting...", multiple: true)
         	}
 			section ("Expert Features") {
 				href("customCommandsPAGE", title: null, description: anyCustom() ? "Custom Commands..." : "Tap to create Custom Commands", state: anyCustom())
