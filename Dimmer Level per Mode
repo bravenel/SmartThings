@@ -1,0 +1,157 @@
+/**
+ *  Dimmer Level per Mode
+ *
+ *  Copyright 2015 Bruce Ravenel
+ *
+ *	09-23-2015 1.0
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License. You may obtain a copy of the License at:
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+ *  for the specific language governing permissions and limitations under the License.
+ *
+ */
+
+definition(
+    name: "Dimmer Level per Mode",
+    namespace: "bravenel",
+    author: "Bruce Ravenel",
+    description: "Set Dimmer Levels Based on Modes, button on, and Master on/off",
+    category: "Convenience",
+    iconUrl: "https://s3.amazonaws.com/smartapp-icons/MyApps/Cat-MyApps.png",
+    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/MyApps/Cat-MyApps@2x.png"
+)
+
+preferences {
+    page(name: "selectDimmers")
+    page(name: "otherSettings")
+}
+
+def selectDimmers() {
+	dynamicPage(name: "selectDimmers", title: "Dimmers, modes and levels", nextPage: "otherSettings", uninstall: true) {
+
+		section("When this master dimmer") { 
+			input "master", "capability.switchLevel", multiple: false, title: "Is turned on", required: true, submitOnChange: true
+		}
+
+		section("These slave dimmers") {
+			input "slaves", "capability.switchLevel", multiple: true, title: "Will also be turned on", required: false
+		}
+
+		section("With dimmer levels") {
+        	input "modesX", "mode", multiple: true, title: "For these modes", required: true, defaultValue: ["Day", "Evening", "Night"], submitOnChange: true
+        
+			if(modesX) {
+				def defaults = [90, 30, 10]
+				def n = 0
+				modesX.each {
+					setModeLevel(it, "level$it", defaults[n])
+					n = n + 1        	
+				}
+			}
+		}
+	}
+}
+
+def setModeLevel(thisMode, modeVar, defaults) {
+	def result = input modeVar, "number", title: "Level for $thisMode", required: true, defaultValue: defaults > 0 ? defaults : null
+    return result
+}
+
+def otherSettings() {
+	dynamicPage(name:"otherSettings", uninstall: false, install: true) {
+
+		section("Turn master and slaves on/off with this") {
+			input "button", "capability.switch", title: "Switch", multiple: false, required: false
+		}
+
+		section("When the master is turned on or off") {
+			input "offSwitches", "capability.switch", title: "These extra switches will be turned on or off", multiple: true, required: false
+		}
+        
+		section {
+			label title: "Assign a name:", required: false
+		}
+   	}
+}
+
+def installed() {
+	initialize()
+}
+
+def updated() {
+	unsubscribe()
+	initialize()
+}
+
+
+def initialize() {
+	subscribe(master, "switch.on", switchOnHandler)
+	subscribe(master, "switch.off", switchOffHandler)
+	subscribe(master, "level", levelHandler)
+	subscribe(slaves, "level", levelHandler)
+	subscribe(location, modeChangeHandler)
+	subscribe(button, "switch.on", switchOnHandler)
+	subscribe(button, "switch.off", switchOffHandler)
+    
+	state.modeLevels = [:]
+	for(m in modesX) {
+		def level = settings.find {it.key == "level$m"}
+		state.modeLevels << [(m):level.value]
+	}
+
+	state.currentMode = location.mode in modesX ? location.mode : modes[0]
+	state.dimLevel = state.modeLevels[state.currentMode]
+	state.masterOff = master.currentSwitch == "off"
+    state.needsReset = false
+}
+
+def switchesOn() {
+	state.masterOff = false
+	master.setLevel(state.dimLevel)
+	slaves?.setLevel(state.dimLevel)
+    state.needsReset = false
+    offSwitches?.on()
+}
+
+def switchOnHandler(evt) {
+	if(state.masterOff) switchesOn() 
+}
+
+def levelHandler(evt) {      				// allows a dimmer to change the current dimLevel
+	if(evt.value == state.dimLevel) return
+	state.dimLevel = evt.value
+	if(!state.masterOff) master.setLevel(evt.value)
+    slaves.each {if(it.currentSwitch == "on") it.setLevel(evt.value)}
+}
+
+def switchOffHandler(evt) {
+	state.dimLevel = state.modeLevels[state.currentMode]
+	state.masterOff = true
+    if(state.needsReset) {
+    	master.resetLevel(state.dimLevel)
+		slaves?.resetLevel(state.dimLevel)
+        state.needsReset = false
+    } else {
+    	master.off()
+    	slaves?.off()
+    }
+    offSwitches?.off()
+}
+
+def modeChangeHandler(evt) {
+	if(state.currentMode == evt.value || !(evt.value in modesX)) return   // no change or not one of our modes
+	state.currentMode = evt.value			   
+	state.dimLevel = state.modeLevels[evt.value]
+// the next two lines brighten any lights on when new mode is brighter than previous
+	if(master.currentSwitch == "on" && master.currentLevel < state.dimLevel) master.setLevel(state.dimLevel)
+	slaves.each {if(it.currentSwitch == "on" && it.currentLevel < state.dimLevel) it.setLevel(state.dimLevel)}
+// the next three lines reset the dimLevel on any dimmer that is off at mode change
+    if(state.masterOff) master.resetLevel(state.dimLevel)
+    else state.needsReset = true
+    slaves.each {if(it.currentSwitch == "off") it.resetLevel(state.dimLevel)}
+}
