@@ -22,7 +22,6 @@ definition(
     author: "Bruce Ravenel",
     description: "Set Dimmer Levels by mode, with Motion on/off/disabled, button on, and Main on/off",
     category: "Convenience",
-	parent: "bravenel:Rule Machine",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/MyApps/Cat-MyApps.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/MyApps/Cat-MyApps@2x.png"
 )
