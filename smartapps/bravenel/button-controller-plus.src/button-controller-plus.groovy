@@ -6,7 +6,7 @@
  */
 definition(
     name: "Button Controller+",
-    namespace: "smartthings",
+    namespace: "bravenl",
     author: "SmartThings",
     description: "Control devices with buttons like the Aeon Labs Minimote",
     category: "Convenience",
